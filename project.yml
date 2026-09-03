@@ -1,0 +1,46 @@
+name: Dockfolio
+options:
+  bundleIdPrefix: app.dockfolio
+  deploymentTarget:
+    macOS: "13.0"
+  xcodeVersion: "14.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+settings:
+  base:
+    MARKETING_VERSION: 1.0.0
+    CURRENT_PROJECT_VERSION: 1
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+targets:
+  Dockfolio:
+    type: application
+    platform: macOS
+    sources:
+      - path: Dockfolio
+        excludes:
+          - "**/.DS_Store"
+    settings:
+      base:
+        PRODUCT_NAME: Dockfolio
+        PRODUCT_BUNDLE_IDENTIFIER: app.dockfolio.Dockfolio
+        INFOPLIST_FILE: Dockfolio/Info.plist
+        GENERATE_INFOPLIST_FILE: false
+        CODE_SIGN_ENTITLEMENTS: Dockfolio/Dockfolio.entitlements
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "-"
+        ENABLE_HARDENED_RUNTIME: YES
+        COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        LD_RUNPATH_SEARCH_PATHS:
+          - "@executable_path/../Frameworks"
+        ALWAYS_SEARCH_USER_PATHS: NO
+        CLANG_ENABLE_MODULES: YES
+        CLANG_ENABLE_OBJC_ARC: YES
+        ENABLE_PREVIEWS: YES
+        SUPPORTED_PLATFORMS: macosx
+        SDKROOT: macosx
+        SWIFT_EMIT_LOC_STRINGS: YES
+    entitlements:
+      path: Dockfolio/Dockfolio.entitlements

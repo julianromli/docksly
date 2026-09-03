@@ -1,0 +1,28 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+DerivedData/
+build/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift / SPM
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor
+.idea/
+*.swp
+
+# Local Firecrawl dumps
+.firecrawl/
+agent-tools/
