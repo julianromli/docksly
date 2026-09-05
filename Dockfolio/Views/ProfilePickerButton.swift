@@ -53,7 +53,9 @@ struct ProfilePickerButton: View {
 
 struct ProfileIdentityEditor: View {
     @EnvironmentObject private var store: DockStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showColors = false
+    @State private var allowsSwatchMotion = false
     @FocusState private var nameFocused: Bool
 
     var body: some View {
@@ -65,12 +67,20 @@ struct ProfileIdentityEditor: View {
                     .frame(width: 22, height: 22)
                     .contentShape(Circle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PressableButtonStyle())
             .help("Change dock color")
             .accessibilityLabel("Dock color")
             .popover(isPresented: $showColors, arrowEdge: .bottom) {
                 colorSwatches
                     .padding(10)
+                    .onAppear {
+                        DispatchQueue.main.async {
+                            allowsSwatchMotion = true
+                        }
+                    }
+                    .onDisappear {
+                        allowsSwatchMotion = false
+                    }
             }
 
             TextField("Dock name", text: Binding(
@@ -92,34 +102,29 @@ struct ProfileIdentityEditor: View {
     private var colorSwatches: some View {
         HStack(spacing: 8) {
             ForEach(ProfileColor.palette) { color in
+                let selected = store.draftColor == color
                 Button {
                     store.setDraftColor(color)
                     showColors = false
                 } label: {
                     ZStack {
                         ColorDot(color: color.color, diameter: 20)
-                        if store.draftColor == color {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(.white)
-                        }
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(.white)
+                            .contextualIconChrome(
+                                visible: selected,
+                                animated: allowsSwatchMotion && !reduceMotion
+                            )
                     }
                     .frame(width: 24, height: 24)
                     .contentShape(Circle())
                 }
-                .buttonStyle(ColorSwatchButtonStyle())
+                .buttonStyle(PressableButtonStyle())
                 .help(color.displayName)
                 .accessibilityLabel(color.displayName)
-                .accessibilityAddTraits(store.draftColor == color ? .isSelected : [])
+                .accessibilityAddTraits(selected ? .isSelected : [])
             }
         }
-    }
-}
-
-struct ColorSwatchButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? DockfolioStyle.pressScale : 1)
-            .animation(DockfolioStyle.pressSpring, value: configuration.isPressed)
     }
 }

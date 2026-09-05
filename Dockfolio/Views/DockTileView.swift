@@ -12,13 +12,15 @@ struct DockTileView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
+    @State private var allowsChromeMotion = false
+
+    private var showRemove: Bool { isHovering && !isDragging }
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
             tile
                 .scaleEffect(liftScale)
-                .animation(reduceMotion ? nil : DockfolioStyle.defaultSpring, value: isHovering)
-                .animation(reduceMotion ? nil : DockfolioStyle.defaultSpring, value: isDragging)
+                .animation(reduceMotion ? nil : DockfolioStyle.defaultSpring, value: liftScale)
                 .gesture(reorderGesture)
                 .onHover { hovering in
                     isHovering = hovering
@@ -46,18 +48,24 @@ struct DockTileView: View {
                 .accessibilityAddTraits(.isButton)
                 .accessibilityAction(named: "Remove", onRemove)
 
-            if isHovering && !isDragging {
-                Button(action: onRemove) {
-                    Image(systemName: "xmark.circle.fill")
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(.primary, Color.primary.opacity(0.18))
-                        .font(.system(size: 13, weight: .semibold))
-                }
-                .buttonStyle(.plain)
-                .offset(x: 5, y: -5)
-                .zIndex(2)
-                .help("Remove")
-                .accessibilityLabel("Remove \(item.title)")
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.primary, Color.primary.opacity(0.18))
+                    .font(.system(size: 13, weight: .semibold))
+            }
+            .buttonStyle(PressableButtonStyle())
+            .offset(x: 5, y: -5)
+            .zIndex(2)
+            .help("Remove")
+            .accessibilityLabel("Remove \(item.title)")
+            .contextualIconChrome(visible: showRemove, animated: allowsChromeMotion && !reduceMotion)
+            .allowsHitTesting(showRemove)
+            .accessibilityHidden(!showRemove)
+        }
+        .onAppear {
+            DispatchQueue.main.async {
+                allowsChromeMotion = true
             }
         }
     }
@@ -118,6 +126,7 @@ struct DockTileView: View {
     private var spacerTile: some View {
         Capsule()
             .fill(Color.primary.opacity(isHovering ? 0.34 : 0.20))
+            .animation(reduceMotion ? nil : DockfolioStyle.chromeFade, value: isHovering)
             .frame(width: 4, height: 36)
             .frame(width: DockfolioStyle.spacerWidth, height: 60)
             .contentShape(Rectangle())

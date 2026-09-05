@@ -8,8 +8,14 @@ struct DockStripView: View {
     @State private var draggingID: UUID?
     @State private var dragTranslation: CGFloat = 0
     @State private var consumedTranslation: CGFloat = 0
+    @State private var renderedProfileID: UUID?
 
     private var itemSpacing: CGFloat { DockfolioStyle.itemSpacing }
+
+    private var isSwitchingDock: Bool {
+        guard let renderedProfileID else { return false }
+        return renderedProfileID != store.selectedProfileID
+    }
 
     var body: some View {
         Group {
@@ -19,38 +25,31 @@ struct DockStripView: View {
                 strip
             }
         }
-        .animation(
-            reduceMotion ? .easeOut(duration: 0.15) : DockfolioStyle.defaultSpring,
-            value: store.selectedProfileID
-        )
-        .frame(maxWidth: .infinity, minHeight: 128)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity)
         .background {
-            VisualEffectBackground(material: .headerView, blendingMode: .withinWindow)
+            RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous)
+                .fill(DockfolioStyle.shelfFill)
         }
         .clipShape(RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
-        }
-        .overlay(alignment: .top) {
-            Capsule()
-                .fill(Color.white.opacity(0.38))
-                .frame(height: 1)
-                .padding(.horizontal, 16)
-                .padding(.top, 1)
-                .allowsHitTesting(false)
+                .strokeBorder(Color.black.opacity(0.08), lineWidth: 1)
         }
         .padding(.horizontal, DockfolioStyle.shelfHorizontal)
         .padding(.bottom, DockfolioStyle.shelfBottom)
-        .onChange(of: store.selectedProfileID) { _ in
+        .onAppear {
+            if renderedProfileID == nil {
+                renderedProfileID = store.selectedProfileID
+            }
+        }
+        .onChange(of: store.selectedProfileID) { newID in
             resetDrag()
+            renderedProfileID = newID
         }
     }
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
             Text("This dock has no pinned apps")
                 .font(.headline)
                 .textCase(nil)
@@ -65,47 +64,87 @@ struct DockStripView: View {
                     .buttonStyle(QuietCapsuleButtonStyle())
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 128)
+        .padding(.horizontal, DockfolioStyle.shelfInner)
+        .padding(.vertical, DockfolioStyle.shelfInner)
+        .frame(maxWidth: .infinity, minHeight: DockfolioStyle.emptyStripMinHeight)
+    }
+
+    private var stripContentWidth: CGFloat {
+        let tiles = store.draftItems.reduce(CGFloat(0)) { $0 + tileWidth($1) }
+        let gaps = CGFloat(store.draftItems.count) * itemSpacing
+        return tiles + gaps + 52
     }
 
     private var strip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: itemSpacing) {
-                ForEach(Array(store.draftItems.enumerated()), id: \.element.id) { index, item in
-                    DockTileView(
-                        item: item,
-                        isDragging: draggingID == item.id,
-                        onRemove: { store.removeItem(id: item.id) },
-                        onMoveLeft: index > 0 ? { store.moveItem(id: item.id, toIndex: index - 1) } : nil,
-                        onMoveRight: index < store.draftItems.count - 1
-                            ? { store.moveItem(id: item.id, toIndex: index + 1) }
-                            : nil,
-                        onDragChanged: { value in handleDrag(item, value) },
-                        onDragEnded: {
-                            withAnimation(reduceMotion ? nil : DockfolioStyle.flickSpring) {
-                                resetDrag()
+        GeometryReader { geo in
+            let overflows = stripContentWidth + (DockfolioStyle.shelfInner * 2) > geo.size.width
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: itemSpacing) {
+                    ForEach(Array(store.draftItems.enumerated()), id: \.element.id) { index, item in
+                        DockTileView(
+                            item: item,
+                            isDragging: draggingID == item.id,
+                            onRemove: { store.removeItem(id: item.id) },
+                            onMoveLeft: index > 0 ? { store.moveItem(id: item.id, toIndex: index - 1) } : nil,
+                            onMoveRight: index < store.draftItems.count - 1
+                                ? { store.moveItem(id: item.id, toIndex: index + 1) }
+                                : nil,
+                            onDragChanged: { value in handleDrag(item, value) },
+                            onDragEnded: {
+                                withAnimation(reduceMotion ? nil : DockfolioStyle.flickSpring) {
+                                    resetDrag()
+                                }
                             }
-                        }
-                    )
-                    .offset(x: draggingID == item.id ? dragTranslation : 0)
-                    .zIndex(draggingID == item.id ? 1 : 0)
-                }
+                        )
+                        .offset(x: draggingID == item.id ? dragTranslation : 0)
+                        .zIndex(draggingID == item.id ? 1 : 0)
+                        .modifier(DockSwitchStagger(
+                            index: index,
+                            playEnter: isSwitchingDock && !reduceMotion,
+                            profileID: store.selectedProfileID,
+                            restaggerOnProfileChange: false,
+                            reduceMotion: reduceMotion
+                        ))
+                    }
 
-                addTile
+                    addTile
+                        .modifier(DockSwitchStagger(
+                            index: store.draftItems.count,
+                            playEnter: isSwitchingDock && !reduceMotion,
+                            profileID: store.selectedProfileID,
+                            restaggerOnProfileChange: true,
+                            reduceMotion: reduceMotion
+                        ))
+                }
+                .padding(.vertical, DockfolioStyle.shelfInner)
+                .padding(.leading, DockfolioStyle.shelfInner)
+                .padding(.trailing, overflows ? DockfolioStyle.overflowPeek : DockfolioStyle.shelfInner)
+                .animation(
+                    (draggingID == nil && !reduceMotion && !isSwitchingDock)
+                        ? DockfolioStyle.defaultSpring
+                        : nil,
+                    value: store.draftItems.map(\.id)
+                )
             }
-            .padding(.vertical, 10)
-            .padding(.horizontal, 8)
-            .animation(
-                (draggingID == nil && !reduceMotion) ? DockfolioStyle.defaultSpring : nil,
-                value: store.draftItems.map(\.id)
-            )
+            .overlay(alignment: .trailing) {
+                if overflows {
+                    LinearGradient(
+                        colors: [DockfolioStyle.shelfFill.opacity(0), DockfolioStyle.shelfFill],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(width: DockfolioStyle.overflowPeek)
+                    .allowsHitTesting(false)
+                }
+            }
         }
+        .frame(height: DockfolioStyle.tileRowHeight + (DockfolioStyle.shelfInner * 2))
     }
 
     private var addTile: some View {
         Button(action: onAddApplication) {
             ZStack {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: DockfolioStyle.addTileCorner, style: .continuous)
                     .fill(Color.primary.opacity(0.08))
                 Image(systemName: "plus")
                     .font(.system(size: 16, weight: .semibold))
@@ -114,7 +153,7 @@ struct DockStripView: View {
             .frame(width: 52, height: 52)
             .contentShape(Rectangle())
         }
-        .buttonStyle(SquareAddTileStyle())
+        .buttonStyle(PressableButtonStyle())
         .help("Add Application")
         .accessibilityLabel("Add Application")
     }
@@ -161,10 +200,55 @@ struct DockStripView: View {
     }
 }
 
-private struct SquareAddTileStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? DockfolioStyle.pressScale : 1)
-            .animation(DockfolioStyle.pressSpring, value: configuration.isPressed)
+private struct DockSwitchStagger: ViewModifier {
+    let index: Int
+    let playEnter: Bool
+    let profileID: UUID
+    let restaggerOnProfileChange: Bool
+    let reduceMotion: Bool
+
+    @State private var visible: Bool
+    @State private var hasAppeared = false
+
+    init(
+        index: Int,
+        playEnter: Bool,
+        profileID: UUID,
+        restaggerOnProfileChange: Bool,
+        reduceMotion: Bool
+    ) {
+        self.index = index
+        self.playEnter = playEnter
+        self.profileID = profileID
+        self.restaggerOnProfileChange = restaggerOnProfileChange
+        self.reduceMotion = reduceMotion
+        _visible = State(initialValue: !playEnter)
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(visible ? 1 : 0)
+            .offset(y: visible ? 0 : 12)
+            .blur(radius: visible ? 0 : 4)
+            .onAppear {
+                reveal(animated: playEnter && !reduceMotion)
+                hasAppeared = true
+            }
+            .onChange(of: profileID) { _ in
+                guard hasAppeared, restaggerOnProfileChange else { return }
+                reveal(animated: !reduceMotion)
+            }
+    }
+
+    private func reveal(animated: Bool) {
+        if !animated {
+            visible = true
+            return
+        }
+        visible = false
+        let delay = min(Double(index) * DockfolioStyle.staggerStep, DockfolioStyle.staggerCap)
+        withAnimation(DockfolioStyle.defaultSpring.delay(delay)) {
+            visible = true
+        }
     }
 }

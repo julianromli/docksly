@@ -16,9 +16,12 @@ struct AddAppSheet: View {
             HStack {
                 Text("Add Application")
                     .font(.title3.weight(.semibold))
+                    .tracking(-0.015)
                 Spacer()
                 Button("Browse…", action: browse)
+                    .buttonStyle(QuietCapsuleButtonStyle())
                 Button("Cancel") { dismiss() }
+                    .buttonStyle(PressableButtonStyle())
                     .keyboardShortcut(.cancelAction)
             }
 
@@ -35,11 +38,16 @@ struct AddAppSheet: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if filtered.isEmpty {
-                    Text(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                         ? "No applications found. Use Browse to pick a bundle."
-                         : "No applications match “\(query)”. Use Browse to pick a bundle.")
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    VStack(spacing: 12) {
+                        Text(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                             ? "No applications found. Use Browse to pick a bundle."
+                             : "No applications match “\(query)”. Use Browse to pick a bundle.")
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                        Button("Browse…", action: browse)
+                            .buttonStyle(QuietCapsuleButtonStyle())
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List(filtered) { app in
                         Button {
@@ -50,13 +58,14 @@ struct AddAppSheet: View {
                             HStack(spacing: 10) {
                                 Image(nsImage: AppIconService.shared.icon(forAppAt: app.path))
                                     .resizable()
+                                    .interpolation(.high)
                                     .frame(width: 32, height: 32)
                                 Text(app.name)
                                 Spacer()
                             }
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableButtonStyle())
                         .padding(.vertical, 4)
                     }
                 }
