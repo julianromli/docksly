@@ -15,6 +15,8 @@ final class DockStore: ObservableObject {
     @Published var lastError: String?
     @Published var isApplying = false
     @Published var liveSignature: String = ""
+    @Published var wantsNewDockName = false
+    @Published var wantsAddApp = false
 
     private let fileURL: URL
     private let backupsDirectory: URL
@@ -42,7 +44,8 @@ final class DockStore: ObservableObject {
     var isSelectedCurrent: Bool {
         isSelectedActive
             && !isDirty
-            && (liveSignature.isEmpty || liveSignature == draftItems.layoutSignature)
+            && !liveSignature.isEmpty
+            && liveSignature == draftItems.layoutSignature
     }
 
     var statusText: String {
@@ -73,17 +76,19 @@ final class DockStore: ObservableObject {
         backupsDirectory = folder.appendingPathComponent("backups", isDirectory: true)
         try? fileManager.createDirectory(at: backupsDirectory, withIntermediateDirectories: true)
 
+        let loadedLibrary: DockLibrary
         if let data = try? Data(contentsOf: fileURL),
            let loaded = try? decoder.decode(DockLibrary.self, from: data),
            !loaded.profiles.isEmpty {
-            library = loaded
+            loadedLibrary = loaded
         } else {
-            library = DockStore.makeFirstLaunchLibrary()
+            loadedLibrary = DockStore.makeFirstLaunchLibrary()
         }
 
-        let initialID = library.activeProfileID ?? library.profiles[0].id
+        let initialID = loadedLibrary.activeProfileID ?? loadedLibrary.profiles[0].id
+        let profile = loadedLibrary.profile(id: initialID) ?? loadedLibrary.profiles[0]
+        library = loadedLibrary
         selectedProfileID = initialID
-        let profile = library.profile(id: initialID) ?? library.profiles[0]
         draftName = profile.name
         draftColor = profile.color
         draftItems = profile.items
@@ -114,34 +119,26 @@ final class DockStore: ObservableObject {
     // MARK: - Mutations
 
     func renameDraft(_ name: String) {
-        draftName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        if draftName.isEmpty { draftName = "Untitled Dock" }
+        draftName = name
+    }
+
+    func commitDraftName() {
+        let trimmed = draftName.trimmingCharacters(in: .whitespacesAndNewlines)
+        draftName = trimmed.isEmpty ? "Untitled Dock" : trimmed
     }
 
     func setDraftColor(_ color: ProfileColor) {
         draftColor = color
     }
 
-    func moveDraft(from source: IndexSet, to destination: Int) {
-        draftItems.move(fromOffsets: source, toOffset: destination)
-    }
-
-    func moveItem(id: UUID, to targetID: UUID) {
-        guard id != targetID,
-              let from = draftItems.firstIndex(where: { $0.id == id }),
-              let to = draftItems.firstIndex(where: { $0.id == targetID })
-        else { return }
+    func moveItem(id: UUID, toIndex dest: Int) {
+        guard let from = draftItems.firstIndex(where: { $0.id == id }) else { return }
+        let clamped = min(max(dest, 0), draftItems.count - 1)
+        guard from != clamped else { return }
         var items = draftItems
         let item = items.remove(at: from)
-        items.insert(item, at: to)
+        items.insert(item, at: clamped)
         draftItems = items
-    }
-
-    func moveSpacer(id: UUID, by offset: Int) {
-        guard let index = draftItems.firstIndex(where: { $0.id == id }) else { return }
-        let destination = index + offset
-        guard draftItems.indices.contains(destination) else { return }
-        draftItems.swapAt(index, destination)
     }
 
     func removeItem(id: UUID) {
@@ -152,7 +149,8 @@ final class DockStore: ObservableObject {
         draftItems.append(.spacer())
     }
 
-    func addApplication(path: String) {
+    @discardableResult
+    func addApplication(path: String) -> Bool {
         let bundleID = DockApplicator.bundleIdentifier(at: path)
         let name = DockApplicator.displayName(at: path)
         if draftItems.contains(where: { item in
@@ -163,12 +161,13 @@ final class DockStore: ObservableObject {
                 )
         }) {
             lastError = "“\(name)” is already in this dock."
-            return
+            return false
         }
         draftItems.append(
             .application(bundleIdentifier: bundleID, path: path, displayName: name)
         )
         lastError = nil
+        return true
     }
 
     func captureLiveDockIntoDraft() {
@@ -222,22 +221,10 @@ final class DockStore: ObservableObject {
         persist()
     }
 
-    func deleteDock(id: UUID) {
-        guard library.profiles.count > 1 else {
-            lastError = "Keep at least one dock."
-            return
-        }
-        library.remove(id: id)
-        if selectedProfileID == id, let next = library.profiles.first {
-            selectedProfileID = next.id
-            loadDraft(from: next.id)
-        }
-        persist()
-    }
-
     // MARK: - Save / apply
 
     func saveDraft(applyIfActive: Bool) {
+        commitDraftName()
         var profile = selectedProfile
         profile.name = draftName.isEmpty ? "Untitled Dock" : draftName
         profile.color = draftColor
@@ -297,23 +284,35 @@ final class DockStore: ObservableObject {
 
     func exportLibrary(to url: URL) throws {
         let data = try encoder.encode(library)
-        try data.write(to: url, options: .atomic)
+        try data.write(to: url, options: Data.WritingOptions.atomic)
     }
 
     func exportSelectedDock(to url: URL) throws {
-        let data = try encoder.encode(selectedProfile)
-        try data.write(to: url, options: .atomic)
+        commitDraftName()
+        var snapshot = selectedProfile
+        snapshot.name = draftName
+        snapshot.color = draftColor
+        snapshot.items = draftItems
+        snapshot.updatedAt = Date()
+        let data = try encoder.encode(snapshot)
+        try data.write(to: url, options: Data.WritingOptions.atomic)
     }
 
     func `import`(from url: URL) throws {
         let data = try Data(contentsOf: url)
         if let incoming = try? decoder.decode(DockLibrary.self, from: data), !incoming.profiles.isEmpty {
+            var lastImportedID: UUID?
             for var profile in incoming.profiles {
                 if library.profile(id: profile.id) != nil {
                     profile.id = UUID()
-                    profile.name = uniqueName(from: profile.name, used: Set(library.profiles.map(\.name)))
                 }
+                profile.name = uniqueName(from: profile.name, used: Set(library.profiles.map(\.name)))
                 library.upsert(profile)
+                lastImportedID = profile.id
+            }
+            if let lastImportedID {
+                selectedProfileID = lastImportedID
+                loadDraft(from: lastImportedID)
             }
             persist()
             return
@@ -334,7 +333,7 @@ final class DockStore: ObservableObject {
     private func persist() {
         do {
             let data = try encoder.encode(library)
-            try data.write(to: fileURL, options: .atomic)
+            try data.write(to: fileURL, options: Data.WritingOptions.atomic)
         } catch {
             lastError = "Dockfolio could not save your docks. \(error.localizedDescription)"
         }
@@ -343,9 +342,28 @@ final class DockStore: ObservableObject {
     private func writeDockBackup() {
         let tiles = DockApplicator.readRawPersistentApps()
         let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+        // Dock tiles include bookmark NSData and sometimes CFURL values.
+        // JSONSerialization raises NSInvalidArgumentException for those.
+        // Prefer XML plist; fall back to a JSON snapshot of parsed items.
+        if !tiles.isEmpty, PropertyListSerialization.propertyList(tiles, isValidFor: .xml) {
+            let url = backupsDirectory.appendingPathComponent("dock-\(stamp).plist")
+            do {
+                let data = try PropertyListSerialization.data(
+                    fromPropertyList: tiles,
+                    format: .xml,
+                    options: 0
+                )
+                try data.write(to: url, options: Data.WritingOptions.atomic)
+                pruneBackups(keeping: 10)
+                return
+            } catch {
+                // Fall through to JSON so apply still leaves a file.
+            }
+        }
         let url = backupsDirectory.appendingPathComponent("dock-\(stamp).json")
-        if let data = try? JSONSerialization.data(withJSONObject: tiles, options: [.prettyPrinted]) {
-            try? data.write(to: url, options: .atomic)
+        let snapshot: [DockItem] = (try? DockApplicator.readPinnedItems()) ?? []
+        if let data = try? encoder.encode(snapshot) {
+            try? data.write(to: url, options: Data.WritingOptions.atomic)
         }
         pruneBackups(keeping: 10)
     }

@@ -84,7 +84,7 @@ enum DockApplicator {
     /// Does not quit open applications. Apps that are running but not in `items`
     /// can still appear in the Dock until you quit them — that is normal Dock behavior.
     static func apply(_ items: [DockItem]) throws {
-        let tiles = items.map { makeTile(from: $0) }
+        let tiles = items.compactMap { makeTile(from: $0) }
         try writePersistentApps(tiles)
         try restartDock()
     }
@@ -120,7 +120,7 @@ enum DockApplicator {
 
     // MARK: - Tile encode / decode
 
-    private static func makeTile(from item: DockItem) -> [String: Any] {
+    private static func makeTile(from item: DockItem) -> [String: Any]? {
         switch item.kind {
         case .spacer:
             return [
@@ -132,7 +132,8 @@ enum DockApplicator {
             let path = resolveApplicationPath(
                 bundleIdentifier: item.bundleIdentifier,
                 fallbackPath: item.bookmarkPath
-            ) ?? item.bookmarkPath ?? ""
+            ) ?? item.bookmarkPath
+            guard let path, !path.isEmpty else { return nil }
             let fileURL = URL(fileURLWithPath: path, isDirectory: true)
             var tileData: [String: Any] = [
                 "file-data": [

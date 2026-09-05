@@ -6,7 +6,8 @@ struct DockfolioCommands: Commands {
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
             Button("New Dock") {
-                store.createDock()
+                store.wantsNewDockName = true
+                NotificationCenter.default.post(name: .dockfolioOpenEditor, object: nil)
             }
             .keyboardShortcut("n", modifiers: .command)
 
@@ -15,6 +16,23 @@ struct DockfolioCommands: Commands {
             }
             .keyboardShortcut("s", modifiers: .command)
             .disabled(!store.isDirty)
+        }
+
+        CommandMenu("Dock") {
+            Button("Add Application…") {
+                store.wantsAddApp = true
+                NotificationCenter.default.post(name: .dockfolioOpenEditor, object: nil)
+            }
+            .keyboardShortcut("a", modifiers: [.command, .shift])
+
+            Button("Add Spacer") {
+                store.addSpacer()
+            }
+
+            Button("Use This Dock") {
+                store.applySelected(saveFirst: true)
+            }
+            .disabled(store.isSelectedCurrent || store.isApplying || (store.isSelectedActive && store.isDirty))
         }
     }
 }

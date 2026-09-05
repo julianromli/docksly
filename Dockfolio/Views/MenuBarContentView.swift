@@ -8,7 +8,11 @@ struct MenuBarContentView: View {
     var body: some View {
         ForEach(store.library.profiles) { profile in
             Button {
-                store.apply(profileID: profile.id)
+                if profile.id == store.selectedProfileID {
+                    store.applySelected(saveFirst: true)
+                } else {
+                    store.apply(profileID: profile.id)
+                }
             } label: {
                 HStack {
                     if store.library.activeProfileID == profile.id {

@@ -2,7 +2,6 @@ import SwiftUI
 
 struct ProfilePickerButton: View {
     @EnvironmentObject private var store: DockStore
-    @State private var showNewName = false
     @State private var newName = ""
     @State private var showDeleteConfirm = false
 
@@ -12,18 +11,12 @@ struct ProfilePickerButton: View {
                 Button {
                     store.select(profileID: profile.id)
                 } label: {
-                    Label {
-                        Text(profile.name)
-                    } icon: {
-                        Image(systemName: store.library.activeProfileID == profile.id ? "checkmark" : "circle.fill")
-                            .foregroundStyle(profile.color.color)
-                    }
+                    Text("\(store.library.activeProfileID == profile.id ? "✓ " : "")\(profile.name)")
                 }
             }
             Divider()
             Button("New Dock…") {
-                newName = ""
-                showNewName = true
+                store.wantsNewDockName = true
             }
             Button("Delete Dock…", role: .destructive) {
                 showDeleteConfirm = true
@@ -53,12 +46,15 @@ struct ProfilePickerButton: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
-        .alert("New Dock", isPresented: $showNewName) {
+        .alert("New Dock", isPresented: $store.wantsNewDockName) {
             TextField("Name", text: $newName)
             Button("Create Dock") {
                 store.createDock(named: newName)
+                newName = ""
             }
-            Button("Cancel", role: .cancel) {}
+            Button("Cancel", role: .cancel) {
+                newName = ""
+            }
         } message: {
             Text("Give this setup a name. Dockfolio copies the items you see now.")
         }
@@ -75,28 +71,25 @@ struct ProfilePickerButton: View {
 
 struct ProfileIdentityEditor: View {
     @EnvironmentObject private var store: DockStore
+    @State private var showColors = false
+    @FocusState private var nameFocused: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
-            Menu {
-                ForEach(ProfileColor.palette) { color in
-                    Button {
-                        store.setDraftColor(color)
-                    } label: {
-                        Label {
-                            Text(color.hex)
-                        } icon: {
-                            Image(systemName: store.draftColor == color ? "checkmark.circle.fill" : "circle.fill")
-                                .foregroundStyle(color.color)
-                        }
-                    }
-                }
+        HStack(spacing: 8) {
+            Button {
+                showColors.toggle()
             } label: {
-                ColorDot(color: store.draftColor.color, diameter: 12)
-                    .padding(4)
+                ColorDot(color: store.draftColor.color, diameter: 14)
+                    .frame(width: 22, height: 22)
+                    .contentShape(Circle())
             }
-            .menuStyle(.borderlessButton)
-            .help("Profile color")
+            .buttonStyle(.plain)
+            .help("Change dock color")
+            .accessibilityLabel("Dock color")
+            .popover(isPresented: $showColors, arrowEdge: .bottom) {
+                colorSwatches
+                    .padding(10)
+            }
 
             TextField("Dock name", text: Binding(
                 get: { store.draftName },
@@ -105,6 +98,38 @@ struct ProfileIdentityEditor: View {
             .textFieldStyle(.plain)
             .font(.title2.weight(.semibold))
             .frame(maxWidth: 240)
+            .focused($nameFocused)
+            .onSubmit { store.commitDraftName() }
+            .onChange(of: nameFocused) { focused in
+                if !focused { store.commitDraftName() }
+            }
+        }
+    }
+
+    private var colorSwatches: some View {
+        HStack(spacing: 8) {
+            ForEach(ProfileColor.palette) { color in
+                Button {
+                    store.setDraftColor(color)
+                    showColors = false
+                } label: {
+                    ZStack {
+                        ColorDot(color: color.color, diameter: 20)
+                        if store.draftColor == color {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    .frame(width: 24, height: 24)
+                    .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .help(color.displayName)
+                .accessibilityLabel(color.displayName)
+                .accessibilityAddTraits(store.draftColor == color ? .isSelected : [])
+            }
         }
     }
 }
+

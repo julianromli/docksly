@@ -1,3 +1,5 @@
+import AppKit
+import ServiceManagement
 import SwiftUI
 
 struct SettingsView: View {
@@ -14,6 +16,11 @@ struct SettingsView: View {
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                if SMAppService.mainApp.status == .requiresApproval {
+                    Button("Open Login Items…") {
+                        openLoginItems()
+                    }
+                }
                 if let errorMessage {
                     Text(errorMessage)
                         .font(.callout)
@@ -32,10 +39,16 @@ struct SettingsView: View {
                         .textSelection(.enabled)
                         .foregroundStyle(.secondary)
                 }
+                LabeledContent("Backups") {
+                    Text(backupsPath)
+                        .font(.caption)
+                        .textSelection(.enabled)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .formStyle(.grouped)
-        .frame(width: 420, height: 260)
+        .frame(width: 420, height: 320)
         .onAppear {
             refresh()
         }
@@ -61,11 +74,29 @@ struct SettingsView: View {
         status = LaunchAtLoginService.statusDescription
     }
 
+    private func openLoginItems() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension"),
+           NSWorkspace.shared.open(url) {
+            return
+        }
+        if let fallback = URL(string: "x-apple.systempreferences:com.apple.preference.security") {
+            _ = NSWorkspace.shared.open(fallback)
+        }
+    }
+
     private var libraryPath: String {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
         return support?
             .appendingPathComponent("Dockfolio/library.json")
             .path
             ?? "~/Library/Application Support/Dockfolio/library.json"
+    }
+
+    private var backupsPath: String {
+        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+        return support?
+            .appendingPathComponent("Dockfolio/backups")
+            .path
+            ?? "~/Library/Application Support/Dockfolio/backups"
     }
 }

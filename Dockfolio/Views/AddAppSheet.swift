@@ -33,14 +33,18 @@ struct AddAppSheet: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if filtered.isEmpty {
-                    Text("No applications match “\(query)”. Use Browse to pick a bundle.")
+                    Text(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                         ? "No applications found. Use Browse to pick a bundle."
+                         : "No applications match “\(query)”. Use Browse to pick a bundle.")
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
+
                     List(filtered) { app in
                         Button {
-                            store.addApplication(path: app.path)
-                            dismiss()
+                            if store.addApplication(path: app.path) {
+                                dismiss()
+                            }
                         } label: {
                             HStack(spacing: 10) {
                                 Image(nsImage: AppIconService.shared.icon(forAppAt: app.path))
@@ -68,10 +72,10 @@ struct AddAppSheet: View {
         .padding(20)
         .frame(width: 480, height: 480)
         .task {
-            let scanned = InstalledAppScanner.scan()
-            apps = scanned
+            apps = await InstalledAppScanner.scan()
             isLoading = false
         }
+
     }
 
     private var filtered: [InstalledApp] {
@@ -93,8 +97,9 @@ struct AddAppSheet: View {
         panel.directoryURL = URL(fileURLWithPath: "/Applications", isDirectory: true)
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
-            store.addApplication(path: url.path)
-            dismiss()
+            if store.addApplication(path: url.path) {
+                dismiss()
+            }
         }
     }
 }

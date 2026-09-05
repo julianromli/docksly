@@ -4,14 +4,14 @@ import UniformTypeIdentifiers
 
 struct EditorWindowView: View {
     @EnvironmentObject private var store: DockStore
-    @State private var showAddApp = false
     @State private var showImportError = false
     @State private var importError = ""
+    @State private var showDeleteConfirm = false
 
     var body: some View {
         VStack(spacing: 0) {
             header
-            DockStripView()
+            DockStripView(onAddApplication: { store.wantsAddApp = true })
             if let lastError = store.lastError {
                 errorBar(lastError)
             }
@@ -19,7 +19,7 @@ struct EditorWindowView: View {
         .frame(minWidth: 720, idealWidth: 780, maxWidth: 1100, minHeight: 268, idealHeight: 300)
         .background(VisualEffectBackground())
         .background(WindowConfigurator())
-        .sheet(isPresented: $showAddApp) {
+        .sheet(isPresented: $store.wantsAddApp) {
             AddAppSheet()
                 .environmentObject(store)
         }
@@ -28,8 +28,19 @@ struct EditorWindowView: View {
         } message: {
             Text(importError)
         }
+        .alert("Delete this dock?", isPresented: $showDeleteConfirm) {
+            Button("Delete Dock", role: .destructive) {
+                store.deleteSelectedDock()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("“\(store.draftName)” will be removed from this Mac. The real Dock does not change until you apply another setup.")
+        }
         .onAppear {
             store.refreshLiveSignature()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification, object: nil)) { _ in
+            if !store.isApplying { store.refreshLiveSignature() }
         }
     }
 
@@ -43,11 +54,13 @@ struct EditorWindowView: View {
                     .monospacedDigit()
             }
             .padding(.leading, 78)
+            .background { WindowMoveBar() }
 
             Spacer(minLength: 12)
 
             HStack(spacing: 8) {
                 ProfilePickerButton()
+                addAppButton
                 editMenu
                 primaryAction
             }
@@ -57,9 +70,31 @@ struct EditorWindowView: View {
         .padding(.bottom, 12)
     }
 
+    private var addAppButton: some View {
+        Button {
+            store.wantsAddApp = true
+        } label: {
+            Label("Add", systemImage: "plus")
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+        }
+        .buttonStyle(.plain)
+        .background {
+            Capsule(style: .continuous)
+                .fill(Color.primary.opacity(0.06))
+        }
+        .overlay {
+            Capsule(style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+        }
+        .help("Add Application")
+        .fixedSize()
+    }
+
     private var editMenu: some View {
         Menu("Edit Dock") {
-            Button("Add Application…") { showAddApp = true }
+            Button("Add Application…") { store.wantsAddApp = true }
             Button("Add Spacer") { store.addSpacer() }
             Divider()
             Button("Capture Current Dock") { store.captureLiveDockIntoDraft() }
@@ -69,7 +104,7 @@ struct EditorWindowView: View {
             Button("Import Dock…") { importDock() }
             Divider()
             Button("Delete Dock…", role: .destructive) {
-                store.deleteSelectedDock()
+                showDeleteConfirm = true
             }
             .disabled(store.library.profiles.count < 2)
         }
@@ -98,7 +133,7 @@ struct EditorWindowView: View {
                 .keyboardShortcut("s", modifiers: .command)
                 .disabled(store.isApplying)
             }
-            if !store.isSelectedCurrent {
+            if !store.isSelectedCurrent && !(store.isSelectedActive && store.isDirty) {
                 Button("Use This Dock") {
                     store.applySelected(saveFirst: true)
                 }
@@ -190,5 +225,23 @@ struct AccentCapsuleButtonStyle: ButtonStyle {
             }
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
+    }
+}
+
+struct QuietCapsuleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline.weight(.medium))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background {
+                Capsule(style: .continuous)
+                    .fill(Color.primary.opacity(configuration.isPressed ? 0.12 : 0.06))
+            }
+            .overlay {
+                Capsule(style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+            }
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
     }
 }

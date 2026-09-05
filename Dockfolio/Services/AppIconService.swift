@@ -75,40 +75,80 @@ struct InstalledApp: Identifiable, Hashable {
 }
 
 enum InstalledAppScanner {
-    static func scan() -> [InstalledApp] {
-        let directories = [
-            "/Applications",
-            "/System/Applications",
-            "/System/Applications/Utilities",
-            NSHomeDirectory() + "/Applications"
+    static func scan() async -> [InstalledApp] {
+        await Task.detached(priority: .userInitiated) {
+            blockingScan()
+        }.value
+    }
+
+    private static func blockingScan() -> [InstalledApp] {
+        let roots = [
+            URL(fileURLWithPath: "/Applications", isDirectory: true),
+            URL(fileURLWithPath: "/System/Applications", isDirectory: true),
+            URL(fileURLWithPath: "/System/Applications/Utilities", isDirectory: true),
+            URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true)
+                .appendingPathComponent("Applications", isDirectory: true)
         ]
+
         var seen = Set<String>()
         var results: [InstalledApp] = []
 
-        for directory in directories {
-            let url = URL(fileURLWithPath: directory, isDirectory: true)
-            guard let contents = try? FileManager.default.contentsOfDirectory(
-                at: url,
-                includingPropertiesForKeys: [.isApplicationKey, .isDirectoryKey],
-                options: [.skipsHiddenFiles]
-            ) else { continue }
-
-            for item in contents where item.pathExtension == "app" {
-                let path = item.path
+        for root in roots {
+            for appURL in appURLs(in: root, extraFolderDepth: 1) {
+                let path = appURL.path
                 if seen.contains(path) { continue }
                 seen.insert(path)
-                let name = FileManager.default.displayName(atPath: path)
-                    .replacingOccurrences(of: ".app", with: "")
+                let info = readInfo(at: appURL)
                 results.append(
                     InstalledApp(
-                        name: name,
+                        name: info.name,
                         path: path,
-                        bundleIdentifier: Bundle(path: path)?.bundleIdentifier
+                        bundleIdentifier: info.bundleIdentifier
                     )
                 )
             }
         }
 
-        return results.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        return results.sorted {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
+    }
+
+    /// Top-level `.app` bundles, plus one extra folder level (`Utilities`, `Setapp`).
+    private static func appURLs(in directory: URL, extraFolderDepth: Int) -> [URL] {
+        guard let contents = try? FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles, .skipsPackageDescendants]
+        ) else { return [] }
+
+        var urls: [URL] = []
+        for item in contents {
+            if item.pathExtension.lowercased() == "app" {
+                urls.append(item)
+                continue
+            }
+            guard extraFolderDepth > 0 else { continue }
+            let isDirectory = (try? item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
+            if isDirectory {
+                urls.append(contentsOf: appURLs(in: item, extraFolderDepth: extraFolderDepth - 1))
+            }
+        }
+        return urls
+    }
+
+    /// `Bundle(path:)` is too slow and can stall the main thread on large `/Applications` folders.
+    private static func readInfo(at appURL: URL) -> (name: String, bundleIdentifier: String?) {
+        let fallback = appURL.deletingPathExtension().lastPathComponent
+        let plistURL = appURL.appendingPathComponent("Contents/Info.plist")
+        guard let info = NSDictionary(contentsOf: plistURL) else {
+            return (fallback, nil)
+        }
+        let bundleIdentifier = info["CFBundleIdentifier"] as? String
+        let display = (info["CFBundleDisplayName"] as? String)
+            ?? (info["CFBundleName"] as? String)
+        let name = (display?.isEmpty == false) ? display! : fallback
+        return (name, bundleIdentifier)
     }
 }
+

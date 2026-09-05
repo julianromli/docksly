@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct DockTileView: View {
     let item: DockItem
@@ -6,40 +7,81 @@ struct DockTileView: View {
     var onRemove: () -> Void
     var onMoveLeft: (() -> Void)?
     var onMoveRight: (() -> Void)?
+    var onDragChanged: ((DragGesture.Value) -> Void)?
+    var onDragEnded: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
 
     var body: some View {
-        Group {
-            switch item.kind {
-            case .application:
-                applicationTile
-            case .spacer:
-                spacerTile
+        ZStack(alignment: .topTrailing) {
+            tile
+                .opacity(isDragging ? 0.92 : 1)
+                .scaleEffect((isDragging && !reduceMotion) ? 1.08 : 1)
+                .gesture(reorderGesture)
+                .onHover { hovering in
+                    isHovering = hovering
+                    if hovering {
+                        NSCursor.openHand.set()
+                    } else {
+                        NSCursor.arrow.set()
+                    }
+                }
+                .contextMenu {
+                    if let onMoveLeft {
+                        Button("Move Left", action: onMoveLeft)
+                    }
+                    if let onMoveRight {
+                        Button("Move Right", action: onMoveRight)
+                    }
+                    if onMoveLeft != nil || onMoveRight != nil {
+                        Divider()
+                    }
+                    Button("Remove", role: .destructive, action: onRemove)
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(item.title)
+                .accessibilityHint("Drag to reorder")
+                .accessibilityAddTraits(.isButton)
+                .accessibilityAction(named: "Remove", onRemove)
+
+            if isHovering && !isDragging {
+                Button(action: onRemove) {
+                    Image(systemName: "xmark.circle.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.white, Color.red)
+                        .font(.system(size: 14, weight: .semibold))
+                        .shadow(color: .black.opacity(0.25), radius: 1, y: 0.5)
+                }
+                .buttonStyle(.plain)
+                .offset(x: 5, y: -5)
+                .help("Remove")
+                .accessibilityLabel("Remove \(item.title)")
             }
         }
-        .opacity(isDragging ? 0.35 : 1)
-        .onHover { hovering in
-            isHovering = hovering
+    }
+
+
+    @ViewBuilder
+    private var tile: some View {
+        switch item.kind {
+        case .application:
+            applicationTile
+        case .spacer:
+            spacerTile
         }
-        .contextMenu {
-            if item.kind == .spacer {
-                if let onMoveLeft {
-                    Button("Move Left", action: onMoveLeft)
-                }
-                if let onMoveRight {
-                    Button("Move Right", action: onMoveRight)
-                }
-                Divider()
-                Button("Remove", role: .destructive, action: onRemove)
-            } else {
-                Button("Remove", role: .destructive, action: onRemove)
+    }
+
+    private var reorderGesture: some Gesture {
+        DragGesture(minimumDistance: 6)
+            .onChanged { value in
+                NSCursor.closedHand.set()
+                onDragChanged?(value)
             }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(item.title)
-        .accessibilityAddTraits(.isButton)
+            .onEnded { _ in
+                NSCursor.arrow.set()
+                onDragEnded?()
+            }
     }
 
     private var applicationTile: some View {
@@ -68,8 +110,8 @@ struct DockTileView: View {
             }
         }
         .frame(width: 52, height: 56)
-        .help(missing ? "\(item.title) — missing on this Mac" : item.title)
-        .scaleEffect((!reduceMotion && isHovering) ? 1.06 : 1)
+        .help(missing ? "\(item.title) — missing on this Mac. Hover for Remove." : "\(item.title). Drag to reorder.")
+        .scaleEffect((!reduceMotion && isHovering && !isDragging) ? 1.06 : 1)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: isHovering)
     }
 
@@ -80,6 +122,6 @@ struct DockTileView: View {
             .padding(.horizontal, 8)
             .frame(width: 28, height: 56)
             .contentShape(Rectangle())
-            .help("Spacer")
+            .help("Spacer. Drag to reorder.")
     }
 }

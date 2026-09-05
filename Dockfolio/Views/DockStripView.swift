@@ -1,9 +1,14 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct DockStripView: View {
     @EnvironmentObject private var store: DockStore
+    var onAddApplication: () -> Void = {}
+
     @State private var draggingID: UUID?
+    @State private var dragTranslation: CGFloat = 0
+    @State private var consumedTranslation: CGFloat = 0
+
+    private let itemSpacing: CGFloat = 10
 
     var body: some View {
         Group {
@@ -26,10 +31,13 @@ struct DockStripView: View {
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 22)
+        .onChange(of: store.selectedProfileID) { _ in
+            resetDrag()
+        }
     }
 
     private var emptyState: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Text("This dock has no pinned apps")
                 .font(.headline)
                 .textCase(nil)
@@ -37,63 +45,107 @@ struct DockStripView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+            HStack(spacing: 8) {
+                Button("Add Application…", action: onAddApplication)
+                    .buttonStyle(QuietCapsuleButtonStyle())
+                Button("Add Spacer") { store.addSpacer() }
+                    .buttonStyle(QuietCapsuleButtonStyle())
+            }
         }
         .frame(maxWidth: .infinity, minHeight: 112)
     }
 
     private var strip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
+            HStack(spacing: itemSpacing) {
                 ForEach(Array(store.draftItems.enumerated()), id: \.element.id) { index, item in
                     DockTileView(
                         item: item,
                         isDragging: draggingID == item.id,
                         onRemove: { store.removeItem(id: item.id) },
-                        onMoveLeft: index > 0 ? { store.moveSpacer(id: item.id, by: -1) } : nil,
+                        onMoveLeft: index > 0 ? { store.moveItem(id: item.id, toIndex: index - 1) } : nil,
                         onMoveRight: index < store.draftItems.count - 1
-                            ? { store.moveSpacer(id: item.id, by: 1) }
-                            : nil
-                    )
-                    .onDrag {
-                        draggingID = item.id
-                        return NSItemProvider(object: item.id.uuidString as NSString)
-                    }
-                    .onDrop(
-                        of: [UTType.plainText],
-                        delegate: TileReorderDropDelegate(
-                            itemID: item.id,
-                            draggingID: $draggingID,
-                            onMove: { source, target in
-                                store.moveItem(id: source, to: target)
+                            ? { store.moveItem(id: item.id, toIndex: index + 1) }
+                            : nil,
+                        onDragChanged: { value in handleDrag(item, value) },
+                        onDragEnded: {
+                            withAnimation(.easeOut(duration: 0.16)) {
+                                resetDrag()
                             }
-                        )
+                        }
                     )
+                    .offset(x: draggingID == item.id ? dragTranslation : 0)
+                    .zIndex(draggingID == item.id ? 1 : 0)
                 }
+
+                addTile
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
         }
     }
-}
 
-private struct TileReorderDropDelegate: DropDelegate {
-    let itemID: UUID
-    @Binding var draggingID: UUID?
-    let onMove: (UUID, UUID) -> Void
-
-    func dropEntered(info: DropInfo) {
-        guard let draggingID, draggingID != itemID else { return }
-        onMove(draggingID, itemID)
+    private var addTile: some View {
+        Button(action: onAddApplication) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(style: StrokeStyle(lineWidth: 1.2, dash: [5, 4]))
+                    .foregroundStyle(Color.primary.opacity(0.28))
+                    .background {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.primary.opacity(0.04))
+                    }
+                Image(systemName: "plus")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(width: 48, height: 48)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help("Add Application")
+        .accessibilityLabel("Add Application")
     }
 
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        DropProposal(operation: .move)
+    private func handleDrag(_ item: DockItem, _ value: DragGesture.Value) {
+        if draggingID != item.id {
+            draggingID = item.id
+            consumedTranslation = 0
+        }
+        guard let from = store.draftItems.firstIndex(where: { $0.id == item.id }) else { return }
+        let items = store.draftItems
+        let effective = value.translation.width - consumedTranslation
+
+        if effective > 0, from + 1 < items.count {
+            let threshold = swapThreshold(current: items[from], neighbor: items[from + 1])
+            if effective > threshold {
+                store.moveItem(id: item.id, toIndex: from + 1)
+                consumedTranslation += Self.tileWidth(items[from + 1]) + itemSpacing
+            }
+        } else if effective < 0, from > 0 {
+            let threshold = swapThreshold(current: items[from], neighbor: items[from - 1])
+            if effective < -threshold {
+                store.moveItem(id: item.id, toIndex: from - 1)
+                consumedTranslation -= Self.tileWidth(items[from - 1]) + itemSpacing
+            }
+        }
+
+        dragTranslation = value.translation.width - consumedTranslation
     }
 
-    func performDrop(info: DropInfo) -> Bool {
+    private func swapThreshold(current: DockItem, neighbor: DockItem) -> CGFloat {
+        let gap = (Self.tileWidth(current) + Self.tileWidth(neighbor)) / 2 + itemSpacing
+        return gap * CGFloat(0.55)
+    }
+
+
+    private func resetDrag() {
         draggingID = nil
-        return true
+        dragTranslation = 0
+        consumedTranslation = 0
     }
 
-    func dropExited(info: DropInfo) {}
+    private static func tileWidth(_ item: DockItem) -> CGFloat {
+        item.kind == .spacer ? 28 : 52
+    }
 }

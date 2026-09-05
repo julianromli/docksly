@@ -33,7 +33,7 @@ struct DockLibrary: Codable, Equatable {
     mutating func remove(id: UUID) {
         profiles.removeAll { $0.id == id }
         if activeProfileID == id {
-            activeProfileID = profiles.first?.id
+            activeProfileID = nil
             lastAppliedSignature = nil
         }
     }

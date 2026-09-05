@@ -22,6 +22,21 @@ struct ProfileColor: Codable, Equatable, Hashable, Identifiable {
     var color: Color {
         Color(hex: hex)
     }
+
+    var displayName: String {
+        switch hex.uppercased() {
+        case "3B82F6": return "Blue"
+        case "F59E0B": return "Amber"
+        case "8B5CF6": return "Violet"
+        case "10B981": return "Green"
+        case "EF4444": return "Red"
+        case "EC4899": return "Pink"
+        case "06B6D4": return "Cyan"
+        case "64748B": return "Slate"
+        default: return "#\(hex.uppercased())"
+        }
+    }
+
 }
 
 extension Color {

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// Full-window material so the chrome stays translucent behind the editor.
@@ -42,11 +43,29 @@ struct WindowConfigurator: NSViewRepresentable {
         window.titleVisibility = .hidden
         window.isOpaque = false
         window.backgroundColor = .clear
-        window.isMovableByWindowBackground = true
+        window.isMovableByWindowBackground = false
         window.titlebarSeparatorStyle = .none
         window.standardWindowButton(.closeButton)?.isHidden = false
         window.standardWindowButton(.miniaturizeButton)?.isHidden = false
         window.standardWindowButton(.zoomButton)?.isHidden = false
         window.invalidateShadow()
+    }
+}
+
+/// Drag handle for the editor header. The window is not movable by background
+/// so strip `DragGesture` can reorder tiles.
+struct WindowMoveBar: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        WindowMoveBarView()
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
+private final class WindowMoveBarView: NSView {
+    override var isOpaque: Bool { false }
+
+    override func mouseDown(with event: NSEvent) {
+        window?.performDrag(with: event)
     }
 }
