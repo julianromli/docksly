@@ -84,6 +84,7 @@ struct DockStripView: View {
                         DockTileView(
                             item: item,
                             isDragging: draggingID == item.id,
+                            isReordering: draggingID != nil,
                             onRemove: { store.removeItem(id: item.id) },
                             onMoveLeft: index > 0 ? { store.moveItem(id: item.id, toIndex: index - 1) } : nil,
                             onMoveRight: index < store.draftItems.count - 1
@@ -105,6 +106,11 @@ struct DockStripView: View {
                             restaggerOnProfileChange: false,
                             reduceMotion: reduceMotion
                         ))
+                        .transaction { transaction in
+                            if draggingID == item.id {
+                                transaction.disablesAnimations = true
+                            }
+                        }
                     }
 
                     addTile
@@ -120,12 +126,11 @@ struct DockStripView: View {
                 .padding(.leading, DockfolioStyle.shelfInner)
                 .padding(.trailing, overflows ? DockfolioStyle.overflowPeek : DockfolioStyle.shelfInner)
                 .animation(
-                    (draggingID == nil && !reduceMotion && !isSwitchingDock)
-                        ? DockfolioStyle.defaultSpring
-                        : nil,
+                    (reduceMotion || isSwitchingDock) ? nil : DockfolioStyle.defaultSpring,
                     value: store.draftItems.map(\.id)
                 )
             }
+            .scrollDisabled(draggingID != nil)
             .overlay(alignment: .trailing) {
                 if overflows {
                     LinearGradient(

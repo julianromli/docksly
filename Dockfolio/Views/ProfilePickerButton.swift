@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct ProfilePickerButton: View {
@@ -56,6 +57,7 @@ struct ProfileIdentityEditor: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showColors = false
     @State private var allowsSwatchMotion = false
+    @State private var nameAtEditStart = ""
     @FocusState private var nameFocused: Bool
 
     var body: some View {
@@ -90,11 +92,37 @@ struct ProfileIdentityEditor: View {
             .textFieldStyle(.plain)
             .font(.title3.weight(.semibold))
             .tracking(-0.015)
+            .autocorrectionDisabled(true)
             .frame(maxWidth: 240)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .background {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.primary.opacity(nameFocused ? 0.08 : 0))
+                    .animation(reduceMotion ? nil : DockfolioStyle.chromeFade, value: nameFocused)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .focused($nameFocused)
-            .onSubmit { store.commitDraftName() }
+            .accessibilityLabel("Dock name")
+            .help(store.draftName)
+            .background(QuietTitleFieldTuning())
+            .onSubmit {
+                store.commitDraftName()
+                nameAtEditStart = store.draftName
+            }
+            .onExitCommand {
+                store.renameDraft(nameAtEditStart)
+                nameFocused = false
+            }
             .onChange(of: nameFocused) { focused in
-                if !focused { store.commitDraftName() }
+                if focused {
+                    nameAtEditStart = store.draftName
+                } else {
+                    store.commitDraftName()
+                }
+            }
+            .onAppear {
+                nameAtEditStart = store.draftName
             }
         }
     }
@@ -126,5 +154,104 @@ struct ProfileIdentityEditor: View {
                 .accessibilityAddTraits(selected ? .isSelected : [])
             }
         }
+    }
+}
+
+/// Turns off AppKit spellcheck and substitutions on the title field.
+private struct QuietTitleFieldTuning: NSViewRepresentable {
+    func makeNSView(context: Context) -> QuietTitleFieldTuningView {
+        QuietTitleFieldTuningView()
+    }
+
+    func updateNSView(_ nsView: QuietTitleFieldTuningView, context: Context) {
+        nsView.quietNearbyField()
+    }
+}
+
+private final class QuietTitleFieldTuningView: NSView {
+    private var observer: NSObjectProtocol?
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        observer = NotificationCenter.default.addObserver(
+            forName: NSControl.textDidBeginEditingNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self else { return }
+            guard let field = notification.object as? NSTextField else { return }
+            guard self.nearestTextField() === field else { return }
+            Self.quiet(field)
+        }
+    }
+
+    required init?(coder: NSCoder) {
+        nil
+    }
+
+    deinit {
+        if let observer {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    override var isOpaque: Bool { false }
+
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        quietNearbyField()
+    }
+
+    func quietNearbyField() {
+        if let field = nearestTextField() {
+            Self.quiet(field)
+        }
+    }
+
+    private func nearestTextField() -> NSTextField? {
+        var node: NSView? = self
+        while let current = node {
+            if let field = current as? NSTextField {
+                return field
+            }
+            if let parent = current.superview {
+                if let field = parent as? NSTextField {
+                    return field
+                }
+                for sibling in parent.subviews where sibling !== current {
+                    if let field = Self.findTextField(in: sibling) {
+                        return field
+                    }
+                }
+            }
+            node = current.superview
+        }
+        return nil
+    }
+
+    private static func findTextField(in view: NSView) -> NSTextField? {
+        if let field = view as? NSTextField {
+            return field
+        }
+        for child in view.subviews {
+            if let field = findTextField(in: child) {
+                return field
+            }
+        }
+        return nil
+    }
+
+    private static func quiet(_ field: NSTextField) {
+        field.isAutomaticTextCompletionEnabled = false
+        guard let editor = field.currentEditor() as? NSTextView else { return }
+        editor.isContinuousSpellCheckingEnabled = false
+        editor.isGrammarCheckingEnabled = false
+        editor.isAutomaticSpellingCorrectionEnabled = false
+        editor.isAutomaticTextReplacementEnabled = false
+        editor.isAutomaticQuoteSubstitutionEnabled = false
+        editor.isAutomaticDashSubstitutionEnabled = false
+        editor.isAutomaticTextCompletionEnabled = false
     }
 }

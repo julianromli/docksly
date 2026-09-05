@@ -6,10 +6,12 @@ final class AppIconService {
     static let shared = AppIconService()
 
     private let cache = NSCache<NSString, NSImage>()
+    private let resolvableCache = NSCache<NSString, NSNumber>()
     private let missing = NSImage(systemSymbolName: "questionmark.app", accessibilityDescription: "Missing application")
 
     private init() {
         cache.countLimit = 256
+        resolvableCache.countLimit = 256
     }
 
     func icon(for item: DockItem) -> NSImage {
@@ -47,10 +49,16 @@ final class AppIconService {
 
     func isResolvable(_ item: DockItem) -> Bool {
         guard item.kind == .application else { return true }
-        return DockApplicator.resolveApplicationPath(
+        let key = (item.bundleIdentifier ?? item.bookmarkPath ?? item.id.uuidString) as NSString
+        if let cached = resolvableCache.object(forKey: key) {
+            return cached.boolValue
+        }
+        let exists = DockApplicator.resolveApplicationPath(
             bundleIdentifier: item.bundleIdentifier,
             fallbackPath: item.bookmarkPath
         ).map { FileManager.default.fileExists(atPath: $0) } ?? false
+        resolvableCache.setObject(NSNumber(value: exists), forKey: key)
+        return exists
     }
 
     private func loadApplicationIcon(_ item: DockItem) -> NSImage? {

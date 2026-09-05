@@ -198,6 +198,8 @@ enum DockfolioStyle {
 
     static let iconSize: CGFloat = 52
     static let tileWidth: CGFloat = 56
+    /// Desktop hit target for the remove control. The glyph stays 13pt.
+    static let removeHitSize: CGFloat = 40
     static let spacerWidth: CGFloat = 28
     static let itemSpacing: CGFloat = 8
 

@@ -4,6 +4,7 @@ import AppKit
 struct DockTileView: View {
     let item: DockItem
     var isDragging: Bool
+    var isReordering: Bool = false
     var onRemove: () -> Void
     var onMoveLeft: (() -> Void)?
     var onMoveRight: (() -> Void)?
@@ -11,24 +12,25 @@ struct DockTileView: View {
     var onDragEnded: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isHovering = false
+    @State private var isHoveringTile = false
+    @State private var isHoveringRemove = false
     @State private var allowsChromeMotion = false
 
-    private var showRemove: Bool { isHovering && !isDragging }
+    private var isHovering: Bool { isHoveringTile || isHoveringRemove }
+    private var showRemove: Bool { isHovering && !isDragging && !isReordering }
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
             tile
                 .scaleEffect(liftScale)
-                .animation(reduceMotion ? nil : DockfolioStyle.defaultSpring, value: liftScale)
-                .gesture(reorderGesture)
+                .animation(
+                    (reduceMotion || isReordering) ? nil : DockfolioStyle.defaultSpring,
+                    value: liftScale
+                )
+                .highPriorityGesture(reorderGesture)
                 .onHover { hovering in
-                    isHovering = hovering
-                    if hovering {
-                        NSCursor.openHand.set()
-                    } else {
-                        NSCursor.arrow.set()
-                    }
+                    isHoveringTile = hovering
+                    updateCursor(overTile: hovering, overRemove: isHoveringRemove)
                 }
                 .contextMenu {
                     if let onMoveLeft {
@@ -53,12 +55,22 @@ struct DockTileView: View {
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(.primary, Color.primary.opacity(0.18))
                     .font(.system(size: 13, weight: .semibold))
+                    .frame(
+                        width: DockfolioStyle.removeHitSize,
+                        height: DockfolioStyle.removeHitSize,
+                        alignment: .topTrailing
+                    )
+                    .contentShape(Rectangle())
             }
             .buttonStyle(PressableButtonStyle())
             .offset(x: 5, y: -5)
             .zIndex(2)
             .help("Remove")
             .accessibilityLabel("Remove \(item.title)")
+            .onHover { hovering in
+                isHoveringRemove = hovering
+                updateCursor(overTile: isHoveringTile, overRemove: hovering)
+            }
             .contextualIconChrome(visible: showRemove, animated: allowsChromeMotion && !reduceMotion)
             .allowsHitTesting(showRemove)
             .accessibilityHidden(!showRemove)
@@ -70,9 +82,24 @@ struct DockTileView: View {
         }
     }
 
+    private func updateCursor(overTile: Bool, overRemove: Bool) {
+        if isDragging || isReordering {
+            NSCursor.closedHand.set()
+            return
+        }
+        if overRemove {
+            NSCursor.arrow.set()
+        } else if overTile {
+            NSCursor.openHand.set()
+        } else {
+            NSCursor.arrow.set()
+        }
+    }
+
     private var liftScale: CGFloat {
         if reduceMotion { return 1 }
         if isDragging { return DockfolioStyle.dragScale }
+        if isReordering { return 1 }
         if isHovering && item.kind == .application { return DockfolioStyle.hoverScale }
         return 1
     }
