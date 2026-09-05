@@ -36,6 +36,12 @@ Private testers can use an unsigned disk image while you wait for Apple Develope
 
 The file is `dist/Docksly-1.0.0-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
 
+The tester disk image uses a Docksly-styled window (dark shelf, drag arrow). That build needs `dmgbuild`:
+
+```bash
+python3 -m pip install --user dmgbuild
+```
+
 ### Open the project in Xcode
 
 1. Open `Docksly.xcodeproj`. You do not need CocoaPods or Swift Package Manager.

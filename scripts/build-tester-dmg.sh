@@ -1,18 +1,28 @@
 #!/bin/sh
-# Build an unsigned tester .dmg. Recipients must bypass Gatekeeper.
-# Usage: scripts/build-tester-dmg.sh
+# Build an unsigned tester .dmg with a Docksly-styled Finder window.
+# Recipients must bypass Gatekeeper. Usage: scripts/build-tester-dmg.sh
+#
+# Needs: Xcode, and `dmgbuild` (python3 -m pip install --user dmgbuild)
 
 set -eu
 
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 VERSION="1.0.0"
+VOLUME="Install Docksly"
 DERIVED="$ROOT/.build/DerivedData"
 APP="$DERIVED/Build/Products/Release/Docksly.app"
-STAGE="$ROOT/dist/dmg-root"
 DMG="$ROOT/dist/Docksly-$VERSION-tester.dmg"
+BG="$ROOT/scripts/dmg/background.png"
+SETTINGS="$ROOT/scripts/dmg/dmgbuild_settings.py"
+RUNNER="$ROOT/scripts/dmg/run_dmgbuild.py"
 
 if ! command -v xcodebuild >/dev/null 2>&1; then
   printf '%s\n' "Install Xcode from the Mac App Store, then open it once." >&2
+  exit 1
+fi
+
+if ! python3 -c 'import dmgbuild, ds_store' >/dev/null 2>&1; then
+  printf '%s\n' "Install dmgbuild: python3 -m pip install --user dmgbuild" >&2
   exit 1
 fi
 
@@ -29,33 +39,23 @@ if [ ! -d "$APP" ]; then
   exit 1
 fi
 
-rm -rf "$STAGE"
-mkdir -p "$STAGE"
-cp -R "$APP" "$STAGE/Docksly.app"
-ln -s /Applications "$STAGE/Applications"
+swift "$ROOT/scripts/generate_dmg_background.swift" "$BG"
 
-cat > "$STAGE/Read Me (testers).txt" <<'EOF'
-Docksly tester build
-
-This disk image is not signed with Developer ID and is not notarized.
-macOS may block the app after you download the file.
-
-1. Drag Docksly to Applications.
-2. If macOS blocks the app, open System Settings → Privacy & Security, then choose Open Anyway.
-   Or run: xattr -cr /Applications/Docksly.app
-3. Open Docksly from Applications.
-
-The 24-hour trial starts on first launch. After that, paste a Mayar license key in Settings.
-EOF
-
+mkdir -p "$ROOT/dist"
+for vol in "/Volumes/$VOLUME" "/Volumes/Docksly $VERSION"; do
+  if [ -d "$vol" ]; then
+    hdiutil detach "$vol" -quiet -force || true
+  fi
+done
+sleep 1
 rm -f "$DMG"
-hdiutil create \
-  -volname "Docksly $VERSION" \
-  -srcfolder "$STAGE" \
-  -ov \
-  -format UDZO \
+
+python3 "$RUNNER" \
+  -s "$SETTINGS" \
+  -Dapp="$APP" \
+  -Dbackground="$BG" \
+  "$VOLUME" \
   "$DMG"
 
-rm -rf "$STAGE"
 printf '%s\n' "Created $DMG"
 printf '%s\n' "Do not sell this file. Share it only with trusted testers."
