@@ -4,15 +4,44 @@ Docksly is a small macOS utility that saves named Dock layouts and applies them 
 
 This project is an independent MVP. It is not Dockset. It does not use Dockset artwork, names, or trademarks.
 
-The source tree is a complete Xcode project. This environment is Linux, so the app was **not** built or run on macOS here. Open it on a Mac with Xcode 14.1 or later (macOS 13 Ventura or later).
+Build Docksly from this repository on a Mac. You do not need a paid Apple Developer team for that path. A public `.dmg` still needs Developer ID and notarization.
 
-## Open the project
+## Build from source
 
-1. Clone this repository on a Mac.
-2. Open `Docksly.xcodeproj` in Xcode. You do not need CocoaPods or Swift Package Manager.
-3. Select the **Docksly** scheme and **My Mac**.
-4. Set your development team under **Signing & Capabilities** if Xcode asks. Local ad-hoc signing (`-`) is already set so a personal run can start.
-5. Press Run.
+You need a Mac with macOS 13 or later and Xcode 14.1 or later. Open Xcode once after you install it.
+
+```bash
+git clone <this-repository>
+cd dockfolio
+chmod +x scripts/build-from-source.sh
+./scripts/build-from-source.sh
+```
+
+That builds a **Release** app (ad-hoc sign) and opens it. Settings → Developer is not in this build.
+
+Useful options:
+
+```bash
+./scripts/build-from-source.sh --debug      # Debug build, includes Settings → Developer
+./scripts/build-from-source.sh --install    # Copy the app to /Applications, then open it
+```
+
+Login at login is reliable only after `--install` (or after you drag Docksly into `/Applications`).
+
+Private testers can use an unsigned disk image while you wait for Apple Developer approval:
+
+```bash
+./scripts/build-tester-dmg.sh
+```
+
+The file is `dist/Docksly-1.0.0-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
+
+### Open the project in Xcode
+
+1. Open `Docksly.xcodeproj`. You do not need CocoaPods or Swift Package Manager.
+2. Select the **Docksly** scheme and **My Mac**.
+3. Local ad-hoc signing (`-`) is already set. A personal run can start without a team.
+4. Press Run.
 
 Optional: if you use [XcodeGen](https://github.com/yonaskolb/XcodeGen), you can regenerate the project from `project.yml`:
 

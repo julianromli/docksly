@@ -34,3 +34,6 @@ license-api/.env.*
 !license-api/.dev.vars.example
 license-api/node_modules/
 license-api/.wrangler/
+
+# Local disk images (do not commit unsigned tester builds)
+dist/
