@@ -25,7 +25,7 @@ struct DockTileView: View {
             tile
                 .scaleEffect(liftScale)
                 .animation(
-                    (reduceMotion || isReordering) ? nil : DockfolioStyle.defaultSpring,
+                    (reduceMotion || isReordering) ? nil : DockslyStyle.defaultSpring,
                     value: liftScale
                 )
                 .highPriorityGesture(reorderGesture)
@@ -58,8 +58,8 @@ struct DockTileView: View {
                     .foregroundStyle(.primary, Color.primary.opacity(0.18))
                     .font(.system(size: 13, weight: .semibold))
                     .frame(
-                        width: DockfolioStyle.removeHitSize,
-                        height: DockfolioStyle.removeHitSize,
+                        width: DockslyStyle.removeHitSize,
+                        height: DockslyStyle.removeHitSize,
                         alignment: .topTrailing
                     )
                     .contentShape(Rectangle())
@@ -101,9 +101,9 @@ struct DockTileView: View {
 
     private var liftScale: CGFloat {
         if reduceMotion { return 1 }
-        if isDragging { return DockfolioStyle.dragScale }
+        if isDragging { return DockslyStyle.dragScale }
         if isReordering { return 1 }
-        if isHovering && item.kind == .application { return DockfolioStyle.hoverScale }
+        if isHovering && item.kind == .application { return DockslyStyle.hoverScale }
         return 1
     }
 
@@ -118,7 +118,7 @@ struct DockTileView: View {
     }
 
     private var reorderGesture: some Gesture {
-        DragGesture(minimumDistance: 6, coordinateSpace: .named(DockfolioStyle.dockStripSpace))
+        DragGesture(minimumDistance: 6, coordinateSpace: .named(DockslyStyle.dockStripSpace))
             .onChanged { value in
                 onDragChanged?(value)
             }
@@ -137,7 +137,7 @@ struct DockTileView: View {
                 .resizable()
                 .interpolation(.high)
                 .aspectRatio(contentMode: .fit)
-                .frame(width: DockfolioStyle.iconSize, height: DockfolioStyle.iconSize)
+                .frame(width: DockslyStyle.iconSize, height: DockslyStyle.iconSize)
                 .opacity(missing ? 0.55 : 1)
 
             if missing {
@@ -148,16 +148,16 @@ struct DockTileView: View {
                     .accessibilityLabel("Application is missing")
             }
         }
-        .frame(width: DockfolioStyle.tileWidth, height: 60)
+        .frame(width: DockslyStyle.tileWidth, height: 60)
         .help(missing ? "\(item.title) — missing on this Mac. Hover for Remove." : "\(item.title). Drag to reorder.")
     }
 
     private var spacerTile: some View {
         Capsule()
             .fill(Color.primary.opacity(isHovering ? 0.34 : 0.20))
-            .animation(reduceMotion ? nil : DockfolioStyle.chromeFade, value: isHovering)
+            .animation(reduceMotion ? nil : DockslyStyle.chromeFade, value: isHovering)
             .frame(width: 4, height: 36)
-            .frame(width: DockfolioStyle.spacerWidth, height: 60)
+            .frame(width: DockslyStyle.spacerWidth, height: 60)
             .contentShape(Rectangle())
             .help("Spacer. Drag to reorder.")
     }

@@ -73,7 +73,7 @@ final class DockStore: ObservableObject {
 
         let support = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        let folder = support.appendingPathComponent("Dockfolio", isDirectory: true)
+        let folder = DockStore.resolveSupportFolder(in: support, fileManager: fileManager)
         try? fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
         fileURL = folder.appendingPathComponent("library.json")
         backupsDirectory = folder.appendingPathComponent("backups", isDirectory: true)
@@ -343,7 +343,7 @@ final class DockStore: ObservableObject {
             let data = try encoder.encode(library)
             try data.write(to: fileURL, options: Data.WritingOptions.atomic)
         } catch {
-            lastError = "Dockfolio could not save your docks. \(error.localizedDescription)"
+            lastError = "Docksly could not save your docks. \(error.localizedDescription)"
         }
     }
 
@@ -403,11 +403,34 @@ final class DockStore: ObservableObject {
 
     private func presentApplyFailure(_ message: String) {
         let alert = NSAlert()
-        alert.messageText = "Dockfolio could not apply this dock"
+        alert.messageText = "Docksly could not apply this dock"
         alert.informativeText = message
         alert.alertStyle = .warning
         alert.addButton(withTitle: "OK")
         alert.runModal()
+    }
+
+    /// Uses `Docksly/`. Moves a leftover `Dockfolio/` folder once if the new library is missing.
+    private static func resolveSupportFolder(in support: URL, fileManager: FileManager) -> URL {
+        let folder = support.appendingPathComponent("Docksly", isDirectory: true)
+        let library = folder.appendingPathComponent("library.json")
+        let legacy = support.appendingPathComponent("Dockfolio", isDirectory: true)
+        let legacyLibrary = legacy.appendingPathComponent("library.json")
+        if !fileManager.fileExists(atPath: library.path),
+           fileManager.fileExists(atPath: legacyLibrary.path) {
+            if !fileManager.fileExists(atPath: folder.path) {
+                try? fileManager.moveItem(at: legacy, to: folder)
+            } else {
+                try? fileManager.copyItem(at: legacyLibrary, to: library)
+                let legacyBackups = legacy.appendingPathComponent("backups", isDirectory: true)
+                let backups = folder.appendingPathComponent("backups", isDirectory: true)
+                if fileManager.fileExists(atPath: legacyBackups.path),
+                   !fileManager.fileExists(atPath: backups.path) {
+                    try? fileManager.copyItem(at: legacyBackups, to: backups)
+                }
+            }
+        }
+        return folder
     }
 
     private static func makeFirstLaunchLibrary() -> DockLibrary {

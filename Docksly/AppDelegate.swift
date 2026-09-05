@@ -14,7 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         sender.activate(ignoringOtherApps: true)
         if !flag {
             if sender.windows.isEmpty {
-                NotificationCenter.default.post(name: .dockfolioOpenEditor, object: nil)
+                NotificationCenter.default.post(name: .dockslyOpenEditor, object: nil)
             } else {
                 sender.windows.forEach { $0.makeKeyAndOrderFront(nil) }
             }
@@ -24,5 +24,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension Notification.Name {
-    static let dockfolioOpenEditor = Notification.Name("dockfolio.openEditor")
+    static let dockslyOpenEditor = Notification.Name("docksly.openEditor")
 }

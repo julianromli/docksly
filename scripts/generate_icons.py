@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate Dockfolio app icons and a template menu-bar glyph as PNG files."""
+"""Generate Docksly app icons and a template menu-bar glyph as PNG files."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-APPICON = ROOT / "Dockfolio" / "Assets.xcassets" / "AppIcon.appiconset"
-MENUBAR = ROOT / "Dockfolio" / "Assets.xcassets" / "MenuBarIcon.imageset"
+APPICON = ROOT / "Docksly" / "Assets.xcassets" / "AppIcon.appiconset"
+MENUBAR = ROOT / "Docksly" / "Assets.xcassets" / "MenuBarIcon.imageset"
 
 
 def write_png(path: Path, width: int, height: int, rgba: list[tuple[int, int, int, int]]) -> None:

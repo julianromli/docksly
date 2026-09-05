@@ -11,13 +11,13 @@ enum DockApplicatorError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .preferenceReadFailed:
-            return "Dockfolio could not read the Dock preference list."
+            return "Docksly could not read the Dock preference list."
         case .preferenceWriteFailed:
-            return "Dockfolio could not write the Dock preference list."
+            return "Docksly could not write the Dock preference list."
         case .dockRestartFailed(let detail):
-            return "The Dock list was written, but Dockfolio could not restart Dock. \(detail)"
+            return "The Dock list was written, but Docksly could not restart Dock. \(detail)"
         case .cannotResolveApplication(let name):
-            return "Dockfolio could not find “\(name)” on this Mac."
+            return "Docksly could not find “\(name)” on this Mac."
         }
     }
 }
@@ -42,7 +42,7 @@ enum DockApplicatorError: LocalizedError, Equatable {
 ///
 /// ## Risks
 /// - A malformed tile can make Dock drop that item or, in rare cases, reset the list.
-/// - Dockfolio is **not sandboxed**. The App Sandbox blocks this preference domain
+/// - Docksly is **not sandboxed**. The App Sandbox blocks this preference domain
 ///   and `killall Dock`.
 /// - Apple can change the tile dictionary on a future macOS. Test after system updates.
 /// - `killall Dock` is the documented community method (dockutil and similar tools).

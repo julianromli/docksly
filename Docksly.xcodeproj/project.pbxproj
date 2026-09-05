@@ -1,0 +1,361 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B90C061B23022B21345B1245 /* DockslyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424CF6D092FCB2D7BC6ACA69 /* DockslyApp.swift */; };
+		A9B47589F1C47027677602E0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12BE6F43C250EA1C0ABFBF32 /* AppDelegate.swift */; };
+		683613A45BC3A24918ABD361 /* DockslyCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6419E266B7FAC466A5CDEEA6 /* DockslyCommands.swift */; };
+		D967771FBBA56F83689576BF /* DockItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6192EAF6C4E38287A97BC57 /* DockItem.swift */; };
+		0A9D6DB12967244C06858D46 /* DockProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E7E146981E82F69FF594A6C /* DockProfile.swift */; };
+		1CF00C6596F33D4A4F307C48 /* DockLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C892D510600761CFFD12C84D /* DockLibrary.swift */; };
+		754399E53B8097EF631C939C /* ProfileColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A5B13DB28E33E7D40BE09C /* ProfileColor.swift */; };
+		8E99ADA596FB7CABB9899575 /* DockStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EA6C162300E4C4F15C945 /* DockStore.swift */; };
+		389AAACB82A9624F6BA04149 /* DockApplicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22567E86ABEE057F0ADF72DF /* DockApplicator.swift */; };
+		30BB0E60EC7518925FA0BC30 /* AppIconService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E73EE626ABF2297BFA7912F /* AppIconService.swift */; };
+		6A463769695693C3C468292E /* LaunchAtLoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB70D8BB51D336ADCEF36269 /* LaunchAtLoginService.swift */; };
+		E24C3D011D670965BEB78630 /* VisualEffectBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634DD1DEF1CDA8E4BDA25E46 /* VisualEffectBackground.swift */; };
+		69762AC378AB14518E205A45 /* ColorDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47BD01F897C2498E01B5653C /* ColorDot.swift */; };
+		6ED025B575121875BCD2A90E /* DockTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3360387D36215090529D47 /* DockTileView.swift */; };
+		CA24789229FB6465313EB470 /* DockStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83199AB51E65AD83E188B22C /* DockStripView.swift */; };
+		63946881CC657BE240BFA9DA /* AddAppSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82EBF0C917F06B29AA912B48 /* AddAppSheet.swift */; };
+		DA9AA537397BFCC524952A01 /* ProfilePickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36DA5E42A52F64AD7CC9537F /* ProfilePickerButton.swift */; };
+		2576700E715E0E487C5B69FC /* EditorWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2785F15900B5637E9109759D /* EditorWindowView.swift */; };
+		5A048A5962D239BE0A1D024E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C1D1E18628DE4D1868A664 /* SettingsView.swift */; };
+		BF7E125A6EC06CFE461A6413 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE7F9E60A6EA59104128AF9 /* MenuBarContentView.swift */; };
+		222F0DBFFE5EB23DCD3FD16F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6C36FFE920F24CEDB7CFDBFC /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		424CF6D092FCB2D7BC6ACA69 /* DockslyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockslyApp.swift; sourceTree = "<group>"; };
+		12BE6F43C250EA1C0ABFBF32 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		6419E266B7FAC466A5CDEEA6 /* DockslyCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockslyCommands.swift; sourceTree = "<group>"; };
+		E6192EAF6C4E38287A97BC57 /* DockItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockItem.swift; sourceTree = "<group>"; };
+		2E7E146981E82F69FF594A6C /* DockProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockProfile.swift; sourceTree = "<group>"; };
+		C892D510600761CFFD12C84D /* DockLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockLibrary.swift; sourceTree = "<group>"; };
+		71A5B13DB28E33E7D40BE09C /* ProfileColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileColor.swift; sourceTree = "<group>"; };
+		CE4EA6C162300E4C4F15C945 /* DockStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockStore.swift; sourceTree = "<group>"; };
+		22567E86ABEE057F0ADF72DF /* DockApplicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockApplicator.swift; sourceTree = "<group>"; };
+		1E73EE626ABF2297BFA7912F /* AppIconService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconService.swift; sourceTree = "<group>"; };
+		FB70D8BB51D336ADCEF36269 /* LaunchAtLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginService.swift; sourceTree = "<group>"; };
+		634DD1DEF1CDA8E4BDA25E46 /* VisualEffectBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBackground.swift; sourceTree = "<group>"; };
+		47BD01F897C2498E01B5653C /* ColorDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDot.swift; sourceTree = "<group>"; };
+		DF3360387D36215090529D47 /* DockTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockTileView.swift; sourceTree = "<group>"; };
+		83199AB51E65AD83E188B22C /* DockStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockStripView.swift; sourceTree = "<group>"; };
+		82EBF0C917F06B29AA912B48 /* AddAppSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAppSheet.swift; sourceTree = "<group>"; };
+		36DA5E42A52F64AD7CC9537F /* ProfilePickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePickerButton.swift; sourceTree = "<group>"; };
+		2785F15900B5637E9109759D /* EditorWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorWindowView.swift; sourceTree = "<group>"; };
+		F0C1D1E18628DE4D1868A664 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		4AE7F9E60A6EA59104128AF9 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+		6C36FFE920F24CEDB7CFDBFC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		68E77A9D7BC78A97D4F4E27B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8509ABF17E9E3CEE9F5D0453 /* Docksly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Docksly.entitlements; sourceTree = "<group>"; };
+		C6E1CE903D63CC00B28329E3 /* Docksly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Docksly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CF5BDB0BEAFE176F9629192A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		ADCF10F76EBF2A74473E9DC4 = {
+			isa = PBXGroup;
+			children = (
+				CF8D0BD4B75E8C2C174692A5 /* Docksly */,
+				00C45FD35CB0F9C5F764F070 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		00C45FD35CB0F9C5F764F070 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C6E1CE903D63CC00B28329E3 /* Docksly.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CF8D0BD4B75E8C2C174692A5 /* Docksly */ = {
+			isa = PBXGroup;
+			children = (
+				424CF6D092FCB2D7BC6ACA69 /* DockslyApp.swift */,
+				12BE6F43C250EA1C0ABFBF32 /* AppDelegate.swift */,
+				6419E266B7FAC466A5CDEEA6 /* DockslyCommands.swift */,
+				9B21A922C1487E69963B16A2 /* Models */,
+				EA06278EA83F24DB14BDD7E1 /* Persistence */,
+				A31D3374946AEC6B0D3886C2 /* Services */,
+				7EFEE443E878286B9201B84F /* Views */,
+				6C36FFE920F24CEDB7CFDBFC /* Assets.xcassets */,
+				68E77A9D7BC78A97D4F4E27B /* Info.plist */,
+				8509ABF17E9E3CEE9F5D0453 /* Docksly.entitlements */,
+			);
+			path = Docksly;
+			sourceTree = "<group>";
+		};
+		9B21A922C1487E69963B16A2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E6192EAF6C4E38287A97BC57 /* DockItem.swift */,
+				2E7E146981E82F69FF594A6C /* DockProfile.swift */,
+				C892D510600761CFFD12C84D /* DockLibrary.swift */,
+				71A5B13DB28E33E7D40BE09C /* ProfileColor.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		EA06278EA83F24DB14BDD7E1 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				CE4EA6C162300E4C4F15C945 /* DockStore.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		A31D3374946AEC6B0D3886C2 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				22567E86ABEE057F0ADF72DF /* DockApplicator.swift */,
+				1E73EE626ABF2297BFA7912F /* AppIconService.swift */,
+				FB70D8BB51D336ADCEF36269 /* LaunchAtLoginService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		7EFEE443E878286B9201B84F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				634DD1DEF1CDA8E4BDA25E46 /* VisualEffectBackground.swift */,
+				47BD01F897C2498E01B5653C /* ColorDot.swift */,
+				DF3360387D36215090529D47 /* DockTileView.swift */,
+				83199AB51E65AD83E188B22C /* DockStripView.swift */,
+				82EBF0C917F06B29AA912B48 /* AddAppSheet.swift */,
+				36DA5E42A52F64AD7CC9537F /* ProfilePickerButton.swift */,
+				2785F15900B5637E9109759D /* EditorWindowView.swift */,
+				F0C1D1E18628DE4D1868A664 /* SettingsView.swift */,
+				4AE7F9E60A6EA59104128AF9 /* MenuBarContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C00E45F0DCE3AC57077AA9A4 /* Docksly */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0701412FE723AFB8BDD6ED72 /* Build configuration list for PBXNativeTarget "Docksly" */;
+			buildPhases = (
+				1CDF2F71A52B082132B04DFF /* Sources */,
+				CF5BDB0BEAFE176F9629192A /* Frameworks */,
+				C02F1309AF4906C92F1EAD44 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Docksly;
+			productName = Docksly;
+			productReference = C6E1CE903D63CC00B28329E3 /* Docksly.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B270706EC03CBAB26A54FC9E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					C00E45F0DCE3AC57077AA9A4 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 42984ABA711C545DA9F6CC37 /* Build configuration list for PBXProject "Docksly" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = ADCF10F76EBF2A74473E9DC4;
+			productRefGroup = 00C45FD35CB0F9C5F764F070 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C00E45F0DCE3AC57077AA9A4 /* Docksly */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C02F1309AF4906C92F1EAD44 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				222F0DBFFE5EB23DCD3FD16F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1CDF2F71A52B082132B04DFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B90C061B23022B21345B1245 /* DockslyApp.swift in Sources */,
+				A9B47589F1C47027677602E0 /* AppDelegate.swift in Sources */,
+				683613A45BC3A24918ABD361 /* DockslyCommands.swift in Sources */,
+				D967771FBBA56F83689576BF /* DockItem.swift in Sources */,
+				0A9D6DB12967244C06858D46 /* DockProfile.swift in Sources */,
+				1CF00C6596F33D4A4F307C48 /* DockLibrary.swift in Sources */,
+				754399E53B8097EF631C939C /* ProfileColor.swift in Sources */,
+				8E99ADA596FB7CABB9899575 /* DockStore.swift in Sources */,
+				389AAACB82A9624F6BA04149 /* DockApplicator.swift in Sources */,
+				30BB0E60EC7518925FA0BC30 /* AppIconService.swift in Sources */,
+				6A463769695693C3C468292E /* LaunchAtLoginService.swift in Sources */,
+				E24C3D011D670965BEB78630 /* VisualEffectBackground.swift in Sources */,
+				69762AC378AB14518E205A45 /* ColorDot.swift in Sources */,
+				6ED025B575121875BCD2A90E /* DockTileView.swift in Sources */,
+				CA24789229FB6465313EB470 /* DockStripView.swift in Sources */,
+				63946881CC657BE240BFA9DA /* AddAppSheet.swift in Sources */,
+				DA9AA537397BFCC524952A01 /* ProfilePickerButton.swift in Sources */,
+				2576700E715E0E487C5B69FC /* EditorWindowView.swift in Sources */,
+				5A048A5962D239BE0A1D024E /* SettingsView.swift in Sources */,
+				BF7E125A6EC06CFE461A6413 /* MenuBarContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B4F6FC399FC0D6734C3B3672 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		347D41C92D5FFF5D0CD2F5DD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		9B8EADA6563212FB5C8EFBE4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Docksly/Docksly.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Docksly/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		7DE42861F97055A63491041B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Docksly/Docksly.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Docksly/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		42984ABA711C545DA9F6CC37 /* Build configuration list for PBXProject "Docksly" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4F6FC399FC0D6734C3B3672 /* Debug */,
+				347D41C92D5FFF5D0CD2F5DD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0701412FE723AFB8BDD6ED72 /* Build configuration list for PBXNativeTarget "Docksly" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B8EADA6563212FB5C8EFBE4 /* Debug */,
+				7DE42861F97055A63491041B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B270706EC03CBAB26A54FC9E /* Project object */;
+}

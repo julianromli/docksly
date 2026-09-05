@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<!--
-	Dockfolio is not sandboxed. Writing com.apple.dock and restarting Dock
+	Docksly is not sandboxed. Writing com.apple.dock and restarting Dock
 	does not work inside the App Sandbox. Leave this file empty so Xcode
 	can still attach a Hardened Runtime for local runs and Developer ID.
 	-->

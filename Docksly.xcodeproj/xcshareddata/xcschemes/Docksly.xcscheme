@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2660"
+   LastUpgradeVersion = "1500"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7B6CF613AB369BCA992CBDA8"
-               BuildableName = "Dockfolio.app"
-               BlueprintName = "Dockfolio"
-               ReferencedContainer = "container:Dockfolio.xcodeproj">
+               BlueprintIdentifier = "C00E45F0DCE3AC57077AA9A4"
+               BuildableName = "Docksly.app"
+               BlueprintName = "Docksly"
+               ReferencedContainer = "container:Docksly.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -43,10 +43,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7B6CF613AB369BCA992CBDA8"
-            BuildableName = "Dockfolio.app"
-            BlueprintName = "Dockfolio"
-            ReferencedContainer = "container:Dockfolio.xcodeproj">
+            BlueprintIdentifier = "C00E45F0DCE3AC57077AA9A4"
+            BuildableName = "Docksly.app"
+            BlueprintName = "Docksly"
+            ReferencedContainer = "container:Docksly.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -60,10 +60,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "7B6CF613AB369BCA992CBDA8"
-            BuildableName = "Dockfolio.app"
-            BlueprintName = "Dockfolio"
-            ReferencedContainer = "container:Dockfolio.xcodeproj">
+            BlueprintIdentifier = "C00E45F0DCE3AC57077AA9A4"
+            BuildableName = "Docksly.app"
+            BlueprintName = "Docksly"
+            ReferencedContainer = "container:Docksly.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

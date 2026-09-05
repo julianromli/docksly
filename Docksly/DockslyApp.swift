@@ -1,20 +1,20 @@
 import SwiftUI
 
 @main
-struct DockfolioApp: App {
+struct DockslyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @ObservedObject private var store = DockStore.shared
 
     var body: some Scene {
-        Window("Dockfolio", id: "main") {
+        Window("Docksly", id: "main") {
             EditorWindowView()
                 .environmentObject(store)
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
-        .defaultSize(width: 780, height: DockfolioStyle.windowIdealHeight)
+        .defaultSize(width: 780, height: DockslyStyle.windowIdealHeight)
         .commands {
-            DockfolioCommands(store: store)
+            DockslyCommands(store: store)
         }
 
         Settings {

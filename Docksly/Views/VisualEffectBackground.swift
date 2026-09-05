@@ -129,7 +129,7 @@ struct WindowConfigurator: NSViewRepresentable {
     /// Saved frames from the taller glass window leave a gray floor. Shrink once.
     private static func compactRestoredFrameIfNeeded(_ window: NSWindow) {
         guard !didCompactRestoredFrame else { return }
-        let target = DockfolioStyle.windowIdealHeight
+        let target = DockslyStyle.windowIdealHeight
         guard window.frame.height > target + 24 else {
             didCompactRestoredFrame = true
             return
@@ -222,7 +222,7 @@ private final class WindowMoveBarView: NSView {
     }
 }
 
-enum DockfolioStyle {
+enum DockslyStyle {
     static let windowMinWidth: CGFloat = 720
     static let windowIdealWidth: CGFloat = 780
     static let windowMaxWidth: CGFloat = 1100
@@ -317,7 +317,7 @@ enum DockfolioStyle {
     }
 }
 
-enum DockfolioFocusShape {
+enum DockslyFocusShape {
     case rounded(CGFloat)
     case capsule
     case circle
@@ -326,7 +326,7 @@ enum DockfolioFocusShape {
 /// Press scale of 0.96. Pass `isStatic: true` when motion would distract.
 struct PressableButtonStyle: ButtonStyle {
     var isStatic: Bool = false
-    var focusShape: DockfolioFocusShape = .rounded(8)
+    var focusShape: DockslyFocusShape = .rounded(8)
 
     func makeBody(configuration: Configuration) -> some View {
         PressableButtonBody(
@@ -340,7 +340,7 @@ struct PressableButtonStyle: ButtonStyle {
 private struct PressableButtonBody: View {
     let configuration: ButtonStyleConfiguration
     var isStatic: Bool
-    var focusShape: DockfolioFocusShape
+    var focusShape: DockslyFocusShape
 
     @Environment(\.isFocused) private var isFocused
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -348,20 +348,20 @@ private struct PressableButtonBody: View {
     var body: some View {
         configuration.label
             .scaleEffect(pressScale)
-            .animation(reduceMotion ? nil : DockfolioStyle.pressSpring, value: configuration.isPressed)
-            .dockfolioFocusRing(isFocused: isFocused, shape: focusShape)
+            .animation(reduceMotion ? nil : DockslyStyle.pressSpring, value: configuration.isPressed)
+            .dockslyFocusRing(isFocused: isFocused, shape: focusShape)
     }
 
     private var pressScale: CGFloat {
         if isStatic || reduceMotion { return 1 }
-        return configuration.isPressed ? DockfolioStyle.pressScale : 1
+        return configuration.isPressed ? DockslyStyle.pressScale : 1
     }
 }
 
 extension View {
-    func dockfolioFocusRing(
+    func dockslyFocusRing(
         isFocused: Bool,
-        shape: DockfolioFocusShape,
+        shape: DockslyFocusShape,
         color: Color = .accentColor
     ) -> some View {
         overlay {
@@ -390,8 +390,8 @@ extension View {
     func contextualIconChrome(visible: Bool, animated: Bool) -> some View {
         self
             .opacity(visible ? 1 : 0)
-            .scaleEffect(visible ? 1 : DockfolioStyle.iconHiddenScale)
-            .blur(radius: visible ? 0 : DockfolioStyle.iconHiddenBlur)
-            .animation(animated ? DockfolioStyle.iconChromeSpring : nil, value: visible)
+            .scaleEffect(visible ? 1 : DockslyStyle.iconHiddenScale)
+            .blur(radius: visible ? 0 : DockslyStyle.iconHiddenBlur)
+            .animation(animated ? DockslyStyle.iconChromeSpring : nil, value: visible)
     }
 }

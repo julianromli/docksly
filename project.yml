@@ -1,6 +1,6 @@
-name: Dockfolio
+name: Docksly
 options:
-  bundleIdPrefix: app.dockfolio
+  bundleIdPrefix: app.docksly
   deploymentTarget:
     macOS: "13.0"
   xcodeVersion: "14.0"
@@ -14,20 +14,20 @@ settings:
     MACOSX_DEPLOYMENT_TARGET: "13.0"
     SWIFT_STRICT_CONCURRENCY: minimal
 targets:
-  Dockfolio:
+  Docksly:
     type: application
     platform: macOS
     sources:
-      - path: Dockfolio
+      - path: Docksly
         excludes:
           - "**/.DS_Store"
     settings:
       base:
-        PRODUCT_NAME: Dockfolio
-        PRODUCT_BUNDLE_IDENTIFIER: app.dockfolio.Dockfolio
-        INFOPLIST_FILE: Dockfolio/Info.plist
+        PRODUCT_NAME: Docksly
+        PRODUCT_BUNDLE_IDENTIFIER: app.docksly.Docksly
+        INFOPLIST_FILE: Docksly/Info.plist
         GENERATE_INFOPLIST_FILE: false
-        CODE_SIGN_ENTITLEMENTS: Dockfolio/Dockfolio.entitlements
+        CODE_SIGN_ENTITLEMENTS: Docksly/Docksly.entitlements
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "-"
         ENABLE_HARDENED_RUNTIME: YES
@@ -43,4 +43,4 @@ targets:
         SDKROOT: macosx
         SWIFT_EMIT_LOC_STRINGS: YES
     entitlements:
-      path: Dockfolio/Dockfolio.entitlements
+      path: Docksly/Docksly.entitlements

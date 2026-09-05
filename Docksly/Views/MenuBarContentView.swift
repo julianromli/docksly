@@ -40,7 +40,7 @@ struct MenuBarContentView: View {
 
         Divider()
 
-        Button("Quit Dockfolio") {
+        Button("Quit Docksly") {
             NSApp.terminate(nil)
         }
         .keyboardShortcut("q", modifiers: .command)
@@ -53,8 +53,8 @@ struct MenuBarLabel: View {
     var body: some View {
         Image("MenuBarIcon")
             .renderingMode(.template)
-            .accessibilityLabel("Dockfolio")
-            .onReceive(NotificationCenter.default.publisher(for: .dockfolioOpenEditor)) { _ in
+            .accessibilityLabel("Docksly")
+            .onReceive(NotificationCenter.default.publisher(for: .dockslyOpenEditor)) { _ in
                 NSApp.activate(ignoringOtherApps: true)
                 openWindow(id: "main")
             }

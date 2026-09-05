@@ -17,15 +17,15 @@ struct EditorWindowView: View {
             errorSlot
         }
         .frame(
-            minWidth: DockfolioStyle.windowMinWidth,
-            idealWidth: DockfolioStyle.windowIdealWidth,
-            maxWidth: DockfolioStyle.windowMaxWidth
+            minWidth: DockslyStyle.windowMinWidth,
+            idealWidth: DockslyStyle.windowIdealWidth,
+            maxWidth: DockslyStyle.windowMaxWidth
         )
-        .background(DockfolioStyle.windowFill(colorScheme))
+        .background(DockslyStyle.windowFill(colorScheme))
         .background(WindowConfigurator())
         .onChange(of: store.lastError) { message in
             if let message {
-                DockfolioStyle.announce(message)
+                DockslyStyle.announce(message)
             }
         }
         .sheet(isPresented: $store.wantsAddApp) {
@@ -57,19 +57,19 @@ struct EditorWindowView: View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 Color.clear
-                    .frame(width: DockfolioStyle.trafficLightClearance)
+                    .frame(width: DockslyStyle.trafficLightClearance)
                     .allowsHitTesting(false)
                 WindowMoveBar()
                     .accessibilityHidden(true)
             }
-            .frame(height: DockfolioStyle.headerTop)
+            .frame(height: DockslyStyle.headerTop)
 
             HStack(alignment: .center, spacing: 8) {
                 HStack(spacing: 6) {
                     ProfileIdentityEditor()
                     ProfilePickerButton()
                 }
-                .padding(.leading, DockfolioStyle.contentLeading)
+                .padding(.leading, DockslyStyle.contentLeading)
 
                 WindowMoveBar()
                     .frame(minWidth: 12, maxWidth: .infinity)
@@ -84,9 +84,9 @@ struct EditorWindowView: View {
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 .layoutPriority(1)
-                .padding(.trailing, DockfolioStyle.trailingInset)
+                .padding(.trailing, DockslyStyle.trailingInset)
             }
-            .padding(.bottom, DockfolioStyle.headerBottom)
+            .padding(.bottom, DockslyStyle.headerBottom)
         }
     }
 
@@ -107,31 +107,31 @@ struct EditorWindowView: View {
             return Color.secondary
         }
         if store.isDirty {
-            return DockfolioStyle.statusDirtyForeground(colorScheme)
+            return DockslyStyle.statusDirtyForeground(colorScheme)
         }
         if store.isSelectedCurrent {
-            return DockfolioStyle.statusCurrentForeground(colorScheme)
+            return DockslyStyle.statusCurrentForeground(colorScheme)
         }
         return Color.secondary
     }
 
     private var chipFill: Color {
         if store.isApplying {
-            return DockfolioStyle.statusNeutralFill(colorScheme)
+            return DockslyStyle.statusNeutralFill(colorScheme)
         }
         if store.isDirty {
-            return DockfolioStyle.statusTint(
-                DockfolioStyle.statusDirtyForeground(colorScheme),
+            return DockslyStyle.statusTint(
+                DockslyStyle.statusDirtyForeground(colorScheme),
                 scheme: colorScheme
             )
         }
         if store.isSelectedCurrent {
-            return DockfolioStyle.statusTint(
-                DockfolioStyle.statusCurrentForeground(colorScheme),
+            return DockslyStyle.statusTint(
+                DockslyStyle.statusCurrentForeground(colorScheme),
                 scheme: colorScheme
             )
         }
-        return DockfolioStyle.statusNeutralFill(colorScheme)
+        return DockslyStyle.statusNeutralFill(colorScheme)
     }
 
     private var overflowMenu: some View {
@@ -237,7 +237,7 @@ struct EditorWindowView: View {
 
     private var errorAnimation: Animation? {
         if reduceMotion { return nil }
-        return store.lastError == nil ? DockfolioStyle.errorExit : DockfolioStyle.errorEnter
+        return store.lastError == nil ? DockslyStyle.errorExit : DockslyStyle.errorEnter
     }
 
     private func errorBar(_ message: String) -> some View {
@@ -257,15 +257,15 @@ struct EditorWindowView: View {
                 .buttonStyle(PressableButtonStyle())
                 .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, DockfolioStyle.shelfHorizontal)
+        .padding(.horizontal, DockslyStyle.shelfHorizontal)
         .padding(.vertical, 10)
-        .background(DockfolioStyle.errorFill(colorScheme))
+        .background(DockslyStyle.errorFill(colorScheme))
     }
 
     private func exportSelected() {
         let panel = NSSavePanel()
         panel.title = "Export this dock"
-        panel.nameFieldStringValue = "\(store.draftName).dockfolio.json"
+        panel.nameFieldStringValue = "\(store.draftName).docksly.json"
         panel.allowedContentTypes = [.json]
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
@@ -281,7 +281,7 @@ struct EditorWindowView: View {
     private func exportLibrary() {
         let panel = NSSavePanel()
         panel.title = "Export all docks"
-        panel.nameFieldStringValue = "Dockfolio-library.json"
+        panel.nameFieldStringValue = "Docksly-library.json"
         panel.allowedContentTypes = [.json]
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
@@ -337,13 +337,13 @@ private struct AccentCapsuleLabel: View {
                     .fill(Color.accentColor.opacity(configuration.isPressed ? 0.82 : 1))
             }
             .scaleEffect(pressScale)
-            .animation(reduceMotion ? nil : DockfolioStyle.pressSpring, value: configuration.isPressed)
-            .dockfolioFocusRing(isFocused: isFocused, shape: .capsule, color: .primary)
+            .animation(reduceMotion ? nil : DockslyStyle.pressSpring, value: configuration.isPressed)
+            .dockslyFocusRing(isFocused: isFocused, shape: .capsule, color: .primary)
     }
 
     private var pressScale: CGFloat {
         if reduceMotion { return 1 }
-        return configuration.isPressed ? DockfolioStyle.pressScale : 1
+        return configuration.isPressed ? DockslyStyle.pressScale : 1
     }
 }
 
@@ -380,17 +380,17 @@ private struct QuietCapsuleLabel<Label: View>: View {
             .overlay {
                 Capsule(style: .continuous)
                     .strokeBorder(ringColor, lineWidth: 1)
-                    .animation(reduceMotion ? nil : DockfolioStyle.chromeFade, value: isHovering)
+                    .animation(reduceMotion ? nil : DockslyStyle.chromeFade, value: isHovering)
             }
             .scaleEffect(pressScale)
-            .animation(reduceMotion ? nil : DockfolioStyle.pressSpring, value: isPressed)
-            .dockfolioFocusRing(isFocused: isFocused, shape: .capsule)
+            .animation(reduceMotion ? nil : DockslyStyle.pressSpring, value: isPressed)
+            .dockslyFocusRing(isFocused: isFocused, shape: .capsule)
             .onHover { isHovering = $0 }
     }
 
     private var pressScale: CGFloat {
         if reduceMotion { return 1 }
-        return isPressed ? DockfolioStyle.pressScale : 1
+        return isPressed ? DockslyStyle.pressScale : 1
     }
 
     private var ringColor: Color {

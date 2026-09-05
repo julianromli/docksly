@@ -1,13 +1,13 @@
 import SwiftUI
 
-struct DockfolioCommands: Commands {
+struct DockslyCommands: Commands {
     @ObservedObject var store: DockStore
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
             Button("New Dock") {
                 store.wantsNewDockName = true
-                NotificationCenter.default.post(name: .dockfolioOpenEditor, object: nil)
+                NotificationCenter.default.post(name: .dockslyOpenEditor, object: nil)
             }
             .keyboardShortcut("n", modifiers: .command)
 
@@ -21,7 +21,7 @@ struct DockfolioCommands: Commands {
         CommandMenu("Dock") {
             Button("Add Application…") {
                 store.wantsAddApp = true
-                NotificationCenter.default.post(name: .dockfolioOpenEditor, object: nil)
+                NotificationCenter.default.post(name: .dockslyOpenEditor, object: nil)
             }
             .keyboardShortcut("a", modifiers: [.command, .shift])
 

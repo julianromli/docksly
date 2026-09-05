@@ -47,7 +47,7 @@ struct ProfilePickerButton: View {
                 newName = ""
             }
         } message: {
-            Text("Give this setup a name. Dockfolio copies the items you see now.")
+            Text("Give this setup a name. Docksly copies the items you see now.")
         }
     }
 }
@@ -101,7 +101,7 @@ struct ProfileIdentityEditor: View {
             .background {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(Color.primary.opacity(nameFocused ? 0.08 : 0))
-                    .animation(reduceMotion ? nil : DockfolioStyle.chromeFade, value: nameFocused)
+                    .animation(reduceMotion ? nil : DockslyStyle.chromeFade, value: nameFocused)
             }
             .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .focused($nameFocused)

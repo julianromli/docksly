@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Emit a checked-in Dockfolio.xcodeproj that Xcode 14+ can open without XcodeGen."""
+"""Emit a checked-in Docksly.xcodeproj that Xcode 14+ can open without XcodeGen."""
 
 from __future__ import annotations
 
@@ -7,12 +7,12 @@ from pathlib import Path
 from textwrap import dedent
 
 ROOT = Path(__file__).resolve().parents[1]
-PROJECT = ROOT / "Dockfolio.xcodeproj"
+PROJECT = ROOT / "Docksly.xcodeproj"
 
 SWIFT_FILES = [
-    ("DockfolioApp.swift", "app"),
+    ("DockslyApp.swift", "app"),
     ("AppDelegate.swift", "app"),
-    ("DockfolioCommands.swift", "app"),
+    ("DockslyCommands.swift", "app"),
     ("Models/DockItem.swift", "models"),
     ("Models/DockProfile.swift", "models"),
     ("Models/DockLibrary.swift", "models"),
@@ -57,7 +57,7 @@ def main() -> None:
     assets_ref = hid("file:Assets.xcassets")
     assets_build = hid("build:Assets.xcassets")
     info_ref = hid("file:Info.plist")
-    entitlements_ref = hid("file:Dockfolio.entitlements")
+    entitlements_ref = hid("file:Docksly.entitlements")
 
     group_app = hid("group:app")
     group_models = hid("group:models")
@@ -66,8 +66,8 @@ def main() -> None:
     group_views = hid("group:views")
     group_products = hid("group:products")
     group_main = hid("group:main")
-    target_ref = hid("target:Dockfolio")
-    project_ref = hid("project:Dockfolio")
+    target_ref = hid("target:Docksly")
+    project_ref = hid("project:Docksly")
     sources_phase = hid("phase:sources")
     resources_phase = hid("phase:resources")
     frameworks_phase = hid("phase:frameworks")
@@ -77,7 +77,7 @@ def main() -> None:
     release_project = hid("xcbuild:project:release")
     debug_target = hid("xcbuild:target:debug")
     release_target = hid("xcbuild:target:release")
-    product_ref = hid("product:Dockfolio.app")
+    product_ref = hid("product:Docksly.app")
 
     file_entries = []
     build_entries = []
@@ -96,10 +96,10 @@ def main() -> None:
         f"\t\t{info_ref} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = \"<group>\"; }};"
     )
     file_entries.append(
-        f"\t\t{entitlements_ref} /* Dockfolio.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Dockfolio.entitlements; sourceTree = \"<group>\"; }};"
+        f"\t\t{entitlements_ref} /* Docksly.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Docksly.entitlements; sourceTree = \"<group>\"; }};"
     )
     file_entries.append(
-        f"\t\t{product_ref} /* Dockfolio.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dockfolio.app; sourceTree = BUILT_PRODUCTS_DIR; }};"
+        f"\t\t{product_ref} /* Docksly.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Docksly.app; sourceTree = BUILT_PRODUCTS_DIR; }};"
     )
     build_entries.append(
         f"\t\t{assets_build} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {assets_ref} /* Assets.xcassets */; }};"
@@ -144,7 +144,7 @@ def main() -> None:
 		{group_main} = {{
 			isa = PBXGroup;
 			children = (
-				{group_app} /* Dockfolio */,
+				{group_app} /* Docksly */,
 				{group_products} /* Products */,
 			);
 			sourceTree = "<group>";
@@ -152,12 +152,12 @@ def main() -> None:
 		{group_products} /* Products */ = {{
 			isa = PBXGroup;
 			children = (
-				{product_ref} /* Dockfolio.app */,
+				{product_ref} /* Docksly.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		}};
-		{group_app} /* Dockfolio */ = {{
+		{group_app} /* Docksly */ = {{
 			isa = PBXGroup;
 			children = (
 {children("app")}
@@ -167,9 +167,9 @@ def main() -> None:
 				{group_views} /* Views */,
 				{assets_ref} /* Assets.xcassets */,
 				{info_ref} /* Info.plist */,
-				{entitlements_ref} /* Dockfolio.entitlements */,
+				{entitlements_ref} /* Docksly.entitlements */,
 			);
-			path = Dockfolio;
+			path = Docksly;
 			sourceTree = "<group>";
 		}};
 		{group_models} /* Models */ = {{
@@ -207,9 +207,9 @@ def main() -> None:
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		{target_ref} /* Dockfolio */ = {{
+		{target_ref} /* Docksly */ = {{
 			isa = PBXNativeTarget;
-			buildConfigurationList = {config_list_target} /* Build configuration list for PBXNativeTarget "Dockfolio" */;
+			buildConfigurationList = {config_list_target} /* Build configuration list for PBXNativeTarget "Docksly" */;
 			buildPhases = (
 				{sources_phase} /* Sources */,
 				{frameworks_phase} /* Frameworks */,
@@ -219,9 +219,9 @@ def main() -> None:
 			);
 			dependencies = (
 			);
-			name = Dockfolio;
-			productName = Dockfolio;
-			productReference = {product_ref} /* Dockfolio.app */;
+			name = Docksly;
+			productName = Docksly;
+			productReference = {product_ref} /* Docksly.app */;
 			productType = "com.apple.product-type.application";
 		}};
 /* End PBXNativeTarget section */
@@ -239,7 +239,7 @@ def main() -> None:
 					}};
 				}};
 			}};
-			buildConfigurationList = {config_list_project} /* Build configuration list for PBXProject "Dockfolio" */;
+			buildConfigurationList = {config_list_project} /* Build configuration list for PBXProject "Docksly" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -252,7 +252,7 @@ def main() -> None:
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				{target_ref} /* Dockfolio */,
+				{target_ref} /* Docksly */,
 			);
 		}};
 /* End PBXProject section */
@@ -323,21 +323,21 @@ def main() -> None:
 			isa = XCBuildConfiguration;
 			buildSettings = {{
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Dockfolio/Dockfolio.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Docksly/Docksly.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Dockfolio/Info.plist;
+				INFOPLIST_FILE = Docksly/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.dockfolio.Dockfolio;
+				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
@@ -350,21 +350,21 @@ def main() -> None:
 			isa = XCBuildConfiguration;
 			buildSettings = {{
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Dockfolio/Dockfolio.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Docksly/Docksly.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Dockfolio/Info.plist;
+				INFOPLIST_FILE = Docksly/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.dockfolio.Dockfolio;
+				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
@@ -376,7 +376,7 @@ def main() -> None:
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		{config_list_project} /* Build configuration list for PBXProject "Dockfolio" */ = {{
+		{config_list_project} /* Build configuration list for PBXProject "Docksly" */ = {{
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				{debug_project} /* Debug */,
@@ -385,7 +385,7 @@ def main() -> None:
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		}};
-		{config_list_target} /* Build configuration list for PBXNativeTarget "Dockfolio" */ = {{
+		{config_list_target} /* Build configuration list for PBXNativeTarget "Docksly" */ = {{
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				{debug_target} /* Debug */,
@@ -424,9 +424,9 @@ def main() -> None:
                     <BuildableReference
                        BuildableIdentifier = "primary"
                        BlueprintIdentifier = "{target_ref}"
-                       BuildableName = "Dockfolio.app"
-                       BlueprintName = "Dockfolio"
-                       ReferencedContainer = "container:Dockfolio.xcodeproj">
+                       BuildableName = "Docksly.app"
+                       BlueprintName = "Docksly"
+                       ReferencedContainer = "container:Docksly.xcodeproj">
                     </BuildableReference>
                  </BuildActionEntry>
               </BuildActionEntries>
@@ -453,9 +453,9 @@ def main() -> None:
                  <BuildableReference
                     BuildableIdentifier = "primary"
                     BlueprintIdentifier = "{target_ref}"
-                    BuildableName = "Dockfolio.app"
-                    BlueprintName = "Dockfolio"
-                    ReferencedContainer = "container:Dockfolio.xcodeproj">
+                    BuildableName = "Docksly.app"
+                    BlueprintName = "Docksly"
+                    ReferencedContainer = "container:Docksly.xcodeproj">
                  </BuildableReference>
               </BuildableProductRunnable>
            </LaunchAction>
@@ -470,9 +470,9 @@ def main() -> None:
                  <BuildableReference
                     BuildableIdentifier = "primary"
                     BlueprintIdentifier = "{target_ref}"
-                    BuildableName = "Dockfolio.app"
-                    BlueprintName = "Dockfolio"
-                    ReferencedContainer = "container:Dockfolio.xcodeproj">
+                    BuildableName = "Docksly.app"
+                    BlueprintName = "Docksly"
+                    ReferencedContainer = "container:Docksly.xcodeproj">
                  </BuildableReference>
               </BuildableProductRunnable>
            </ProfileAction>
@@ -486,7 +486,7 @@ def main() -> None:
         </Scheme>
         """
     )
-    (scheme_dir / "Dockfolio.xcscheme").write_text(scheme)
+    (scheme_dir / "Docksly.xcscheme").write_text(scheme)
     print(f"Wrote {PROJECT}")
 
 

@@ -12,7 +12,7 @@ struct DockStripView: View {
     @State private var dragItems: [DockItem]?
     @State private var renderedProfileID: UUID?
 
-    private var itemSpacing: CGFloat { DockfolioStyle.itemSpacing }
+    private var itemSpacing: CGFloat { DockslyStyle.itemSpacing }
 
     private var displayItems: [DockItem] {
         dragItems ?? store.draftItems
@@ -33,16 +33,16 @@ struct DockStripView: View {
         }
         .frame(maxWidth: .infinity)
         .background {
-            RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous)
-                .fill(DockfolioStyle.shelfFill(colorScheme))
+            RoundedRectangle(cornerRadius: DockslyStyle.shelfCorner, style: .continuous)
+                .fill(DockslyStyle.shelfFill(colorScheme))
         }
-        .clipShape(RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: DockslyStyle.shelfCorner, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous)
-                .strokeBorder(DockfolioStyle.shelfStroke(colorScheme), lineWidth: 1)
+            RoundedRectangle(cornerRadius: DockslyStyle.shelfCorner, style: .continuous)
+                .strokeBorder(DockslyStyle.shelfStroke(colorScheme), lineWidth: 1)
         }
-        .padding(.horizontal, DockfolioStyle.shelfHorizontal)
-        .padding(.bottom, DockfolioStyle.shelfBottom)
+        .padding(.horizontal, DockslyStyle.shelfHorizontal)
+        .padding(.bottom, DockslyStyle.shelfBottom)
         .onAppear {
             if renderedProfileID == nil {
                 renderedProfileID = store.selectedProfileID
@@ -70,9 +70,9 @@ struct DockStripView: View {
                     .buttonStyle(QuietCapsuleButtonStyle())
             }
         }
-        .padding(.horizontal, DockfolioStyle.shelfInner)
-        .padding(.vertical, DockfolioStyle.shelfInner)
-        .frame(maxWidth: .infinity, minHeight: DockfolioStyle.emptyStripMinHeight)
+        .padding(.horizontal, DockslyStyle.shelfInner)
+        .padding(.vertical, DockslyStyle.shelfInner)
+        .frame(maxWidth: .infinity, minHeight: DockslyStyle.emptyStripMinHeight)
     }
 
     private var stripContentWidth: CGFloat {
@@ -83,7 +83,7 @@ struct DockStripView: View {
 
     private var strip: some View {
         GeometryReader { geo in
-            let overflows = stripContentWidth + (DockfolioStyle.shelfInner * 2) > geo.size.width
+            let overflows = stripContentWidth + (DockslyStyle.shelfInner * 2) > geo.size.width
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: itemSpacing) {
                     ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
@@ -118,42 +118,42 @@ struct DockStripView: View {
                             reduceMotion: reduceMotion
                         ))
                 }
-                .padding(.vertical, DockfolioStyle.shelfInner)
-                .padding(.leading, DockfolioStyle.shelfInner)
-                .padding(.trailing, overflows ? DockfolioStyle.overflowPeek : DockfolioStyle.shelfInner)
+                .padding(.vertical, DockslyStyle.shelfInner)
+                .padding(.leading, DockslyStyle.shelfInner)
+                .padding(.trailing, overflows ? DockslyStyle.overflowPeek : DockslyStyle.shelfInner)
                 .animation(
-                    (reduceMotion || isSwitchingDock) ? nil : DockfolioStyle.defaultSpring,
+                    (reduceMotion || isSwitchingDock) ? nil : DockslyStyle.defaultSpring,
                     value: displayItems.map(\.id)
                 )
                 .overlay(alignment: .topLeading) {
                     floatingTile
                         .transaction { $0.disablesAnimations = true }
                 }
-                .coordinateSpace(name: DockfolioStyle.dockStripSpace)
+                .coordinateSpace(name: DockslyStyle.dockStripSpace)
             }
             .scrollDisabled(draggingID != nil)
             .overlay(alignment: .trailing) {
                 if overflows {
                     LinearGradient(
                         colors: [
-                            DockfolioStyle.shelfFill(colorScheme).opacity(0),
-                            DockfolioStyle.shelfFill(colorScheme)
+                            DockslyStyle.shelfFill(colorScheme).opacity(0),
+                            DockslyStyle.shelfFill(colorScheme)
                         ],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
-                    .frame(width: DockfolioStyle.overflowPeek)
+                    .frame(width: DockslyStyle.overflowPeek)
                     .allowsHitTesting(false)
                 }
             }
         }
-        .frame(height: DockfolioStyle.tileRowHeight + (DockfolioStyle.shelfInner * 2))
+        .frame(height: DockslyStyle.tileRowHeight + (DockslyStyle.shelfInner * 2))
     }
 
     private var addTile: some View {
         Button(action: onAddApplication) {
             ZStack {
-                RoundedRectangle(cornerRadius: DockfolioStyle.addTileCorner, style: .continuous)
+                RoundedRectangle(cornerRadius: DockslyStyle.addTileCorner, style: .continuous)
                     .fill(Color.primary.opacity(0.08))
                 Image(systemName: "plus")
                     .font(.system(size: 16, weight: .semibold))
@@ -162,7 +162,7 @@ struct DockStripView: View {
             .frame(width: 52, height: 52)
             .contentShape(Rectangle())
         }
-        .buttonStyle(PressableButtonStyle(focusShape: .rounded(DockfolioStyle.addTileCorner)))
+        .buttonStyle(PressableButtonStyle(focusShape: .rounded(DockslyStyle.addTileCorner)))
         .help("Add Application")
         .accessibilityLabel("Add Application")
     }
@@ -178,7 +178,7 @@ struct DockStripView: View {
             )
             .offset(
                 x: dragStartX + dragTranslation,
-                y: DockfolioStyle.shelfInner
+                y: DockslyStyle.shelfInner
             )
             .allowsHitTesting(false)
         }
@@ -214,7 +214,7 @@ struct DockStripView: View {
     }
 
     private func originX(of id: UUID, in items: [DockItem]) -> CGFloat {
-        var x = DockfolioStyle.shelfInner
+        var x = DockslyStyle.shelfInner
         for item in items {
             if item.id == id { return x }
             x += tileWidth(item) + itemSpacing
@@ -223,7 +223,7 @@ struct DockStripView: View {
     }
 
     private func indexAtCenter(_ pointX: CGFloat, in items: [DockItem]) -> Int {
-        var x = DockfolioStyle.shelfInner
+        var x = DockslyStyle.shelfInner
         var result = 0
         for (index, item) in items.enumerated() {
             if pointX >= x + tileWidth(item) / 2 {
@@ -242,7 +242,7 @@ struct DockStripView: View {
     }
 
     private func tileWidth(_ item: DockItem) -> CGFloat {
-        item.kind == .spacer ? DockfolioStyle.spacerWidth : DockfolioStyle.tileWidth
+        item.kind == .spacer ? DockslyStyle.spacerWidth : DockslyStyle.tileWidth
     }
 }
 
@@ -292,8 +292,8 @@ private struct DockSwitchStagger: ViewModifier {
             return
         }
         visible = false
-        let delay = min(Double(index) * DockfolioStyle.staggerStep, DockfolioStyle.staggerCap)
-        withAnimation(DockfolioStyle.defaultSpring.delay(delay)) {
+        let delay = min(Double(index) * DockslyStyle.staggerStep, DockslyStyle.staggerCap)
+        withAnimation(DockslyStyle.defaultSpring.delay(delay)) {
             visible = true
         }
     }

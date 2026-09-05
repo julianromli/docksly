@@ -1,6 +1,6 @@
-# Dockfolio
+# Docksly
 
-Dockfolio is a small macOS utility that saves named Dock layouts and applies them in one click. Each layout stores pinned applications and spacers. Finder and Trash stay in place. Open apps stay open.
+Docksly is a small macOS utility that saves named Dock layouts and applies them in one click. Each layout stores pinned applications and spacers. Finder and Trash stay in place. Open apps stay open.
 
 This project is an independent MVP. It is not Dockset. It does not use Dockset artwork, names, or trademarks.
 
@@ -9,8 +9,8 @@ The source tree is a complete Xcode project. This environment is Linux, so the a
 ## Open the project
 
 1. Clone this repository on a Mac.
-2. Open `Dockfolio.xcodeproj` in Xcode. You do not need CocoaPods or Swift Package Manager.
-3. Select the **Dockfolio** scheme and **My Mac**.
+2. Open `Docksly.xcodeproj` in Xcode. You do not need CocoaPods or Swift Package Manager.
+3. Select the **Docksly** scheme and **My Mac**.
 4. Set your development team under **Signing & Capabilities** if Xcode asks. Local ad-hoc signing (`-`) is already set so a personal run can start.
 5. Press Run.
 
@@ -27,7 +27,7 @@ python3 scripts/generate_xcodeproj.py
 python3 scripts/generate_icons.py
 ```
 
-Do **not** enable App Sandbox. Dockfolio writes the `com.apple.dock` preference domain and restarts Dock. The sandbox blocks that path.
+Do **not** enable App Sandbox. Docksly writes the `com.apple.dock` preference domain and restarts Dock. The sandbox blocks that path.
 
 ## What the MVP does
 
@@ -37,7 +37,7 @@ Do **not** enable App Sandbox. Dockfolio writes the `com.apple.dock` preference 
 - **Use This Dock** — Appears when you view a saved layout that is not the live Dock.
 - **Multiple docks** — Named profiles with a color dot. Switch from the pill menu. Create or delete a dock. You must keep at least one.
 - **Menu bar extra** — List of docks (checkmark on the active one), Manage Docks…, Settings…, Quit. A click in the menu bar applies a dock without opening the editor.
-- **Local persistence** — JSON in `~/Library/Application Support/Dockfolio/library.json`. No account, cloud, or analytics.
+- **Local persistence** — JSON in `~/Library/Application Support/Docksly/library.json`. No account, cloud, or analytics.
 - **Export / import** — JSON for one dock or the whole library (Edit Dock menu).
 - **Settings** — Open at login through `SMAppService`. This is reliable after you copy the app into `/Applications`.
 
@@ -45,19 +45,19 @@ Out of scope: Focus Filters, licensing, paywall, and cloud sync.
 
 ## How Dock switching works
 
-macOS does not publish an AppKit API that replaces the whole pinned-apps list. Dockfolio isolates the work in `Dockfolio/Services/DockApplicator.swift`.
+macOS does not publish an AppKit API that replaces the whole pinned-apps list. Docksly isolates the work in `Docksly/Services/DockApplicator.swift`.
 
 1. Read or write `persistent-apps` in the `com.apple.dock` preference domain with `CFPreferencesCopyAppValue` / `CFPreferencesSetAppValue` and `CFPreferencesAppSynchronize`.
 2. Each application tile uses `tile-type = file-tile` and a `file-data` URL (`_CFURLString` + `_CFURLStringType` 15).
 3. Each spacer uses `tile-type = spacer-tile`.
 4. `persistent-others` is left alone (folders and stacks on the right).
 5. Finder and Trash are not in `persistent-apps`. They stay.
-6. After a successful write, Dockfolio runs `/usr/bin/killall Dock`. Dock relaunches. A short flicker is normal.
-7. Dockfolio does not quit your apps. An app that is running but not pinned can still show in the Dock until you quit it. That is normal Dock behavior.
+6. After a successful write, Docksly runs `/usr/bin/killall Dock`. Dock relaunches. A short flicker is normal.
+7. Docksly does not quit your apps. An app that is running but not pinned can still show in the Dock until you quit it. That is normal Dock behavior.
 
-Before each apply, Dockfolio copies the previous `persistent-apps` array to:
+Before each apply, Docksly copies the previous `persistent-apps` array to:
 
-`~/Library/Application Support/Dockfolio/backups/`
+`~/Library/Application Support/Docksly/backups/`
 
 It keeps the last 10 backups.
 
@@ -72,7 +72,7 @@ It keeps the last 10 backups.
 
 - No extra Privacy permission is required for preference writes in a non-sandboxed app.
 - First launch reads the current Dock and stores it as **Main**.
-- Login item registration can fail when you run from Xcode DerivedData. Put Dockfolio in `/Applications`, then toggle the setting again. If macOS shows **requires approval**, open **System Settings → General → Login Items**.
+- Login item registration can fail when you run from Xcode DerivedData. Put Docksly in `/Applications`, then toggle the setting again. If macOS shows **requires approval**, open **System Settings → General → Login Items**.
 - Missing apps show a warning badge on the tile. Apply still writes the last known path.
 - Gatekeeper may block an unsigned local build. Use your team certificate, or right-click Open the first time.
 
@@ -85,7 +85,7 @@ Build and run from Xcode. Then walk this list.
 - [ ] The editor window opens with a glassy chrome and traffic lights.
 - [ ] Status reads `Current · N items` (or `Not active` if the live Dock could not be read).
 - [ ] The strip shows the apps that were already pinned, plus any spacers.
-- [ ] A Dockfolio glyph appears in the menu bar.
+- [ ] A Docksly glyph appears in the menu bar.
 
 ### Edit a dock
 
@@ -112,13 +112,13 @@ Build and run from Xcode. Then walk this list.
 - [ ] Choose another dock. The real Dock switches. The editor does not need to be open.
 - [ ] Choose **Manage Docks…**. The editor returns.
 - [ ] Choose **Settings…**. The settings window opens.
-- [ ] Choose **Quit Dockfolio**. The menu extra disappears.
+- [ ] Choose **Quit Docksly**. The menu extra disappears.
 
 ### Settings and files
 
-- [ ] Toggle **Open Dockfolio at login**. Read the status line. If registration fails, move the app to `/Applications` and try again.
-- [ ] Confirm `~/Library/Application Support/Dockfolio/library.json` exists and lists your docks.
-- [ ] After an apply, confirm a file exists under `~/Library/Application Support/Dockfolio/backups/`.
+- [ ] Toggle **Open Docksly at login**. Read the status line. If registration fails, move the app to `/Applications` and try again.
+- [ ] Confirm `~/Library/Application Support/Docksly/library.json` exists and lists your docks.
+- [ ] After an apply, confirm a file exists under `~/Library/Application Support/Docksly/backups/`.
 
 ### Export / import
 
@@ -134,10 +134,10 @@ Build and run from Xcode. Then walk this list.
 ## Project layout
 
 ```
-Dockfolio.xcodeproj/     Xcode project + shared scheme
+Docksly.xcodeproj/     Xcode project + shared scheme
 project.yml              XcodeGen spec (optional)
-Dockfolio/
-  DockfolioApp.swift     SwiftUI app, window, menu extra, settings
+Docksly/
+  DockslyApp.swift     SwiftUI app, window, menu extra, settings
   Models/                Dock, items, colors, library document
   Persistence/DockStore  Application Support JSON + editor draft
   Services/

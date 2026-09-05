@@ -10,7 +10,7 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section {
-                Toggle("Open Dockfolio at login", isOn: launchBinding)
+                Toggle("Open Docksly at login", isOn: launchBinding)
                     .help("Uses the macOS login-item service. Put the app in Applications for a reliable result.")
                 Text(status)
                     .font(.callout)
@@ -29,7 +29,7 @@ struct SettingsView: View {
             } header: {
                 Text("Startup")
             } footer: {
-                Text("Dockfolio stores docks in your Application Support folder. There is no account and no network sync.")
+                Text("Docksly stores docks in your Application Support folder. There is no account and no network sync.")
             }
 
             Section("Data") {
@@ -87,13 +87,13 @@ struct SettingsView: View {
     private var libraryURL: URL {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
-        return support.appendingPathComponent("Dockfolio/library.json")
+        return support.appendingPathComponent("Docksly/library.json")
     }
 
     private var backupsURL: URL {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
-        return support.appendingPathComponent("Dockfolio/backups", isDirectory: true)
+        return support.appendingPathComponent("Docksly/backups", isDirectory: true)
     }
 
     private func reveal(_ url: URL) {
