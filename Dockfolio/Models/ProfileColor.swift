@@ -7,14 +7,14 @@ struct ProfileColor: Codable, Equatable, Hashable, Identifiable {
     var id: String { hex.uppercased() }
 
     static let palette: [ProfileColor] = [
-        ProfileColor(hex: "3B82F6"),
-        ProfileColor(hex: "F59E0B"),
-        ProfileColor(hex: "8B5CF6"),
-        ProfileColor(hex: "10B981"),
-        ProfileColor(hex: "EF4444"),
-        ProfileColor(hex: "EC4899"),
-        ProfileColor(hex: "06B6D4"),
-        ProfileColor(hex: "64748B")
+        ProfileColor(hex: "0A84FF"),
+        ProfileColor(hex: "FF9F0A"),
+        ProfileColor(hex: "BF5AF2"),
+        ProfileColor(hex: "32D74B"),
+        ProfileColor(hex: "FF453A"),
+        ProfileColor(hex: "FF375F"),
+        ProfileColor(hex: "64D2FF"),
+        ProfileColor(hex: "8E8E93")
     ]
 
     static let `default` = palette[0]
@@ -25,14 +25,14 @@ struct ProfileColor: Codable, Equatable, Hashable, Identifiable {
 
     var displayName: String {
         switch hex.uppercased() {
-        case "3B82F6": return "Blue"
-        case "F59E0B": return "Amber"
-        case "8B5CF6": return "Violet"
-        case "10B981": return "Green"
-        case "EF4444": return "Red"
-        case "EC4899": return "Pink"
-        case "06B6D4": return "Cyan"
-        case "64748B": return "Slate"
+        case "0A84FF": return "Blue"
+        case "FF9F0A": return "Orange"
+        case "BF5AF2": return "Purple"
+        case "32D74B": return "Green"
+        case "FF453A": return "Red"
+        case "FF375F": return "Pink"
+        case "64D2FF": return "Teal"
+        case "8E8E93": return "Gray"
         default: return "#\(hex.uppercased())"
         }
     }

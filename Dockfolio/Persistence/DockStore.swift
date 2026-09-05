@@ -51,13 +51,16 @@ final class DockStore: ObservableObject {
     var statusText: String {
         let count = draftItems.count
         let noun = count == 1 ? "item" : "items"
+        if isApplying {
+            return "Applying… · \(count) \(noun)"
+        }
         if isDirty {
             return "Unsaved · \(count) \(noun)"
         }
         if isSelectedCurrent {
-            return "Current · \(count) \(noun)"
+            return "On Dock · \(count) \(noun)"
         }
-        return "Not active · \(count) \(noun)"
+        return "Not on Dock · \(count) \(noun)"
     }
 
     init(fileManager: FileManager = .default) {

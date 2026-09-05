@@ -33,17 +33,17 @@ struct SettingsView: View {
             }
 
             Section("Data") {
-                LabeledContent("Library") {
-                    Text(libraryPath)
-                        .font(.caption)
-                        .textSelection(.enabled)
-                        .foregroundStyle(.secondary)
+                HStack {
+                    Text("Library")
+                    Spacer()
+                    Button("Show in Finder") { reveal(libraryURL) }
+                        .help(libraryURL.path)
                 }
-                LabeledContent("Backups") {
-                    Text(backupsPath)
-                        .font(.caption)
-                        .textSelection(.enabled)
-                        .foregroundStyle(.secondary)
+                HStack {
+                    Text("Backups")
+                    Spacer()
+                    Button("Show in Finder") { reveal(backupsURL) }
+                        .help(backupsURL.path)
                 }
             }
         }
@@ -84,19 +84,21 @@ struct SettingsView: View {
         }
     }
 
-    private var libraryPath: String {
+    private var libraryURL: URL {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-        return support?
-            .appendingPathComponent("Dockfolio/library.json")
-            .path
-            ?? "~/Library/Application Support/Dockfolio/library.json"
+            ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
+        return support.appendingPathComponent("Dockfolio/library.json")
     }
 
-    private var backupsPath: String {
+    private var backupsURL: URL {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-        return support?
-            .appendingPathComponent("Dockfolio/backups")
-            .path
-            ?? "~/Library/Application Support/Dockfolio/backups"
+            ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support")
+        return support.appendingPathComponent("Dockfolio/backups", isDirectory: true)
+    }
+
+    private func reveal(_ url: URL) {
+        let folder = url.hasDirectoryPath ? url : url.deletingLastPathComponent()
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 }

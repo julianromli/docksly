@@ -12,7 +12,7 @@ struct DockfolioApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
-        .defaultSize(width: 780, height: 300)
+        .defaultSize(width: 780, height: 340)
         .commands {
             DockfolioCommands(store: store)
         }

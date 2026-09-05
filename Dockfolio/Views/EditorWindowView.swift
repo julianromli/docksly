@@ -16,7 +16,13 @@ struct EditorWindowView: View {
                 errorBar(lastError)
             }
         }
-        .frame(minWidth: 720, idealWidth: 780, maxWidth: 1100, minHeight: 268, idealHeight: 300)
+        .frame(
+            minWidth: DockfolioStyle.windowMinWidth,
+            idealWidth: DockfolioStyle.windowIdealWidth,
+            maxWidth: DockfolioStyle.windowMaxWidth,
+            minHeight: DockfolioStyle.windowMinHeight,
+            idealHeight: DockfolioStyle.windowIdealHeight
+        )
         .background(VisualEffectBackground())
         .background(WindowConfigurator())
         .sheet(isPresented: $store.wantsAddApp) {
@@ -45,55 +51,66 @@ struct EditorWindowView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(alignment: .center, spacing: 10) {
+            HStack(spacing: 6) {
                 ProfileIdentityEditor()
-                Text(store.statusText)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
+                ProfilePickerButton()
             }
-            .padding(.leading, 78)
+            .padding(.leading, DockfolioStyle.trafficLightInset)
             .background { WindowMoveBar() }
+
+            statusChip
 
             Spacer(minLength: 12)
 
             HStack(spacing: 8) {
-                ProfilePickerButton()
-                addAppButton
-                editMenu
+                overflowMenu
                 primaryAction
             }
-            .padding(.trailing, 20)
+            .padding(.trailing, DockfolioStyle.trailingInset)
         }
-        .padding(.top, 16)
-        .padding(.bottom, 12)
+        .padding(.top, DockfolioStyle.headerTop)
+        .padding(.bottom, DockfolioStyle.headerBottom)
     }
 
-    private var addAppButton: some View {
-        Button {
-            store.wantsAddApp = true
-        } label: {
-            Label("Add", systemImage: "plus")
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-        }
-        .buttonStyle(.plain)
-        .background {
-            Capsule(style: .continuous)
-                .fill(Color.primary.opacity(0.06))
-        }
-        .overlay {
-            Capsule(style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
-        }
-        .help("Add Application")
-        .fixedSize()
+    private var statusChip: some View {
+        Text(store.statusText)
+            .font(.caption.weight(.semibold))
+            .monospacedDigit()
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .foregroundStyle(chipForeground)
+            .background(Capsule(style: .continuous).fill(chipFill))
     }
 
-    private var editMenu: some View {
-        Menu("Edit Dock") {
+    private var chipForeground: Color {
+        if store.isApplying {
+            return Color.secondary
+        }
+        if store.isDirty {
+            return Color(red: 0.80, green: 0.47, blue: 0.04)
+        }
+        if store.isSelectedCurrent {
+            return Color(red: 0.19, green: 0.66, blue: 0.32)
+        }
+        return Color.secondary
+    }
+
+    private var chipFill: Color {
+        if store.isApplying {
+            return Color.primary.opacity(0.08)
+        }
+        if store.isDirty {
+            return Color(red: 0.80, green: 0.47, blue: 0.04).opacity(0.14)
+        }
+        if store.isSelectedCurrent {
+            return Color(red: 0.19, green: 0.66, blue: 0.32).opacity(0.14)
+        }
+        return Color.primary.opacity(0.08)
+    }
+
+    private var overflowMenu: some View {
+        Menu {
             Button("Add Application…") { store.wantsAddApp = true }
             Button("Add Spacer") { store.addSpacer() }
             Divider()
@@ -103,43 +120,75 @@ struct EditorWindowView: View {
             Button("Export All Docks…") { exportLibrary() }
             Button("Import Dock…") { importDock() }
             Divider()
-            Button("Delete Dock…", role: .destructive) {
-                showDeleteConfirm = true
-            }
-            .disabled(store.library.profiles.count < 2)
+            Button("Delete Dock…", role: .destructive) { showDeleteConfirm = true }
+                .disabled(store.library.profiles.count < 2)
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(.secondary)
+                .frame(width: 28, height: 28)
+                .contentShape(Circle())
         }
         .menuStyle(.borderlessButton)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .background {
-            Capsule(style: .continuous)
-                .fill(Color.primary.opacity(0.06))
-        }
-        .overlay {
-            Capsule(style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
-        }
-        .fixedSize()
+        .menuIndicator(.hidden)
+        .help("Edit Dock")
+        .accessibilityLabel("Edit Dock")
     }
 
     @ViewBuilder
     private var primaryAction: some View {
-        HStack(spacing: 8) {
-            if store.isDirty {
-                Button("Save Changes") {
-                    store.saveDraft(applyIfActive: true)
+        if store.isApplying {
+            HStack(spacing: 8) {
+                if store.isDirty {
+                    Button {
+                        store.saveDraft(applyIfActive: true)
+                    } label: {
+                        applyingLabel
+                    }
+                    .buttonStyle(AccentCapsuleButtonStyle())
+                    .keyboardShortcut("s", modifiers: .command)
+                    .disabled(true)
                 }
-                .buttonStyle(AccentCapsuleButtonStyle())
-                .keyboardShortcut("s", modifiers: .command)
-                .disabled(store.isApplying)
-            }
-            if !store.isSelectedCurrent && !(store.isSelectedActive && store.isDirty) {
-                Button("Use This Dock") {
-                    store.applySelected(saveFirst: true)
+                if !store.isSelectedCurrent && !(store.isSelectedActive && store.isDirty) {
+                    Button {
+                        store.applySelected(saveFirst: true)
+                    } label: {
+                        applyingLabel
+                    }
+                    .buttonStyle(AccentCapsuleButtonStyle())
+                    .disabled(true)
                 }
-                .buttonStyle(AccentCapsuleButtonStyle())
-                .disabled(store.isApplying)
             }
+        } else if store.isSelectedCurrent && !store.isDirty {
+            Label("On Dock", systemImage: "checkmark")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+        } else {
+            HStack(spacing: 8) {
+                if store.isDirty {
+                    Button("Save Changes") {
+                        store.saveDraft(applyIfActive: true)
+                    }
+                    .buttonStyle(AccentCapsuleButtonStyle())
+                    .keyboardShortcut("s", modifiers: .command)
+                    .disabled(store.isApplying)
+                }
+                if !store.isSelectedCurrent && !(store.isSelectedActive && store.isDirty) {
+                    Button("Use This Dock") {
+                        store.applySelected(saveFirst: true)
+                    }
+                    .buttonStyle(AccentCapsuleButtonStyle())
+                    .disabled(store.isApplying)
+                }
+            }
+        }
+    }
+
+    private var applyingLabel: some View {
+        HStack(spacing: 6) {
+            ProgressView()
+                .scaleEffect(0.7)
+            Text("Applying…")
         }
     }
 
@@ -155,7 +204,7 @@ struct EditorWindowView: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, 22)
+        .padding(.horizontal, DockfolioStyle.shelfHorizontal)
         .padding(.vertical, 10)
         .background(Color.red.opacity(0.08))
         .accessibilityElement(children: .combine)
@@ -223,8 +272,8 @@ struct AccentCapsuleButtonStyle: ButtonStyle {
                 Capsule(style: .continuous)
                     .fill(Color.accentColor.opacity(configuration.isPressed ? 0.82 : 1))
             }
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? DockfolioStyle.pressScale : 1)
+            .animation(DockfolioStyle.pressSpring, value: configuration.isPressed)
     }
 }
 
@@ -242,6 +291,7 @@ struct QuietCapsuleButtonStyle: ButtonStyle {
                 Capsule(style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
             }
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .scaleEffect(configuration.isPressed ? DockfolioStyle.pressScale : 1)
+            .animation(DockfolioStyle.pressSpring, value: configuration.isPressed)
     }
 }

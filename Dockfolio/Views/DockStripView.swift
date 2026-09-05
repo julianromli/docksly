@@ -2,13 +2,14 @@ import SwiftUI
 
 struct DockStripView: View {
     @EnvironmentObject private var store: DockStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var onAddApplication: () -> Void = {}
 
     @State private var draggingID: UUID?
     @State private var dragTranslation: CGFloat = 0
     @State private var consumedTranslation: CGFloat = 0
 
-    private let itemSpacing: CGFloat = 10
+    private var itemSpacing: CGFloat { DockfolioStyle.itemSpacing }
 
     var body: some View {
         Group {
@@ -18,19 +19,31 @@ struct DockStripView: View {
                 strip
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 112)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 18)
+        .animation(
+            reduceMotion ? .easeOut(duration: 0.15) : DockfolioStyle.defaultSpring,
+            value: store.selectedProfileID
+        )
+        .frame(maxWidth: .infinity, minHeight: 128)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 14)
         .background {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.primary.opacity(0.05))
+            VisualEffectBackground(material: .headerView, blendingMode: .withinWindow)
         }
+        .clipShape(RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+            RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
         }
-        .padding(.horizontal, 22)
-        .padding(.bottom, 22)
+        .overlay(alignment: .top) {
+            Capsule()
+                .fill(Color.white.opacity(0.38))
+                .frame(height: 1)
+                .padding(.horizontal, 16)
+                .padding(.top, 1)
+                .allowsHitTesting(false)
+        }
+        .padding(.horizontal, DockfolioStyle.shelfHorizontal)
+        .padding(.bottom, DockfolioStyle.shelfBottom)
         .onChange(of: store.selectedProfileID) { _ in
             resetDrag()
         }
@@ -52,7 +65,7 @@ struct DockStripView: View {
                     .buttonStyle(QuietCapsuleButtonStyle())
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 112)
+        .frame(maxWidth: .infinity, minHeight: 128)
     }
 
     private var strip: some View {
@@ -69,7 +82,7 @@ struct DockStripView: View {
                             : nil,
                         onDragChanged: { value in handleDrag(item, value) },
                         onDragEnded: {
-                            withAnimation(.easeOut(duration: 0.16)) {
+                            withAnimation(reduceMotion ? nil : DockfolioStyle.flickSpring) {
                                 resetDrag()
                             }
                         }
@@ -80,29 +93,28 @@ struct DockStripView: View {
 
                 addTile
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 8)
+            .animation(
+                (draggingID == nil && !reduceMotion) ? DockfolioStyle.defaultSpring : nil,
+                value: store.draftItems.map(\.id)
+            )
         }
     }
 
     private var addTile: some View {
         Button(action: onAddApplication) {
             ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(style: StrokeStyle(lineWidth: 1.2, dash: [5, 4]))
-                    .foregroundStyle(Color.primary.opacity(0.28))
-                    .background {
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.primary.opacity(0.04))
-                    }
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color.primary.opacity(0.08))
                 Image(systemName: "plus")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
-            .frame(width: 48, height: 48)
+            .frame(width: 52, height: 52)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SquareAddTileStyle())
         .help("Add Application")
         .accessibilityLabel("Add Application")
     }
@@ -120,13 +132,13 @@ struct DockStripView: View {
             let threshold = swapThreshold(current: items[from], neighbor: items[from + 1])
             if effective > threshold {
                 store.moveItem(id: item.id, toIndex: from + 1)
-                consumedTranslation += Self.tileWidth(items[from + 1]) + itemSpacing
+                consumedTranslation += tileWidth(items[from + 1]) + itemSpacing
             }
         } else if effective < 0, from > 0 {
             let threshold = swapThreshold(current: items[from], neighbor: items[from - 1])
             if effective < -threshold {
                 store.moveItem(id: item.id, toIndex: from - 1)
-                consumedTranslation -= Self.tileWidth(items[from - 1]) + itemSpacing
+                consumedTranslation -= tileWidth(items[from - 1]) + itemSpacing
             }
         }
 
@@ -134,10 +146,9 @@ struct DockStripView: View {
     }
 
     private func swapThreshold(current: DockItem, neighbor: DockItem) -> CGFloat {
-        let gap = (Self.tileWidth(current) + Self.tileWidth(neighbor)) / 2 + itemSpacing
+        let gap = (tileWidth(current) + tileWidth(neighbor)) / 2 + itemSpacing
         return gap * CGFloat(0.55)
     }
-
 
     private func resetDrag() {
         draggingID = nil
@@ -145,7 +156,15 @@ struct DockStripView: View {
         consumedTranslation = 0
     }
 
-    private static func tileWidth(_ item: DockItem) -> CGFloat {
-        item.kind == .spacer ? 28 : 52
+    private func tileWidth(_ item: DockItem) -> CGFloat {
+        item.kind == .spacer ? DockfolioStyle.spacerWidth : DockfolioStyle.tileWidth
+    }
+}
+
+private struct SquareAddTileStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? DockfolioStyle.pressScale : 1)
+            .animation(DockfolioStyle.pressSpring, value: configuration.isPressed)
     }
 }

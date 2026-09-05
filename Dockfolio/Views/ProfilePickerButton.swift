@@ -3,7 +3,6 @@ import SwiftUI
 struct ProfilePickerButton: View {
     @EnvironmentObject private var store: DockStore
     @State private var newName = ""
-    @State private var showDeleteConfirm = false
 
     var body: some View {
         Menu {
@@ -11,41 +10,32 @@ struct ProfilePickerButton: View {
                 Button {
                     store.select(profileID: profile.id)
                 } label: {
-                    Text("\(store.library.activeProfileID == profile.id ? "✓ " : "")\(profile.name)")
+                    HStack {
+                        if store.library.activeProfileID == profile.id {
+                            Image(systemName: "checkmark")
+                        }
+                        Label {
+                            Text(profile.name)
+                        } icon: {
+                            ColorDot(color: profile.color.color, diameter: 8)
+                        }
+                    }
                 }
             }
             Divider()
             Button("New Dock…") {
                 store.wantsNewDockName = true
             }
-            Button("Delete Dock…", role: .destructive) {
-                showDeleteConfirm = true
-            }
-            .disabled(store.library.profiles.count < 2)
         } label: {
-            HStack(spacing: 8) {
-                ColorDot(color: store.draftColor.color, diameter: 9)
-                Text(store.draftName)
-                    .font(.subheadline.weight(.medium))
-                    .lineLimit(1)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background {
-                Capsule(style: .continuous)
-                    .fill(Color.primary.opacity(0.06))
-            }
-            .overlay {
-                Capsule(style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
-            }
+            Image(systemName: "chevron.down")
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 22, height: 22)
+                .contentShape(Rectangle())
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
-        .fixedSize()
+        .accessibilityLabel("Switch Dock")
         .alert("New Dock", isPresented: $store.wantsNewDockName) {
             TextField("Name", text: $newName)
             Button("Create Dock") {
@@ -57,14 +47,6 @@ struct ProfilePickerButton: View {
             }
         } message: {
             Text("Give this setup a name. Dockfolio copies the items you see now.")
-        }
-        .alert("Delete this dock?", isPresented: $showDeleteConfirm) {
-            Button("Delete Dock", role: .destructive) {
-                store.deleteSelectedDock()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("“\(store.draftName)” will be removed from this Mac. The real Dock does not change until you apply another setup.")
         }
     }
 }
@@ -96,7 +78,8 @@ struct ProfileIdentityEditor: View {
                 set: { store.renameDraft($0) }
             ))
             .textFieldStyle(.plain)
-            .font(.title2.weight(.semibold))
+            .font(.title3.weight(.semibold))
+            .tracking(-0.015)
             .frame(maxWidth: 240)
             .focused($nameFocused)
             .onSubmit { store.commitDraftName() }
@@ -124,7 +107,7 @@ struct ProfileIdentityEditor: View {
                     .frame(width: 24, height: 24)
                     .contentShape(Circle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ColorSwatchButtonStyle())
                 .help(color.displayName)
                 .accessibilityLabel(color.displayName)
                 .accessibilityAddTraits(store.draftColor == color ? .isSelected : [])
@@ -133,3 +116,10 @@ struct ProfileIdentityEditor: View {
     }
 }
 
+struct ColorSwatchButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? DockfolioStyle.pressScale : 1)
+            .animation(DockfolioStyle.pressSpring, value: configuration.isPressed)
+    }
+}

@@ -9,20 +9,22 @@ struct AddAppSheet: View {
     @State private var query = ""
     @State private var apps: [InstalledApp] = []
     @State private var isLoading = true
+    @FocusState private var searchFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Add application")
-                    .font(.title2.weight(.semibold))
+                Text("Add Application")
+                    .font(.title3.weight(.semibold))
                 Spacer()
                 Button("Browse…", action: browse)
-                Button("Close") { dismiss() }
+                Button("Cancel") { dismiss() }
                     .keyboardShortcut(.cancelAction)
             }
 
             TextField("Search applications", text: $query)
                 .textFieldStyle(.roundedBorder)
+                .focused($searchFocused)
 
             Group {
                 if isLoading {
@@ -39,7 +41,6 @@ struct AddAppSheet: View {
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-
                     List(filtered) { app in
                         Button {
                             if store.addApplication(path: app.path) {
@@ -49,33 +50,26 @@ struct AddAppSheet: View {
                             HStack(spacing: 10) {
                                 Image(nsImage: AppIconService.shared.icon(forAppAt: app.path))
                                     .resizable()
-                                    .frame(width: 28, height: 28)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(app.name)
-                                    if let bundleIdentifier = app.bundleIdentifier {
-                                        Text(bundleIdentifier)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                    }
-                                }
+                                    .frame(width: 32, height: 32)
+                                Text(app.name)
                                 Spacer()
                             }
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .padding(.vertical, 4)
                     }
                 }
             }
             .frame(minHeight: 320)
         }
         .padding(20)
-        .frame(width: 480, height: 480)
+        .frame(width: 460, height: 500)
+        .onAppear { searchFocused = true }
         .task {
             apps = await InstalledAppScanner.scan()
             isLoading = false
         }
-
     }
 
     private var filtered: [InstalledApp] {

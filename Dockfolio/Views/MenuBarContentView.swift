@@ -15,10 +15,11 @@ struct MenuBarContentView: View {
                 }
             } label: {
                 HStack {
+                    ColorDot(color: profile.color.color, diameter: 8)
+                    Text(profile.name)
                     if store.library.activeProfileID == profile.id {
                         Image(systemName: "checkmark")
                     }
-                    Text(profile.name)
                 }
             }
             .disabled(store.isApplying)
