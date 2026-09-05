@@ -76,7 +76,7 @@ struct VisualEffectBackground: NSViewRepresentable {
     }
 }
 
-/// Opaque white chrome. The editor stays solid so a dark desktop cannot show through.
+/// Opaque chrome that follows the system appearance.
 struct WindowConfigurator: NSViewRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -109,11 +109,19 @@ struct WindowConfigurator: NSViewRepresentable {
         window.standardWindowButton(.miniaturizeButton)?.isHidden = false
         window.standardWindowButton(.zoomButton)?.isHidden = false
 
-        window.appearance = NSAppearance(named: .aqua)
+        window.appearance = nil
         window.isOpaque = true
-        window.backgroundColor = NSColor(srgbRed: 245 / 255, green: 245 / 255, blue: 245 / 255, alpha: 1)
+        window.backgroundColor = windowFillColor
         window.invalidateShadow()
         compactRestoredFrameIfNeeded(window)
+    }
+
+    private static let windowFillColor = NSColor(name: nil) { appearance in
+        let dark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        if dark {
+            return NSColor(srgbRed: 28 / 255, green: 28 / 255, blue: 30 / 255, alpha: 1)
+        }
+        return NSColor(srgbRed: 245 / 255, green: 245 / 255, blue: 245 / 255, alpha: 1)
     }
 
     private static var didCompactRestoredFrame = false
@@ -144,6 +152,12 @@ struct WindowConfigurator: NSViewRepresentable {
                 name: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification,
                 object: NSWorkspace.shared
             )
+            DistributedNotificationCenter.default().addObserver(
+                self,
+                selector: #selector(optionsChanged(_:)),
+                name: Notification.Name("AppleInterfaceThemeChangedNotification"),
+                object: nil
+            )
         }
 
         @objc func optionsChanged(_ notification: Notification) {
@@ -154,6 +168,7 @@ struct WindowConfigurator: NSViewRepresentable {
 
         deinit {
             NSWorkspace.shared.notificationCenter.removeObserver(self)
+            DistributedNotificationCenter.default().removeObserver(self)
         }
     }
 }
@@ -169,10 +184,41 @@ struct WindowMoveBar: NSViewRepresentable {
 }
 
 private final class WindowMoveBarView: NSView {
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        setAccessibilityElement(false)
+    }
+
+    required init?(coder: NSCoder) {
+        nil
+    }
+
     override var isOpaque: Bool { false }
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        if isOverStandardWindowButton(point) {
+            return nil
+        }
+        return super.hitTest(point)
+    }
 
     override func mouseDown(with event: NSEvent) {
         window?.performDrag(with: event)
+    }
+
+    private func isOverStandardWindowButton(_ point: NSPoint) -> Bool {
+        guard let window else { return false }
+        let types: [NSWindow.ButtonType] = [.closeButton, .miniaturizeButton, .zoomButton]
+        for type in types {
+            guard let button = window.standardWindowButton(type) else { continue }
+            let rect = button.convert(button.bounds, to: self).insetBy(dx: -4, dy: -4)
+            if rect.contains(point) {
+                return true
+            }
+        }
+        return false
     }
 }
 
@@ -184,6 +230,8 @@ enum DockfolioStyle {
     static let windowIdealHeight: CGFloat = 168
 
     static let headerTop: CGFloat = 30
+    /// Leave the system traffic lights clickable.
+    static let trafficLightClearance: CGFloat = 78
     static let headerBottom: CGFloat = 8
     static let trailingInset: CGFloat = 12
     static let shelfHorizontal: CGFloat = 12
@@ -222,18 +270,118 @@ enum DockfolioStyle {
     static let errorExit = Animation.easeOut(duration: 0.15)
     static let chromeFade = Animation.easeOut(duration: 0.15)
 
-    static let windowFill = Color(hex: "F5F5F5")
-    static let shelfFill = Color(hex: "F5F5F5")
+    static func windowFill(_ scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "1C1C1E") : Color(hex: "F5F5F5")
+    }
+
+    static func shelfFill(_ scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color(hex: "2A2A2C") : Color(hex: "EBEBEB")
+    }
+
+    static func shelfStroke(_ scheme: ColorScheme) -> Color {
+        scheme == .dark ? Color.white.opacity(0.09) : Color.black.opacity(0.08)
+    }
+
+    static func errorFill(_ scheme: ColorScheme) -> Color {
+        scheme == .dark
+            ? Color(red: 1, green: 0.38, blue: 0.36).opacity(0.18)
+            : Color.red.opacity(0.08)
+    }
+
+    static func statusCurrentForeground(_ scheme: ColorScheme) -> Color {
+        scheme == .dark
+            ? Color(red: 0.55, green: 0.88, blue: 0.62)
+            : Color(red: 0.19, green: 0.66, blue: 0.32)
+    }
+
+    static func statusDirtyForeground(_ scheme: ColorScheme) -> Color {
+        scheme == .dark
+            ? Color(red: 1.0, green: 0.78, blue: 0.36)
+            : Color(red: 0.80, green: 0.47, blue: 0.04)
+    }
+
+    static func statusTint(_ color: Color, scheme: ColorScheme) -> Color {
+        color.opacity(scheme == .dark ? 0.22 : 0.14)
+    }
+
+    static func statusNeutralFill(_ scheme: ColorScheme) -> Color {
+        Color.primary.opacity(scheme == .dark ? 0.12 : 0.08)
+    }
+
+    static func announce(_ message: String) {
+        NSAccessibility.post(
+            element: NSApp as Any,
+            notification: .announcementRequested,
+            userInfo: [NSAccessibility.NotificationUserInfoKey.announcement: message]
+        )
+    }
+}
+
+enum DockfolioFocusShape {
+    case rounded(CGFloat)
+    case capsule
+    case circle
 }
 
 /// Press scale of 0.96. Pass `isStatic: true` when motion would distract.
 struct PressableButtonStyle: ButtonStyle {
     var isStatic: Bool = false
+    var focusShape: DockfolioFocusShape = .rounded(8)
 
     func makeBody(configuration: Configuration) -> some View {
+        PressableButtonBody(
+            configuration: configuration,
+            isStatic: isStatic,
+            focusShape: focusShape
+        )
+    }
+}
+
+private struct PressableButtonBody: View {
+    let configuration: ButtonStyleConfiguration
+    var isStatic: Bool
+    var focusShape: DockfolioFocusShape
+
+    @Environment(\.isFocused) private var isFocused
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
         configuration.label
-            .scaleEffect((!isStatic && configuration.isPressed) ? DockfolioStyle.pressScale : 1)
-            .animation(DockfolioStyle.pressSpring, value: configuration.isPressed)
+            .scaleEffect(pressScale)
+            .animation(reduceMotion ? nil : DockfolioStyle.pressSpring, value: configuration.isPressed)
+            .dockfolioFocusRing(isFocused: isFocused, shape: focusShape)
+    }
+
+    private var pressScale: CGFloat {
+        if isStatic || reduceMotion { return 1 }
+        return configuration.isPressed ? DockfolioStyle.pressScale : 1
+    }
+}
+
+extension View {
+    func dockfolioFocusRing(
+        isFocused: Bool,
+        shape: DockfolioFocusShape,
+        color: Color = .accentColor
+    ) -> some View {
+        overlay {
+            Group {
+                switch shape {
+                case .capsule:
+                    Capsule(style: .continuous)
+                        .strokeBorder(color, lineWidth: 2)
+                case .circle:
+                    Circle()
+                        .strokeBorder(color, lineWidth: 2)
+                case .rounded(let radius):
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .strokeBorder(color, lineWidth: 2)
+                }
+            }
+            .padding(-3)
+            .opacity(isFocused ? 1 : 0)
+            .allowsHitTesting(false)
+        }
     }
 }
 

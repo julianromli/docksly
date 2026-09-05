@@ -69,9 +69,9 @@ struct ProfileIdentityEditor: View {
                     .frame(width: 22, height: 22)
                     .contentShape(Circle())
             }
-            .buttonStyle(PressableButtonStyle())
+            .buttonStyle(PressableButtonStyle(focusShape: .circle))
             .help("Change dock color")
-            .accessibilityLabel("Dock color")
+            .accessibilityLabel("Dock color, \(store.draftColor.displayName)")
             .popover(isPresented: $showColors, arrowEdge: .bottom) {
                 colorSwatches
                     .padding(10)
@@ -93,7 +93,9 @@ struct ProfileIdentityEditor: View {
             .font(.title3.weight(.semibold))
             .tracking(-0.015)
             .autocorrectionDisabled(true)
-            .frame(maxWidth: 240)
+            .lineLimit(1)
+            .frame(minWidth: 72, maxWidth: 240, alignment: .leading)
+            .layoutPriority(0)
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
             .background {
@@ -137,9 +139,14 @@ struct ProfileIdentityEditor: View {
                 } label: {
                     ZStack {
                         ColorDot(color: color.color, diameter: 20)
+                        if selected {
+                            Circle()
+                                .strokeBorder(Color.primary, lineWidth: 2)
+                                .frame(width: 24, height: 24)
+                        }
                         Image(systemName: "checkmark")
                             .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(color.markColor)
                             .contextualIconChrome(
                                 visible: selected,
                                 animated: allowsSwatchMotion && !reduceMotion
@@ -148,7 +155,7 @@ struct ProfileIdentityEditor: View {
                     .frame(width: 24, height: 24)
                     .contentShape(Circle())
                 }
-                .buttonStyle(PressableButtonStyle())
+                .buttonStyle(PressableButtonStyle(focusShape: .circle))
                 .help(color.displayName)
                 .accessibilityLabel(color.displayName)
                 .accessibilityAddTraits(selected ? .isSelected : [])

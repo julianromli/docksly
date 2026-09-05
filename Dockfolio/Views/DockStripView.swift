@@ -3,6 +3,7 @@ import SwiftUI
 struct DockStripView: View {
     @EnvironmentObject private var store: DockStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     var onAddApplication: () -> Void = {}
 
     @State private var draggingID: UUID?
@@ -33,12 +34,12 @@ struct DockStripView: View {
         .frame(maxWidth: .infinity)
         .background {
             RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous)
-                .fill(DockfolioStyle.shelfFill)
+                .fill(DockfolioStyle.shelfFill(colorScheme))
         }
         .clipShape(RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: DockfolioStyle.shelfCorner, style: .continuous)
-                .strokeBorder(Color.black.opacity(0.08), lineWidth: 1)
+                .strokeBorder(DockfolioStyle.shelfStroke(colorScheme), lineWidth: 1)
         }
         .padding(.horizontal, DockfolioStyle.shelfHorizontal)
         .padding(.bottom, DockfolioStyle.shelfBottom)
@@ -134,7 +135,10 @@ struct DockStripView: View {
             .overlay(alignment: .trailing) {
                 if overflows {
                     LinearGradient(
-                        colors: [DockfolioStyle.shelfFill.opacity(0), DockfolioStyle.shelfFill],
+                        colors: [
+                            DockfolioStyle.shelfFill(colorScheme).opacity(0),
+                            DockfolioStyle.shelfFill(colorScheme)
+                        ],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -158,7 +162,7 @@ struct DockStripView: View {
             .frame(width: 52, height: 52)
             .contentShape(Rectangle())
         }
-        .buttonStyle(PressableButtonStyle())
+        .buttonStyle(PressableButtonStyle(focusShape: .rounded(DockfolioStyle.addTileCorner)))
         .help("Add Application")
         .accessibilityLabel("Add Application")
     }

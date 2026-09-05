@@ -64,7 +64,7 @@ struct DockTileView: View {
                     )
                     .contentShape(Rectangle())
             }
-            .buttonStyle(PressableButtonStyle())
+            .buttonStyle(PressableButtonStyle(focusShape: .circle))
             .offset(x: 5, y: -5)
             .zIndex(2)
             .help("Remove")

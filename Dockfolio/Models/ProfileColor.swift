@@ -37,6 +37,30 @@ struct ProfileColor: Codable, Equatable, Hashable, Identifiable {
         }
     }
 
+    /// WCAG relative luminance of the swatch fill.
+    var relativeLuminance: Double {
+        let cleaned = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var value: UInt64 = 0
+        Scanner(string: cleaned).scanHexInt64(&value)
+        guard cleaned.count == 6 else { return 0.23 }
+        let r = Double((value & 0xFF0000) >> 16) / 255
+        let g = Double((value & 0x00FF00) >> 8) / 255
+        let b = Double(value & 0x0000FF) / 255
+        func linear(_ channel: Double) -> Double {
+            channel <= 0.04045 ? channel / 12.92 : pow((channel + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+    }
+
+    /// Light fills need a dark check so the mark stays above 3:1.
+    var prefersDarkMark: Bool {
+        relativeLuminance > 0.40
+    }
+
+    var markColor: Color {
+        prefersDarkMark ? Color(hex: "1A1A1A") : Color.white
+    }
+
 }
 
 extension Color {

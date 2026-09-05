@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 struct EditorWindowView: View {
     @EnvironmentObject private var store: DockStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     @State private var showImportError = false
     @State private var importError = ""
     @State private var showDeleteConfirm = false
@@ -20,9 +21,13 @@ struct EditorWindowView: View {
             idealWidth: DockfolioStyle.windowIdealWidth,
             maxWidth: DockfolioStyle.windowMaxWidth
         )
-        .background(DockfolioStyle.windowFill)
-        .preferredColorScheme(.light)
+        .background(DockfolioStyle.windowFill(colorScheme))
         .background(WindowConfigurator())
+        .onChange(of: store.lastError) { message in
+            if let message {
+                DockfolioStyle.announce(message)
+            }
+        }
         .sheet(isPresented: $store.wantsAddApp) {
             AddAppSheet()
                 .environmentObject(store)
@@ -49,31 +54,48 @@ struct EditorWindowView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 8) {
-            HStack(spacing: 6) {
-                ProfileIdentityEditor()
-                ProfilePickerButton()
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                Color.clear
+                    .frame(width: DockfolioStyle.trafficLightClearance)
+                    .allowsHitTesting(false)
+                WindowMoveBar()
+                    .accessibilityHidden(true)
             }
-            .padding(.leading, DockfolioStyle.contentLeading)
-            .background { WindowMoveBar() }
+            .frame(height: DockfolioStyle.headerTop)
 
-            Spacer(minLength: 12)
+            HStack(alignment: .center, spacing: 8) {
+                HStack(spacing: 6) {
+                    ProfileIdentityEditor()
+                    ProfilePickerButton()
+                }
+                .padding(.leading, DockfolioStyle.contentLeading)
 
-            HStack(spacing: 8) {
-                statusChip
-                overflowMenu
-                primaryAction
+                WindowMoveBar()
+                    .frame(minWidth: 12, maxWidth: .infinity)
+                    .frame(height: 28)
+                    .layoutPriority(-1)
+                    .accessibilityHidden(true)
+
+                HStack(spacing: 8) {
+                    statusChip
+                    overflowMenu
+                    primaryAction
+                }
+                .fixedSize(horizontal: true, vertical: false)
+                .layoutPriority(1)
+                .padding(.trailing, DockfolioStyle.trailingInset)
             }
-            .padding(.trailing, DockfolioStyle.trailingInset)
+            .padding(.bottom, DockfolioStyle.headerBottom)
         }
-        .padding(.top, DockfolioStyle.headerTop)
-        .padding(.bottom, DockfolioStyle.headerBottom)
     }
 
     private var statusChip: some View {
         Text(store.statusText)
             .font(.caption.weight(.semibold))
             .monospacedDigit()
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .foregroundStyle(chipForeground)
@@ -85,25 +107,31 @@ struct EditorWindowView: View {
             return Color.secondary
         }
         if store.isDirty {
-            return Color(red: 0.80, green: 0.47, blue: 0.04)
+            return DockfolioStyle.statusDirtyForeground(colorScheme)
         }
         if store.isSelectedCurrent {
-            return Color(red: 0.19, green: 0.66, blue: 0.32)
+            return DockfolioStyle.statusCurrentForeground(colorScheme)
         }
         return Color.secondary
     }
 
     private var chipFill: Color {
         if store.isApplying {
-            return Color.primary.opacity(0.08)
+            return DockfolioStyle.statusNeutralFill(colorScheme)
         }
         if store.isDirty {
-            return Color(red: 0.80, green: 0.47, blue: 0.04).opacity(0.14)
+            return DockfolioStyle.statusTint(
+                DockfolioStyle.statusDirtyForeground(colorScheme),
+                scheme: colorScheme
+            )
         }
         if store.isSelectedCurrent {
-            return Color(red: 0.19, green: 0.66, blue: 0.32).opacity(0.14)
+            return DockfolioStyle.statusTint(
+                DockfolioStyle.statusCurrentForeground(colorScheme),
+                scheme: colorScheme
+            )
         }
-        return Color.primary.opacity(0.08)
+        return DockfolioStyle.statusNeutralFill(colorScheme)
     }
 
     private var overflowMenu: some View {
@@ -184,6 +212,8 @@ struct EditorWindowView: View {
             ProgressView()
                 .scaleEffect(0.7)
             Text("Applying…")
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
         }
     }
 
@@ -212,11 +242,16 @@ struct EditorWindowView: View {
 
     private func errorBar(_ message: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .symbolRenderingMode(.multicolor)
-            Text(message)
-                .font(.callout)
-                .textSelection(.enabled)
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .symbolRenderingMode(.multicolor)
+                    .accessibilityHidden(true)
+                Text(message)
+                    .font(.callout)
+                    .textSelection(.enabled)
+            }
+            .accessibilityElement(children: .combine)
+
             Spacer()
             Button("Dismiss") { store.clearError() }
                 .buttonStyle(PressableButtonStyle())
@@ -224,9 +259,7 @@ struct EditorWindowView: View {
         }
         .padding(.horizontal, DockfolioStyle.shelfHorizontal)
         .padding(.vertical, 10)
-        .background(Color.red.opacity(0.08))
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isStaticText)
+        .background(DockfolioStyle.errorFill(colorScheme))
     }
 
     private func exportSelected() {
@@ -281,17 +314,36 @@ struct EditorWindowView: View {
 
 struct AccentCapsuleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
+        AccentCapsuleLabel(configuration: configuration)
+    }
+}
+
+private struct AccentCapsuleLabel: View {
+    let configuration: ButtonStyleConfiguration
+
+    @Environment(\.isFocused) private var isFocused
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
         configuration.label
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(.white)
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .padding(.horizontal, 14)
             .padding(.vertical, 7)
             .background {
                 Capsule(style: .continuous)
                     .fill(Color.accentColor.opacity(configuration.isPressed ? 0.82 : 1))
             }
-            .scaleEffect(configuration.isPressed ? DockfolioStyle.pressScale : 1)
-            .animation(DockfolioStyle.pressSpring, value: configuration.isPressed)
+            .scaleEffect(pressScale)
+            .animation(reduceMotion ? nil : DockfolioStyle.pressSpring, value: configuration.isPressed)
+            .dockfolioFocusRing(isFocused: isFocused, shape: .capsule, color: .primary)
+    }
+
+    private var pressScale: CGFloat {
+        if reduceMotion { return 1 }
+        return configuration.isPressed ? DockfolioStyle.pressScale : 1
     }
 }
 
@@ -308,11 +360,15 @@ private struct QuietCapsuleLabel<Label: View>: View {
     @ViewBuilder var label: Label
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.isFocused) private var isFocused
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
 
     var body: some View {
         label
             .font(.subheadline.weight(.medium))
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background {
@@ -324,11 +380,17 @@ private struct QuietCapsuleLabel<Label: View>: View {
             .overlay {
                 Capsule(style: .continuous)
                     .strokeBorder(ringColor, lineWidth: 1)
-                    .animation(DockfolioStyle.chromeFade, value: isHovering)
+                    .animation(reduceMotion ? nil : DockfolioStyle.chromeFade, value: isHovering)
             }
-            .scaleEffect(isPressed ? DockfolioStyle.pressScale : 1)
-            .animation(DockfolioStyle.pressSpring, value: isPressed)
+            .scaleEffect(pressScale)
+            .animation(reduceMotion ? nil : DockfolioStyle.pressSpring, value: isPressed)
+            .dockfolioFocusRing(isFocused: isFocused, shape: .capsule)
             .onHover { isHovering = $0 }
+    }
+
+    private var pressScale: CGFloat {
+        if reduceMotion { return 1 }
+        return isPressed ? DockfolioStyle.pressScale : 1
     }
 
     private var ringColor: Color {
