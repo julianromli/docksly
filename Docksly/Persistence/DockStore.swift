@@ -103,7 +103,7 @@ final class DockStore: ObservableObject {
 
     func select(profileID: UUID) {
         guard library.profile(id: profileID) != nil else { return }
-        if isDirty {
+        if isDirty, LicenseStore.shared.hasAccess {
             // Keep unsaved work on the current profile before we leave it.
             saveDraft(applyIfActive: false)
         }
@@ -122,24 +122,29 @@ final class DockStore: ObservableObject {
     // MARK: - Mutations
 
     func renameDraft(_ name: String) {
+        guard !rejectIfLocked() else { return }
         draftName = name
     }
 
     func commitDraftName() {
+        guard !rejectIfLocked() else { return }
         let trimmed = draftName.trimmingCharacters(in: .whitespacesAndNewlines)
         draftName = trimmed.isEmpty ? "Untitled Dock" : trimmed
     }
 
     func setDraftColor(_ color: ProfileColor) {
+        guard !rejectIfLocked() else { return }
         draftColor = color
     }
 
     func replaceDraftItems(_ items: [DockItem]) {
+        guard !rejectIfLocked() else { return }
         guard items != draftItems else { return }
         draftItems = items
     }
 
     func moveItem(id: UUID, toIndex dest: Int) {
+        guard !rejectIfLocked() else { return }
         guard let from = draftItems.firstIndex(where: { $0.id == id }) else { return }
         let clamped = min(max(dest, 0), draftItems.count - 1)
         guard from != clamped else { return }
@@ -150,15 +155,18 @@ final class DockStore: ObservableObject {
     }
 
     func removeItem(id: UUID) {
+        guard !rejectIfLocked() else { return }
         draftItems.removeAll { $0.id == id }
     }
 
     func addSpacer() {
+        guard !rejectIfLocked() else { return }
         draftItems.append(.spacer())
     }
 
     @discardableResult
     func addApplication(path: String) -> Bool {
+        if rejectIfLocked() { return false }
         let bundleID = DockApplicator.bundleIdentifier(at: path)
         let name = DockApplicator.displayName(at: path)
         if draftItems.contains(where: { item in
@@ -179,6 +187,7 @@ final class DockStore: ObservableObject {
     }
 
     func captureLiveDockIntoDraft() {
+        guard !rejectIfLocked() else { return }
         do {
             draftItems = try DockApplicator.readPinnedItems()
             lastError = nil
@@ -191,6 +200,9 @@ final class DockStore: ObservableObject {
 
     @discardableResult
     func createDock(named name: String? = nil) -> DockProfile {
+        if rejectIfLocked() {
+            return selectedProfile
+        }
         if isDirty {
             saveDraft(applyIfActive: false)
         }
@@ -216,6 +228,7 @@ final class DockStore: ObservableObject {
     }
 
     func deleteSelectedDock() {
+        guard !rejectIfLocked() else { return }
         guard library.profiles.count > 1 else {
             lastError = "Keep at least one dock."
             return
@@ -232,6 +245,7 @@ final class DockStore: ObservableObject {
     // MARK: - Save / apply
 
     func saveDraft(applyIfActive: Bool) {
+        guard !rejectIfLocked() else { return }
         commitDraftName()
         var profile = selectedProfile
         profile.name = draftName.isEmpty ? "Untitled Dock" : draftName
@@ -247,6 +261,7 @@ final class DockStore: ObservableObject {
     }
 
     func applySelected(saveFirst: Bool) {
+        guard !rejectIfLocked() else { return }
         if saveFirst {
             saveDraft(applyIfActive: false)
         }
@@ -258,6 +273,7 @@ final class DockStore: ObservableObject {
     }
 
     func apply(profileID: UUID, items: [DockItem]? = nil) {
+        guard !rejectIfLocked() else { return }
         guard let profile = library.profile(id: profileID) else { return }
         let layout = items ?? profile.items
         isApplying = true
@@ -291,11 +307,13 @@ final class DockStore: ObservableObject {
     // MARK: - Export / import
 
     func exportLibrary(to url: URL) throws {
+        try requireAccess()
         let data = try encoder.encode(library)
         try data.write(to: url, options: Data.WritingOptions.atomic)
     }
 
     func exportSelectedDock(to url: URL) throws {
+        try requireAccess()
         commitDraftName()
         var snapshot = selectedProfile
         snapshot.name = draftName
@@ -307,6 +325,7 @@ final class DockStore: ObservableObject {
     }
 
     func `import`(from url: URL) throws {
+        try requireAccess()
         let data = try Data(contentsOf: url)
         if let incoming = try? decoder.decode(DockLibrary.self, from: data), !incoming.profiles.isEmpty {
             var lastImportedID: UUID?
@@ -337,6 +356,19 @@ final class DockStore: ObservableObject {
     }
 
     // MARK: - Persistence
+
+    @discardableResult
+    private func rejectIfLocked() -> Bool {
+        guard !LicenseStore.shared.hasAccess else { return false }
+        lastError = LicenseStore.lockedMessage
+        return true
+    }
+
+    private func requireAccess() throws {
+        if rejectIfLocked() {
+            throw LicenseAccessError.locked
+        }
+    }
 
     private func persist() {
         do {

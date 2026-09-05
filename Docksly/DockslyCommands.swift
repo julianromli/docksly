@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DockslyCommands: Commands {
     @ObservedObject var store: DockStore
+    @ObservedObject var license: LicenseStore
 
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
@@ -10,12 +11,13 @@ struct DockslyCommands: Commands {
                 NotificationCenter.default.post(name: .dockslyOpenEditor, object: nil)
             }
             .keyboardShortcut("n", modifiers: .command)
+            .disabled(!license.hasAccess)
 
             Button("Save Changes") {
                 store.saveDraft(applyIfActive: true)
             }
             .keyboardShortcut("s", modifiers: .command)
-            .disabled(!store.isDirty)
+            .disabled(!store.isDirty || !license.hasAccess)
         }
 
         CommandMenu("Dock") {
@@ -24,15 +26,22 @@ struct DockslyCommands: Commands {
                 NotificationCenter.default.post(name: .dockslyOpenEditor, object: nil)
             }
             .keyboardShortcut("a", modifiers: [.command, .shift])
+            .disabled(!license.hasAccess)
 
             Button("Add Spacer") {
                 store.addSpacer()
             }
+            .disabled(!license.hasAccess)
 
             Button("Use This Dock") {
                 store.applySelected(saveFirst: true)
             }
-            .disabled(store.isSelectedCurrent || store.isApplying || (store.isSelectedActive && store.isDirty))
+            .disabled(
+                !license.hasAccess
+                    || store.isSelectedCurrent
+                    || store.isApplying
+                    || (store.isSelectedActive && store.isDirty)
+            )
         }
     }
 }

@@ -40,8 +40,9 @@ Do **not** enable App Sandbox. Docksly writes the `com.apple.dock` preference do
 - **Local persistence** — JSON in `~/Library/Application Support/Docksly/library.json`. No account, cloud, or analytics.
 - **Export / import** — JSON for one dock or the whole library (Edit Dock menu).
 - **Settings** — Open at login through `SMAppService`. This is reliable after you copy the app into `/Applications`.
+- **Trial and license** — First launch starts a 24-hour trial. After that, apply, save, create, delete, import, and export stay locked until you paste a Mayar software license key. Buy License opens the Mayar product page.
 
-Out of scope: Focus Filters, licensing, paywall, and cloud sync.
+Out of scope: Focus Filters and cloud sync.
 
 ## How Dock switching works
 
@@ -119,6 +120,9 @@ Build and run from Xcode. Then walk this list.
 - [ ] Toggle **Open Docksly at login**. Read the status line. If registration fails, move the app to `/Applications` and try again.
 - [ ] Confirm `~/Library/Application Support/Docksly/library.json` exists and lists your docks.
 - [ ] After an apply, confirm a file exists under `~/Library/Application Support/Docksly/backups/`.
+- [ ] Settings → License shows `Trial · N hours left` on a new install.
+- [ ] After you set `DockslyLicenseAPIURL` and deploy the Worker, Activate a valid Mayar sandbox key. Status becomes `Licensed`.
+- [ ] Activate a bad key. The form shows a short error. The app does not unlock.
 
 ### Export / import
 
@@ -131,6 +135,42 @@ Build and run from Xcode. Then walk this list.
 - [ ] Leave an unpinned app running. Apply a dock that does not include it. The app stays running.
 - [ ] Folders or stacks on the right of the divider stay.
 
+### License lock
+
+- [ ] After the trial ends, the editor shows a lock sheet. You cannot dismiss it by an empty click.
+- [ ] Save, Use This Dock, New Dock, import, and export stay disabled.
+- [ ] Settings… from the menu bar still opens. You can paste a key there.
+- [ ] Menu bar apply stays disabled. Quit still works.
+
+## License service
+
+Docksly does not keep a Mayar API key in the Mac app. A Cloudflare Worker in `license-api/` verifies keys.
+
+1. Create a Mayar **Software License** product (lifetime).
+2. Copy `license-api/.dev.vars.example` to `license-api/.dev.vars`.
+3. Set `MAYAR_API_KEY`, `MAYAR_PRODUCT_ID`, and `MAYAR_ENV` (`sandbox` or `production`).
+4. Put secrets on the Worker for deploy:
+   `npx wrangler secret put MAYAR_API_KEY`
+   `npx wrangler secret put MAYAR_PRODUCT_ID`
+5. Deploy the Worker. Put the Worker URL in `Docksly/Info.plist` as `DockslyLicenseAPIURL`.
+6. Put the Mayar product page URL in `DockslyCheckoutURL`.
+
+The Worker calls `POST /software/v2/license/verify`. It grants access only when Mayar returns `isLicenseActive == true` and `licenseCode.status == ACTIVE`.
+
+Sandbox (current):
+
+- Product: Docksly Lifetime Key — Rp49.000
+- Product ID: `bed86a57-d037-4ed6-b552-ec2cbcd7776c`
+- Checkout: https://faizintifada.myr.wtf/pl/docksly-lifetime-key
+- Coupon `F41Z` — 99% off, reusable
+- License API: https://docksly-license-api.faizintifada.workers.dev
+- Custom domain (attached, DNS still pending): https://docksly.faizintifada.com
+
+Local files:
+
+- `~/Library/Application Support/Docksly/license.json` — license record
+- Keychain item `app.docksly.Docksly` / `trialStartedAt` — trial start, so a deleted JSON file does not restart the trial
+
 ## Project layout
 
 ```
@@ -139,13 +179,15 @@ project.yml              XcodeGen spec (optional)
 Docksly/
   DockslyApp.swift     SwiftUI app, window, menu extra, settings
   Models/                Dock, items, colors, library document
-  Persistence/DockStore  Application Support JSON + editor draft
+  Persistence/            Application Support JSON + license record
   Services/
     DockApplicator.swift Real Dock read/write + restart
     AppIconService.swift NSWorkspace icons
     LaunchAtLoginService.swift
-  Views/                 Editor, strip, tiles, add-app sheet, settings
+    LicenseClient.swift  Worker verify client
+  Views/                 Editor, strip, tiles, add-app sheet, settings, license
   Assets.xcassets        Original app icon + template menu-bar glyph
+license-api/             Cloudflare Worker for Mayar software license verify
 ```
 
 ## License

@@ -1,0 +1,13 @@
+{
+  "name": "docksly-license-api",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "latest",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.37.0"
+  }
+}

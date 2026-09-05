@@ -17,10 +17,13 @@ SWIFT_FILES = [
     ("Models/DockProfile.swift", "models"),
     ("Models/DockLibrary.swift", "models"),
     ("Models/ProfileColor.swift", "models"),
+    ("Models/LicenseRecord.swift", "models"),
     ("Persistence/DockStore.swift", "persistence"),
+    ("Persistence/LicenseStore.swift", "persistence"),
     ("Services/DockApplicator.swift", "services"),
     ("Services/AppIconService.swift", "services"),
     ("Services/LaunchAtLoginService.swift", "services"),
+    ("Services/LicenseClient.swift", "services"),
     ("Views/VisualEffectBackground.swift", "views"),
     ("Views/ColorDot.swift", "views"),
     ("Views/DockTileView.swift", "views"),
@@ -29,6 +32,7 @@ SWIFT_FILES = [
     ("Views/ProfilePickerButton.swift", "views"),
     ("Views/EditorWindowView.swift", "views"),
     ("Views/SettingsView.swift", "views"),
+    ("Views/LicenseLockSheet.swift", "views"),
     ("Views/MenuBarContentView.swift", "views"),
 ]
 

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DockStripView: View {
     @EnvironmentObject private var store: DockStore
+    @EnvironmentObject private var license: LicenseStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
     var onAddApplication: () -> Void = {}
@@ -59,15 +60,19 @@ struct DockStripView: View {
             Text("This dock has no pinned apps")
                 .font(.headline)
                 .textCase(nil)
-            Text("Add an application or a spacer to start this layout.")
+            Text(license.hasAccess
+                ? "Add an application or a spacer to start this layout."
+                : "Enter a license key to change this layout.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            HStack(spacing: 8) {
-                Button("Add Application…", action: onAddApplication)
-                    .buttonStyle(QuietCapsuleButtonStyle())
-                Button("Add Spacer") { store.addSpacer() }
-                    .buttonStyle(QuietCapsuleButtonStyle())
+            if license.hasAccess {
+                HStack(spacing: 8) {
+                    Button("Add Application…", action: onAddApplication)
+                        .buttonStyle(QuietCapsuleButtonStyle())
+                    Button("Add Spacer") { store.addSpacer() }
+                        .buttonStyle(QuietCapsuleButtonStyle())
+                }
             }
         }
         .padding(.horizontal, DockslyStyle.shelfInner)
@@ -93,12 +98,17 @@ struct DockStripView: View {
                             isPlaceholder: draggingID == item.id,
                             isReordering: draggingID != nil,
                             onRemove: { store.removeItem(id: item.id) },
-                            onMoveLeft: index > 0 ? { store.moveItem(id: item.id, toIndex: index - 1) } : nil,
-                            onMoveRight: index < displayItems.count - 1
+                            onMoveLeft: license.hasAccess && index > 0
+                                ? { store.moveItem(id: item.id, toIndex: index - 1) }
+                                : nil,
+                            onMoveRight: license.hasAccess && index < displayItems.count - 1
                                 ? { store.moveItem(id: item.id, toIndex: index + 1) }
                                 : nil,
-                            onDragChanged: { value in handleDrag(item, value) },
-                            onDragEnded: endDrag
+                            onDragChanged: license.hasAccess
+                                ? { value in handleDrag(item, value) }
+                                : nil,
+                            onDragEnded: license.hasAccess ? endDrag : nil,
+                            allowsEditing: license.hasAccess
                         )
                         .modifier(DockSwitchStagger(
                             index: index,
@@ -109,14 +119,16 @@ struct DockStripView: View {
                         ))
                     }
 
-                    addTile
-                        .modifier(DockSwitchStagger(
-                            index: displayItems.count,
-                            playEnter: isSwitchingDock && !reduceMotion,
-                            profileID: store.selectedProfileID,
-                            restaggerOnProfileChange: true,
-                            reduceMotion: reduceMotion
-                        ))
+                    if license.hasAccess {
+                        addTile
+                            .modifier(DockSwitchStagger(
+                                index: displayItems.count,
+                                playEnter: isSwitchingDock && !reduceMotion,
+                                profileID: store.selectedProfileID,
+                                restaggerOnProfileChange: true,
+                                reduceMotion: reduceMotion
+                            ))
+                    }
                 }
                 .padding(.vertical, DockslyStyle.shelfInner)
                 .padding(.leading, DockslyStyle.shelfInner)

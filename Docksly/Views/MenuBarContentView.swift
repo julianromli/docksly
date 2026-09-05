@@ -3,6 +3,7 @@ import AppKit
 
 struct MenuBarContentView: View {
     @EnvironmentObject private var store: DockStore
+    @EnvironmentObject private var license: LicenseStore
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -22,7 +23,7 @@ struct MenuBarContentView: View {
                     }
                 }
             }
-            .disabled(store.isApplying)
+            .disabled(store.isApplying || !license.hasAccess)
         }
 
         Divider()

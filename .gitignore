@@ -26,3 +26,11 @@ build/
 # Local Firecrawl dumps
 .firecrawl/
 agent-tools/
+
+# License Worker secrets and deps
+license-api/.dev.vars
+license-api/.env
+license-api/.env.*
+!license-api/.dev.vars.example
+license-api/node_modules/
+license-api/.wrangler/

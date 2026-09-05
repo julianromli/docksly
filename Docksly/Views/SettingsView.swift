@@ -3,12 +3,24 @@ import ServiceManagement
 import SwiftUI
 
 struct SettingsView: View {
+    @EnvironmentObject private var license: LicenseStore
     @State private var launchAtLogin = LaunchAtLoginService.isEnabled
     @State private var status = LaunchAtLoginService.statusDescription
     @State private var errorMessage: String?
 
     var body: some View {
         Form {
+            Section {
+                Text(license.statusText)
+                    .font(.body.weight(.medium))
+                    .monospacedDigit()
+                LicenseActivationForm()
+            } header: {
+                Text("License")
+            } footer: {
+                Text("The trial starts the first time you open Docksly. After 24 hours, enter a license key from Mayar.")
+            }
+
             Section {
                 Toggle("Open Docksly at login", isOn: launchBinding)
                     .help("Uses the macOS login-item service. Put the app in Applications for a reliable result.")
@@ -29,7 +41,7 @@ struct SettingsView: View {
             } header: {
                 Text("Startup")
             } footer: {
-                Text("Docksly stores docks in your Application Support folder. There is no account and no network sync.")
+                Text("Docksly stores docks on this Mac. License checks use the Mayar service.")
             }
 
             Section("Data") {
@@ -46,9 +58,25 @@ struct SettingsView: View {
                         .help(backupsURL.path)
                 }
             }
+
+            #if DEBUG
+            Section {
+                Button("Simulate trial ended") {
+                    license.simulateTrialEnded()
+                }
+                Button("Restore local license") {
+                    license.restoreLocalLicense()
+                }
+                .disabled(license.record.licenseCode.isEmpty)
+            } header: {
+                Text("Developer")
+            } footer: {
+                Text("Local only. These buttons do not call Mayar and do not use an activation slot.")
+            }
+            #endif
         }
         .formStyle(.grouped)
-        .frame(width: 420, height: 320)
+        .frame(width: 420, height: 580)
         .onAppear {
             refresh()
         }

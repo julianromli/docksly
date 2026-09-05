@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct EditorWindowView: View {
     @EnvironmentObject private var store: DockStore
+    @EnvironmentObject private var license: LicenseStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
     @State private var showImportError = false
@@ -13,7 +14,9 @@ struct EditorWindowView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            DockStripView(onAddApplication: { store.wantsAddApp = true })
+            DockStripView(onAddApplication: {
+                if license.hasAccess { store.wantsAddApp = true }
+            })
             errorSlot
         }
         .frame(
@@ -31,6 +34,10 @@ struct EditorWindowView: View {
         .sheet(isPresented: $store.wantsAddApp) {
             AddAppSheet()
                 .environmentObject(store)
+        }
+        .sheet(isPresented: lockBinding) {
+            LicenseLockSheet()
+                .environmentObject(license)
         }
         .alert("Import failed", isPresented: $showImportError) {
             Button("OK", role: .cancel) {}
@@ -137,16 +144,22 @@ struct EditorWindowView: View {
     private var overflowMenu: some View {
         Menu {
             Button("Add Application…") { store.wantsAddApp = true }
+                .disabled(!license.hasAccess)
             Button("Add Spacer") { store.addSpacer() }
+                .disabled(!license.hasAccess)
             Divider()
             Button("Capture Current Dock") { store.captureLiveDockIntoDraft() }
+                .disabled(!license.hasAccess)
             Divider()
             Button("Export This Dock…") { exportSelected() }
+                .disabled(!license.hasAccess)
             Button("Export All Docks…") { exportLibrary() }
+                .disabled(!license.hasAccess)
             Button("Import Dock…") { importDock() }
+                .disabled(!license.hasAccess)
             Divider()
             Button("Delete Dock…", role: .destructive) { showDeleteConfirm = true }
-                .disabled(store.library.profiles.count < 2)
+                .disabled(!license.hasAccess || store.library.profiles.count < 2)
         } label: {
             Image(systemName: "ellipsis.circle")
                 .font(.system(size: 15, weight: .medium))
@@ -194,14 +207,14 @@ struct EditorWindowView: View {
                     }
                     .buttonStyle(AccentCapsuleButtonStyle())
                     .keyboardShortcut("s", modifiers: .command)
-                    .disabled(store.isApplying)
+                    .disabled(store.isApplying || !license.hasAccess)
                 }
                 if !store.isSelectedCurrent && !(store.isSelectedActive && store.isDirty) {
                     Button("Use This Dock") {
                         store.applySelected(saveFirst: true)
                     }
                     .buttonStyle(AccentCapsuleButtonStyle())
-                    .disabled(store.isApplying)
+                    .disabled(store.isApplying || !license.hasAccess)
                 }
             }
         }
@@ -260,6 +273,13 @@ struct EditorWindowView: View {
         .padding(.horizontal, DockslyStyle.shelfHorizontal)
         .padding(.vertical, 10)
         .background(DockslyStyle.errorFill(colorScheme))
+    }
+
+    private var lockBinding: Binding<Bool> {
+        Binding(
+            get: { !license.hasAccess },
+            set: { _ in }
+        )
     }
 
     private func exportSelected() {

@@ -11,6 +11,7 @@ struct DockTileView: View {
     var onMoveRight: (() -> Void)?
     var onDragChanged: ((DragGesture.Value) -> Void)?
     var onDragEnded: (() -> Void)?
+    var allowsEditing: Bool = true
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHoveringTile = false
@@ -18,7 +19,7 @@ struct DockTileView: View {
     @State private var allowsChromeMotion = false
 
     private var isHovering: Bool { isHoveringTile || isHoveringRemove }
-    private var showRemove: Bool { isHovering && !isDragging && !isReordering }
+    private var showRemove: Bool { allowsEditing && isHovering && !isDragging && !isReordering }
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -28,28 +29,21 @@ struct DockTileView: View {
                     (reduceMotion || isReordering) ? nil : DockslyStyle.defaultSpring,
                     value: liftScale
                 )
-                .highPriorityGesture(reorderGesture)
+                .modifier(TileEditGestures(
+                    allowsEditing: allowsEditing,
+                    reorderGesture: reorderGesture,
+                    onRemove: onRemove,
+                    onMoveLeft: onMoveLeft,
+                    onMoveRight: onMoveRight
+                ))
                 .onHover { hovering in
                     isHoveringTile = hovering
                     updateCursor(overTile: hovering, overRemove: isHoveringRemove)
                 }
-                .contextMenu {
-                    if let onMoveLeft {
-                        Button("Move Left", action: onMoveLeft)
-                    }
-                    if let onMoveRight {
-                        Button("Move Right", action: onMoveRight)
-                    }
-                    if onMoveLeft != nil || onMoveRight != nil {
-                        Divider()
-                    }
-                    Button("Remove", role: .destructive, action: onRemove)
-                }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(item.title)
-                .accessibilityHint("Drag to reorder")
+                .accessibilityHint(allowsEditing ? "Drag to reorder" : "View only")
                 .accessibilityAddTraits(.isButton)
-                .accessibilityAction(named: "Remove", onRemove)
                 .accessibilityHidden(isPlaceholder)
 
             Button(action: onRemove) {
@@ -86,6 +80,10 @@ struct DockTileView: View {
     }
 
     private func updateCursor(overTile: Bool, overRemove: Bool) {
+        if !allowsEditing {
+            NSCursor.arrow.set()
+            return
+        }
         if isDragging || isReordering {
             NSCursor.closedHand.set()
             return
@@ -160,5 +158,36 @@ struct DockTileView: View {
             .frame(width: DockslyStyle.spacerWidth, height: 60)
             .contentShape(Rectangle())
             .help("Spacer. Drag to reorder.")
+    }
+}
+
+private struct TileEditGestures<G: Gesture>: ViewModifier {
+    let allowsEditing: Bool
+    let reorderGesture: G
+    let onRemove: () -> Void
+    let onMoveLeft: (() -> Void)?
+    let onMoveRight: (() -> Void)?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if allowsEditing {
+            content
+                .highPriorityGesture(reorderGesture)
+                .contextMenu {
+                    if let onMoveLeft {
+                        Button("Move Left", action: onMoveLeft)
+                    }
+                    if let onMoveRight {
+                        Button("Move Right", action: onMoveRight)
+                    }
+                    if onMoveLeft != nil || onMoveRight != nil {
+                        Divider()
+                    }
+                    Button("Remove", role: .destructive, action: onRemove)
+                }
+                .accessibilityAction(named: "Remove", onRemove)
+        } else {
+            content
+        }
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ProfilePickerButton: View {
     @EnvironmentObject private var store: DockStore
+    @EnvironmentObject private var license: LicenseStore
     @State private var newName = ""
 
     var body: some View {
@@ -27,6 +28,7 @@ struct ProfilePickerButton: View {
             Button("New Dock…") {
                 store.wantsNewDockName = true
             }
+            .disabled(!license.hasAccess)
         } label: {
             Image(systemName: "chevron.down")
                 .font(.system(size: 9, weight: .semibold))
@@ -43,6 +45,7 @@ struct ProfilePickerButton: View {
                 store.createDock(named: newName)
                 newName = ""
             }
+            .disabled(!license.hasAccess)
             Button("Cancel", role: .cancel) {
                 newName = ""
             }
@@ -54,6 +57,7 @@ struct ProfilePickerButton: View {
 
 struct ProfileIdentityEditor: View {
     @EnvironmentObject private var store: DockStore
+    @EnvironmentObject private var license: LicenseStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showColors = false
     @State private var allowsSwatchMotion = false
@@ -72,6 +76,7 @@ struct ProfileIdentityEditor: View {
             .buttonStyle(PressableButtonStyle(focusShape: .circle))
             .help("Change dock color")
             .accessibilityLabel("Dock color, \(store.draftColor.displayName)")
+            .disabled(!license.hasAccess)
             .popover(isPresented: $showColors, arrowEdge: .bottom) {
                 colorSwatches
                     .padding(10)
@@ -107,6 +112,7 @@ struct ProfileIdentityEditor: View {
             .focused($nameFocused)
             .accessibilityLabel("Dock name")
             .help(store.draftName)
+            .disabled(!license.hasAccess)
             .background(QuietTitleFieldTuning())
             .onSubmit {
                 store.commitDraftName()
