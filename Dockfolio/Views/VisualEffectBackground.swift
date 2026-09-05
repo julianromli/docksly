@@ -202,6 +202,7 @@ enum DockfolioStyle {
     static let removeHitSize: CGFloat = 40
     static let spacerWidth: CGFloat = 28
     static let itemSpacing: CGFloat = 8
+    static let dockStripSpace = "dockStrip"
 
     static let hoverScale: CGFloat = 1.12
     static let dragScale: CGFloat = 1.16

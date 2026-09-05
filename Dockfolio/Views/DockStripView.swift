@@ -7,10 +7,15 @@ struct DockStripView: View {
 
     @State private var draggingID: UUID?
     @State private var dragTranslation: CGFloat = 0
-    @State private var consumedTranslation: CGFloat = 0
+    @State private var dragStartX: CGFloat = 0
+    @State private var dragItems: [DockItem]?
     @State private var renderedProfileID: UUID?
 
     private var itemSpacing: CGFloat { DockfolioStyle.itemSpacing }
+
+    private var displayItems: [DockItem] {
+        dragItems ?? store.draftItems
+    }
 
     private var isSwitchingDock: Bool {
         guard let renderedProfileID else { return false }
@@ -80,25 +85,20 @@ struct DockStripView: View {
             let overflows = stripContentWidth + (DockfolioStyle.shelfInner * 2) > geo.size.width
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: itemSpacing) {
-                    ForEach(Array(store.draftItems.enumerated()), id: \.element.id) { index, item in
+                    ForEach(Array(displayItems.enumerated()), id: \.element.id) { index, item in
                         DockTileView(
                             item: item,
-                            isDragging: draggingID == item.id,
+                            isDragging: false,
+                            isPlaceholder: draggingID == item.id,
                             isReordering: draggingID != nil,
                             onRemove: { store.removeItem(id: item.id) },
                             onMoveLeft: index > 0 ? { store.moveItem(id: item.id, toIndex: index - 1) } : nil,
-                            onMoveRight: index < store.draftItems.count - 1
+                            onMoveRight: index < displayItems.count - 1
                                 ? { store.moveItem(id: item.id, toIndex: index + 1) }
                                 : nil,
                             onDragChanged: { value in handleDrag(item, value) },
-                            onDragEnded: {
-                                withAnimation(reduceMotion ? nil : DockfolioStyle.flickSpring) {
-                                    resetDrag()
-                                }
-                            }
+                            onDragEnded: endDrag
                         )
-                        .offset(x: draggingID == item.id ? dragTranslation : 0)
-                        .zIndex(draggingID == item.id ? 1 : 0)
                         .modifier(DockSwitchStagger(
                             index: index,
                             playEnter: isSwitchingDock && !reduceMotion,
@@ -106,16 +106,11 @@ struct DockStripView: View {
                             restaggerOnProfileChange: false,
                             reduceMotion: reduceMotion
                         ))
-                        .transaction { transaction in
-                            if draggingID == item.id {
-                                transaction.disablesAnimations = true
-                            }
-                        }
                     }
 
                     addTile
                         .modifier(DockSwitchStagger(
-                            index: store.draftItems.count,
+                            index: displayItems.count,
                             playEnter: isSwitchingDock && !reduceMotion,
                             profileID: store.selectedProfileID,
                             restaggerOnProfileChange: true,
@@ -127,8 +122,13 @@ struct DockStripView: View {
                 .padding(.trailing, overflows ? DockfolioStyle.overflowPeek : DockfolioStyle.shelfInner)
                 .animation(
                     (reduceMotion || isSwitchingDock) ? nil : DockfolioStyle.defaultSpring,
-                    value: store.draftItems.map(\.id)
+                    value: displayItems.map(\.id)
                 )
+                .overlay(alignment: .topLeading) {
+                    floatingTile
+                        .transaction { $0.disablesAnimations = true }
+                }
+                .coordinateSpace(name: DockfolioStyle.dockStripSpace)
             }
             .scrollDisabled(draggingID != nil)
             .overlay(alignment: .trailing) {
@@ -163,41 +163,78 @@ struct DockStripView: View {
         .accessibilityLabel("Add Application")
     }
 
+    @ViewBuilder
+    private var floatingTile: some View {
+        if let draggingID, let item = displayItems.first(where: { $0.id == draggingID }) {
+            DockTileView(
+                item: item,
+                isDragging: true,
+                isReordering: true,
+                onRemove: {}
+            )
+            .offset(
+                x: dragStartX + dragTranslation,
+                y: DockfolioStyle.shelfInner
+            )
+            .allowsHitTesting(false)
+        }
+    }
+
     private func handleDrag(_ item: DockItem, _ value: DragGesture.Value) {
         if draggingID != item.id {
             draggingID = item.id
-            consumedTranslation = 0
+            dragItems = store.draftItems
+            dragStartX = originX(of: item.id, in: store.draftItems)
+            NSCursor.closedHand.set()
         }
-        guard let from = store.draftItems.firstIndex(where: { $0.id == item.id }) else { return }
-        let items = store.draftItems
-        let effective = value.translation.width - consumedTranslation
+        dragTranslation = value.translation.width
 
-        if effective > 0, from + 1 < items.count {
-            let threshold = swapThreshold(current: items[from], neighbor: items[from + 1])
-            if effective > threshold {
-                store.moveItem(id: item.id, toIndex: from + 1)
-                consumedTranslation += tileWidth(items[from + 1]) + itemSpacing
-            }
-        } else if effective < 0, from > 0 {
-            let threshold = swapThreshold(current: items[from], neighbor: items[from - 1])
-            if effective < -threshold {
-                store.moveItem(id: item.id, toIndex: from - 1)
-                consumedTranslation -= tileWidth(items[from - 1]) + itemSpacing
-            }
-        }
-
-        dragTranslation = value.translation.width - consumedTranslation
+        guard var items = dragItems,
+              let from = items.firstIndex(where: { $0.id == item.id }) else { return }
+        let target = indexAtCenter(
+            dragStartX + dragTranslation + tileWidth(item) / 2,
+            in: items
+        )
+        guard target != from else { return }
+        let moving = items.remove(at: from)
+        items.insert(moving, at: target)
+        dragItems = items
     }
 
-    private func swapThreshold(current: DockItem, neighbor: DockItem) -> CGFloat {
-        let gap = (tileWidth(current) + tileWidth(neighbor)) / 2 + itemSpacing
-        return gap * CGFloat(0.55)
+    private func endDrag() {
+        if let dragItems {
+            store.replaceDraftItems(dragItems)
+        }
+        NSCursor.arrow.set()
+        resetDrag()
+    }
+
+    private func originX(of id: UUID, in items: [DockItem]) -> CGFloat {
+        var x = DockfolioStyle.shelfInner
+        for item in items {
+            if item.id == id { return x }
+            x += tileWidth(item) + itemSpacing
+        }
+        return x
+    }
+
+    private func indexAtCenter(_ pointX: CGFloat, in items: [DockItem]) -> Int {
+        var x = DockfolioStyle.shelfInner
+        var result = 0
+        for (index, item) in items.enumerated() {
+            if pointX >= x + tileWidth(item) / 2 {
+                result = index
+            }
+            x += tileWidth(item) + itemSpacing
+        }
+        return result
     }
 
     private func resetDrag() {
         draggingID = nil
         dragTranslation = 0
-        consumedTranslation = 0
+        dragStartX = 0
+        dragItems = nil
     }
 
     private func tileWidth(_ item: DockItem) -> CGFloat {

@@ -134,6 +134,11 @@ final class DockStore: ObservableObject {
         draftColor = color
     }
 
+    func replaceDraftItems(_ items: [DockItem]) {
+        guard items != draftItems else { return }
+        draftItems = items
+    }
+
     func moveItem(id: UUID, toIndex dest: Int) {
         guard let from = draftItems.firstIndex(where: { $0.id == id }) else { return }
         let clamped = min(max(dest, 0), draftItems.count - 1)

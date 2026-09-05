@@ -4,6 +4,7 @@ import AppKit
 struct DockTileView: View {
     let item: DockItem
     var isDragging: Bool
+    var isPlaceholder: Bool = false
     var isReordering: Bool = false
     var onRemove: () -> Void
     var onMoveLeft: (() -> Void)?
@@ -49,6 +50,7 @@ struct DockTileView: View {
                 .accessibilityHint("Drag to reorder")
                 .accessibilityAddTraits(.isButton)
                 .accessibilityAction(named: "Remove", onRemove)
+                .accessibilityHidden(isPlaceholder)
 
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
@@ -75,6 +77,7 @@ struct DockTileView: View {
             .allowsHitTesting(showRemove)
             .accessibilityHidden(!showRemove)
         }
+        .opacity(isPlaceholder ? 0 : 1)
         .onAppear {
             DispatchQueue.main.async {
                 allowsChromeMotion = true
@@ -115,9 +118,8 @@ struct DockTileView: View {
     }
 
     private var reorderGesture: some Gesture {
-        DragGesture(minimumDistance: 6)
+        DragGesture(minimumDistance: 6, coordinateSpace: .named(DockfolioStyle.dockStripSpace))
             .onChanged { value in
-                NSCursor.closedHand.set()
                 onDragChanged?(value)
             }
             .onEnded { _ in
