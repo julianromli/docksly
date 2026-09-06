@@ -42,7 +42,7 @@ A public download needs a Developer ID Application certificate and the `docksly-
 ./scripts/build-release-dmg.sh
 ```
 
-The file is `dist/Docksly-1.0.0.dmg`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
+The file is `dist/Docksly-1.0.0.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
 
 Both disk images use a Docksly-styled window (dark shelf, drag arrow). That build needs `dmgbuild`:
 
@@ -207,7 +207,7 @@ Sandbox (current):
 - Checkout: https://faizintifada.myr.wtf/pl/docksly-lifetime-key
 - Coupon `F41Z` — 99% off, reusable
 - License API: https://docksly-license-api.faizintifada.workers.dev
-- Custom domain (attached, DNS still pending): https://docksly.faizintifada.com
+- Marketing site: https://docksly.faizintifada.com
 
 Local files:
 

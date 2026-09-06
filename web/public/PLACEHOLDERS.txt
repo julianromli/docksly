@@ -1,5 +1,7 @@
-Drop this file here when you have it:
+Public download:
 
-- Docksly.dmg   public download for /download
+- Docksly.dmg   notarized 1.0.0 image for /download
 
-The download page says the file is not published yet until you add it.
+The release script copies the stapled disk image here:
+
+    ./scripts/build-release-dmg.sh

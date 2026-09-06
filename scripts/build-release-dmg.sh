@@ -146,5 +146,9 @@ xcrun stapler staple "$DMG"
 xcrun stapler validate "$DMG"
 hdiutil verify "$DMG" >/dev/null
 
+SITE_DMG="$ROOT/web/public/Docksly.dmg"
+cp "$DMG" "$SITE_DMG"
+
 printf '%s\n' "Created $DMG"
-printf '%s\n' "This file is signed, notarized, and stapled. You can put it on your site."
+printf '%s\n' "Copied $SITE_DMG for the marketing site download."
+printf '%s\n' "This file is signed, notarized, and stapled."

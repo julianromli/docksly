@@ -5,7 +5,3 @@ workers_dev = true
 
 [vars]
 MAYAR_ENV = "sandbox"
-
-[[routes]]
-pattern = "docksly.faizintifada.com"
-custom_domain = true
