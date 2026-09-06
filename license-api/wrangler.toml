@@ -4,4 +4,4 @@ compatibility_date = "2026-09-05"
 workers_dev = true
 
 [vars]
-MAYAR_ENV = "sandbox"
+MAYAR_ENV = "production"
