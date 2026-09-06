@@ -1,0 +1,108 @@
+---
+import FeatureGrid from "../components/FeatureGrid.astro";
+import Hero from "../components/Hero.astro";
+import HeroMockup from "../components/HeroMockup.astro";
+import { site } from "../content/site";
+import SiteLayout from "../layouts/SiteLayout.astro";
+---
+
+<SiteLayout
+  title={`${site.name} — Download for Mac`}
+  description={`Download Docksly for ${site.macos}. ${site.trial} included.`}
+  current="download"
+>
+  <Hero />
+  <HeroMockup />
+  <FeatureGrid />
+
+  <div
+    id="download-overlay"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/40 px-5"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="download-title"
+  >
+    <div
+      class="w-full max-w-[28rem] rounded-[1.75rem] bg-orange-25 px-8 py-10 text-center shadow-2xl shadow-orange-950/25"
+    >
+      <h2 id="download-title" class="text-2xl font-bold text-stone-800">Checking download</h2>
+      <p id="download-copy" class="mt-3 text-pretty text-stone-600">
+        Checking for the Docksly disk image.
+      </p>
+      <a
+        id="download-file"
+        href={site.downloadPath}
+        class="btn-press mt-6 inline-flex rounded-2xl bg-stone-800 px-5 py-3 text-base font-bold text-orange-75"
+      >
+        Download Docksly.dmg
+      </a>
+      <p class="mt-4 text-sm text-stone-500">{site.macos}. {site.trial} included.</p>
+      <a
+        id="download-close"
+        href="/"
+        class="mt-6 inline-block text-sm font-medium text-stone-600 underline underline-offset-4"
+      >
+        Back to home
+      </a>
+    </div>
+  </div>
+</SiteLayout>
+
+<script>
+  const title = document.getElementById("download-title");
+  const copy = document.getElementById("download-copy");
+  const link = document.getElementById("download-file");
+  const close = document.getElementById("download-close");
+  const overlay = document.getElementById("download-overlay");
+  const path = link instanceof HTMLAnchorElement ? link.getAttribute("href") : null;
+
+  function markMissing() {
+    if (title) title.textContent = "Download not ready";
+    if (copy) {
+      copy.textContent =
+        "The disk image is not published yet. Drop Docksly.dmg into web/public when you are ready.";
+    }
+    if (link instanceof HTMLAnchorElement) {
+      link.hidden = true;
+    }
+  }
+
+  async function startDownload() {
+    if (!path || !copy || !(link instanceof HTMLAnchorElement)) return;
+    try {
+      const response = await fetch(path, { method: "HEAD" });
+      if (!response.ok) {
+        markMissing();
+        close?.focus();
+        return;
+      }
+      if (title) title.textContent = "Download started";
+      copy.textContent = "If the file did not start, use the link below.";
+      const trigger = document.createElement("a");
+      trigger.href = path;
+      trigger.setAttribute("download", "Docksly.dmg");
+      trigger.hidden = true;
+      document.body.append(trigger);
+      trigger.click();
+      trigger.remove();
+      link.focus();
+    } catch {
+      markMissing();
+      close?.focus();
+    }
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      window.location.href = "/";
+    }
+  });
+
+  overlay?.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      window.location.href = "/";
+    }
+  });
+
+  void startDownload();
+</script>

@@ -1,0 +1,39 @@
+---
+import AppMark from "../components/AppMark.astro";
+import { site } from "../content/site";
+import SiteLayout from "../layouts/SiteLayout.astro";
+---
+
+<SiteLayout
+  title={`${site.name} — Privacy policy`}
+  description="The Docksly Mac app does not collect personal data."
+  surface="dark"
+  current="privacy"
+  compactFooter
+>
+  <article class="mx-auto w-full max-w-[40rem] px-6 pt-16 pb-8 text-center sm:pt-24">
+    <h1 class="text-5xl font-bold tracking-tight text-balance text-orange-75 sm:text-6xl">
+      Privacy policy
+    </h1>
+    <p class="mx-auto mt-8 max-w-md text-pretty text-lg text-orange-75/80">
+      No data or personal information is collected by the
+      <span class="inline-flex items-center gap-1.5 font-semibold">
+        <AppMark class="size-4" />
+        {site.name}
+      </span>
+      Mac app.
+    </p>
+    <p class="mx-auto mt-4 max-w-md text-pretty text-orange-75/60">
+      There is no account, cloud, or analytics in the app. License check goes to the Docksly license
+      service. This website may use Cloudflare for hosting.
+    </p>
+
+    <h2 class="mt-16 text-2xl font-bold">Have questions?</h2>
+    <p class="mx-auto mt-3 max-w-md text-pretty text-orange-75/70">
+      If you have questions or suggestions about this privacy policy, <a
+        class="underline decoration-orange-75/30 underline-offset-4 hover:text-teal-400"
+        href={`mailto:${site.email}`}>contact us</a
+      >.
+    </p>
+  </article>
+</SiteLayout>

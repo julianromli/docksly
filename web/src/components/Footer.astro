@@ -1,0 +1,59 @@
+---
+import { site } from "../content/site";
+
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+---
+
+<footer class:list={["relative overflow-hidden", compact ? "mt-16" : "mt-24 sm:mt-28"]}>
+  {
+    !compact && (
+      <div class="flex justify-center">
+        <a
+          href="/download"
+          class="btn-press relative inline-flex items-center justify-center rounded-2xl bg-stone-800 py-4 pr-5 pl-[52px] text-lg font-bold text-orange-75 shadow-md shadow-orange-950/20"
+        >
+          <span class="absolute top-1/2 left-5 size-[22px] -translate-y-1/2" aria-hidden="true">
+            <svg viewBox="0 0 24 24" class="size-full fill-current">
+              <path d="M4.5 6.25C4.5 5.007 5.507 4 6.75 4h10.5C18.493 4 19.5 5.007 19.5 6.25v8.5c0 1.243-1.007 2.25-2.25 2.25H13.5v1.25h2.25a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1 0-1.5H10.5V17H6.75A2.25 2.25 0 0 1 4.5 14.75v-8.5Zm1.5 0v8.5c0 .414.336.75.75.75h10.5a.75.75 0 0 0 .75-.75v-8.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75Z" />
+            </svg>
+          </span>
+          Download for Mac
+        </a>
+      </div>
+    )
+  }
+
+  <div class="mt-10 flex items-center justify-center gap-3 sm:mt-12">
+    <a
+      href={site.twitter}
+      class="btn-press inline-flex size-11 items-center justify-center rounded-xl bg-orange-950/5 text-orange-950/50 dark:bg-orange-75/5 dark:text-orange-75/50"
+      aria-label="X (Twitter)"
+    >
+      <svg class="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.727-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"
+        ></path>
+      </svg>
+    </a>
+    <a
+      href={`mailto:${site.email}`}
+      class="btn-press inline-flex size-11 items-center justify-center rounded-xl bg-orange-950/5 text-orange-950/50 dark:bg-orange-75/5 dark:text-orange-75/50"
+      aria-label={`Email ${site.email}`}
+    >
+      <svg class="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M4.5 6.75A2.25 2.25 0 0 1 6.75 4.5h10.5A2.25 2.25 0 0 1 19.5 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 17.25V6.75Zm1.5 0v.54l6 3.86 6-3.86v-.54a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75Zm13.5 1.8-5.66 3.64 5.66 3.47V8.55ZM18.2 16.2l-5.45-3.34L12 13.5l-.75-.64L5.8 16.2a.75.75 0 0 0 .95.08L12 12.96l5.25 3.32a.75.75 0 0 0 .95-.08ZM5.25 15.66l5.66-3.47L5.25 8.55v7.11Z"
+        ></path>
+      </svg>
+    </a>
+  </div>
+
+  <p
+    class="footer-mark pointer-events-none mt-6 select-none overflow-hidden text-center leading-none font-bold tracking-tight"
+    aria-hidden="true"
+  ></p>
+</footer>

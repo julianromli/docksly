@@ -1,0 +1,56 @@
+---
+import MarkWord from "../components/MarkWord.astro";
+import { site } from "../content/site";
+import SiteLayout from "../layouts/SiteLayout.astro";
+---
+
+<SiteLayout
+  title={`${site.name} — Recover your license`}
+  description="Paste your Mayar license key in Docksly Settings."
+  current="recover"
+  compactFooter
+>
+  <section class="mx-auto max-w-[48rem] px-5 pt-12 text-center sm:pt-16">
+    <h1 class="text-balance text-6xl leading-[1.05] font-bold tracking-tight sm:text-8xl sm:leading-none">
+      Recover your
+      <br />
+      <span class="inline-flex items-center gap-3">
+        <svg class="size-10 fill-current sm:size-14" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            d="M12 2.25a9.75 9.75 0 1 1 0 19.5 9.75 9.75 0 0 1 0-19.5Zm3.53 6.97a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-2-2a.75.75 0 1 1 1.06-1.06L10.5 13.19l3.97-3.97a.75.75 0 0 1 1.06 0Z"
+          ></path>
+        </svg>
+        <MarkWord>license</MarkWord>
+      </span>
+    </h1>
+  </section>
+
+  <div
+    class="mx-auto mt-12 w-full max-w-[28rem] rounded-[1.75rem] bg-orange-25 px-8 py-10 text-center shadow-xl shadow-orange-950/15 sm:px-10"
+  >
+    <h2 class="text-2xl font-bold">Lost your license?</h2>
+    <p class="mt-2 text-stone-600">Paste your Mayar key in the app.</p>
+    <ol class="mt-8 space-y-3 text-left text-stone-800">
+      <li class="flex gap-3">
+        <span class="font-bold tabular-nums text-orange-950/55">1</span>
+        Open Docksly on your Mac.
+      </li>
+      <li class="flex gap-3">
+        <span class="font-bold tabular-nums text-orange-950/55">2</span>
+        Go to Settings → License.
+      </li>
+      <li class="flex gap-3">
+        <span class="font-bold tabular-nums text-orange-950/55">3</span>
+        Paste the key from your Mayar purchase email.
+      </li>
+    </ol>
+    <p class="mt-8 text-pretty text-sm text-stone-600">
+      If you still need help, <a
+        class="underline decoration-orange-950/20 underline-offset-4 hover:text-teal-400"
+        href={`mailto:${site.email}`}>contact us</a
+      >.
+    </p>
+  </div>
+
+</SiteLayout>

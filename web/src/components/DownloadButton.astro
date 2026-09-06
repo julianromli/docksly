@@ -1,0 +1,37 @@
+---
+import { site } from "../content/site";
+
+interface Props {
+  variant?: "solid" | "ghost" | "nav";
+  class?: string;
+}
+
+const { variant = "solid", class: className } = Astro.props;
+
+const variants = {
+  solid:
+    "bg-stone-800 text-orange-75 shadow-md shadow-orange-950/20 dark:bg-orange-75/10 dark:text-orange-75",
+  ghost:
+    "bg-orange-950/5 text-stone-800 dark:bg-orange-75/10 dark:text-orange-75",
+  nav: "bg-orange-950/8 text-stone-800 dark:bg-orange-75/10 dark:text-orange-75",
+};
+---
+
+<a
+  href="/download"
+  class:list={[
+    "btn-press group relative inline-flex items-center justify-center rounded-2xl py-4 pr-5 pl-[52px] text-lg font-bold",
+    variants[variant],
+    className,
+  ]}
+>
+  <span class="absolute top-1/2 left-5 size-[22px] -translate-y-1/2" aria-hidden="true">
+    <svg viewBox="0 0 24 24" class="size-full fill-current" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M4.5 6.25C4.5 5.007 5.507 4 6.75 4h10.5C18.493 4 19.5 5.007 19.5 6.25v8.5c0 1.243-1.007 2.25-2.25 2.25H13.5v1.25h2.25a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1 0-1.5H10.5V17H6.75A2.25 2.25 0 0 1 4.5 14.75v-8.5Zm1.5 0v8.5c0 .414.336.75.75.75h10.5a.75.75 0 0 0 .75-.75v-8.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75Z"
+      ></path>
+    </svg>
+  </span>
+  Download for Mac
+  <span class="sr-only">. Requires {site.macos}.</span>
+</a>

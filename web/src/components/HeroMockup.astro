@@ -1,0 +1,106 @@
+---
+const apps = [
+  { name: "Mail", fill: "#0A84FF" },
+  { name: "Notes", fill: "#FF9F0A" },
+  { name: "Safari", fill: "#32D74B" },
+  { name: "Music", fill: "#FF375F" },
+  { name: "spacer" as const },
+  { name: "Xcode", fill: "#64D2FF" },
+  { name: "Terminal", fill: "#8E8E93" },
+];
+---
+
+<figure class="mx-auto mt-12 w-full max-w-[56rem] px-5 sm:mt-16 sm:px-8">
+  <div
+    class="relative overflow-hidden rounded-[1.75rem] bg-stone-950 shadow-[0_2px_16px_0_rgba(12,10,9,0.25)] shadow-xl ring ring-orange-950/10 sm:rounded-[1.875rem]"
+  >
+    <div
+      class="pointer-events-none absolute inset-0 bg-linear-to-b from-stone-950/20 to-stone-950"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div
+      role="img"
+      aria-label="Docksly editor on a Mac. A named Work dock with apps and a spacer."
+      class="pointer-events-none relative aspect-video select-none sm:aspect-2/1"
+    >
+      <div class="absolute inset-x-8 top-7 flex items-center gap-2 sm:inset-x-10 sm:top-9">
+        <span class="size-2.5 rounded-full bg-[#ff5f57] sm:size-3"></span>
+        <span class="size-2.5 rounded-full bg-[#febc2e] sm:size-3"></span>
+        <span class="size-2.5 rounded-full bg-[#28c840] sm:size-3"></span>
+        <span class="ml-3 text-[11px] font-semibold tracking-wide text-orange-75/70 sm:text-sm">
+          Work
+        </span>
+        <span class="size-2 rounded-full bg-[#0A84FF]"></span>
+      </div>
+
+      <div
+        class="absolute inset-x-5 top-1/2 flex -translate-y-1/2 items-end justify-center gap-2 sm:inset-x-12 sm:gap-3"
+      >
+        {
+          apps.map((app) =>
+            app.name === "spacer" ? (
+              <span
+                class="mb-3 h-10 w-1.5 rounded-full bg-orange-75/20 sm:mb-4 sm:h-14 sm:w-2"
+                aria-hidden="true"
+              />
+            ) : (
+              <span
+                class="flex size-11 items-center justify-center rounded-[0.875rem] text-[10px] font-bold text-white shadow-md sm:size-16 sm:rounded-[1.25rem] sm:text-xs"
+                style={`background-color:${app.fill}`}
+              >
+                {app.name.slice(0, 1)}
+              </span>
+            ),
+          )
+        }
+      </div>
+
+      <p
+        class="absolute inset-x-0 bottom-6 text-center text-[11px] font-medium text-orange-75/50 sm:bottom-8 sm:text-sm"
+      >
+        Current · 6 items
+      </p>
+    </div>
+
+  </div>
+
+  <figcaption
+    id="hero-caption"
+    class="mt-4 text-center text-sm font-medium text-orange-950/70 dark:text-orange-75/70"
+  >
+    Save a dock. Switch it back.
+  </figcaption>
+</figure>
+
+<script>
+  const frame = document.querySelector("figure .relative");
+  const caption = document.getElementById("hero-caption");
+  const existing = document.getElementById("hero-video");
+  existing?.remove();
+
+  async function mountDemo() {
+    try {
+      const response = await fetch("/hero.mp4", { method: "HEAD" });
+      if (!response.ok || !(frame instanceof HTMLElement)) return;
+      const video = document.createElement("video");
+      video.id = "hero-video";
+      video.className = "absolute inset-0 z-10 size-full object-cover";
+      video.playsInline = true;
+      video.muted = true;
+      video.loop = true;
+      video.setAttribute("aria-label", "Docksly demo");
+      video.src = "/hero.mp4";
+      video.addEventListener("loadeddata", () => {
+        if (caption) caption.textContent = "Docksly on a Mac";
+        void video.play();
+      });
+      frame.append(video);
+    } catch {
+      // Keep the dock mockup.
+    }
+  }
+
+  void mountDemo();
+</script>

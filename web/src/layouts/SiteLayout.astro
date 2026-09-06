@@ -1,0 +1,84 @@
+---
+import { ClientRouter } from "astro:transitions";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import type { NavId } from "../content/site";
+import { site } from "../content/site";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  surface?: "light" | "dark";
+  current?: NavId;
+  compactFooter?: boolean;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description,
+  surface = "light",
+  current = "home",
+  compactFooter = false,
+  ogImage = "/og.png",
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const image = new URL(ogImage, site.url).href;
+---
+
+<!doctype html>
+<html lang="en" class:list={{ dark: surface === "dark" }}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="title" content={site.name} />
+    <meta
+      name="keywords"
+      content="macos, dock, dock layouts, mac app, docksly, named docks, menu bar"
+    />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+    <link rel="preload" as="image" href="/icon.png" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <ClientRouter />
+    <script is:inline>
+      try {
+        if (sessionStorage.getItem("hasSeenIntro")) {
+          document.documentElement.classList.add("seen-intro");
+        } else {
+          sessionStorage.setItem("hasSeenIntro", "true");
+        }
+      } catch {
+        document.documentElement.classList.add("seen-intro");
+      }
+    </script>
+  </head>
+  <body class="flex min-h-svh flex-col">
+    <a
+      href="#content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-stone-800 focus:px-3 focus:py-2 focus:text-orange-75"
+    >
+      Skip to content
+    </a>
+    <Header current={current} />
+    <main id="content" class="flex-1" transition:animate="fade">
+      <slot />
+    </main>
+    <Footer compact={compactFooter} />
+  </body>
+</html>

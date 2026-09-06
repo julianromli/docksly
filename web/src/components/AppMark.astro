@@ -1,0 +1,32 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = "size-[26px]" } = Astro.props;
+---
+
+<svg
+  class={className}
+  viewBox="0 0 32 32"
+  role="img"
+  aria-label="Docksly"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <linearGradient id="docksly-plate" x1="16" y1="2" x2="16" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3a4152"></stop>
+      <stop offset="1" stop-color="#161820"></stop>
+    </linearGradient>
+    <linearGradient id="docksly-tray" x1="16" y1="19" x2="16" y2="27" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3a4150"></stop>
+      <stop offset="1" stop-color="#262a36"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="2.4" y="2.4" width="27.2" height="27.2" rx="7" fill="url(#docksly-plate)"></rect>
+  <rect x="5.2" y="19.6" width="21.6" height="7.2" rx="3" fill="url(#docksly-tray)"></rect>
+  <circle cx="10.4" cy="23.2" r="1.85" fill="#3884ff"></circle>
+  <circle cx="14.6" cy="23.2" r="1.85" fill="#34d399"></circle>
+  <rect x="17.7" y="21.6" width="1.1" height="3.2" rx="0.4" fill="#c8cedc" opacity="0.55"></rect>
+  <circle cx="21.6" cy="23.2" r="1.85" fill="#fb923c"></circle>
+</svg>

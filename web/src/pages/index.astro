@@ -1,0 +1,13 @@
+---
+import FeatureGrid from "../components/FeatureGrid.astro";
+import Hero from "../components/Hero.astro";
+import HeroMockup from "../components/HeroMockup.astro";
+import { site } from "../content/site";
+import SiteLayout from "../layouts/SiteLayout.astro";
+---
+
+<SiteLayout title={`${site.name} — Named docks for your Mac`} description={site.description} current="home">
+  <Hero />
+  <HeroMockup />
+  <FeatureGrid />
+</SiteLayout>

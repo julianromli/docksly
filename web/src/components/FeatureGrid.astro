@@ -1,0 +1,21 @@
+---
+import { features } from "../content/features";
+import FeatureIcon from "./FeatureIcon.astro";
+---
+
+<section class="mx-auto mt-16 max-w-[64rem] px-8 sm:mt-20 lg:mt-23" aria-label="Features">
+  <ul class="grid grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-2 sm:gap-y-14 lg:grid-cols-4">
+    {
+      features.map((feature) => (
+        <li class="flex flex-col items-center text-center">
+          <FeatureIcon name={feature.icon} />
+          <h2 class="mt-3 text-lg leading-tight font-bold sm:mt-4 sm:text-2xl">
+            {feature.title}
+            <br />
+            {feature.subtitle}
+          </h2>
+        </li>
+      ))
+    }
+  </ul>
+</section>

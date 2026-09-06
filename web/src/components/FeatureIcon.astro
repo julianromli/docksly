@@ -1,0 +1,70 @@
+---
+import type { FeatureIcon } from "../content/features";
+
+interface Props {
+  name: FeatureIcon;
+}
+
+const { name } = Astro.props;
+---
+
+{
+  name === "docks" && (
+    <svg class="size-8 fill-current sm:size-10" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="8" cy="16" r="4" />
+      <circle cx="16" cy="16" r="4" />
+      <circle cx="24" cy="16" r="4" />
+    </svg>
+  )
+}
+{
+  name === "apply" && (
+    <svg class="size-8 fill-current sm:size-10" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 3a13 13 0 1 1 0 26 13 13 0 0 1 0-26Zm0 2a11 11 0 1 0 0 22 11 11 0 0 0 0-22Zm5.2 7.1a1 1 0 0 1 0 1.4l-6.2 6.2a1 1 0 0 1-1.4 0l-2.8-2.8a1 1 0 1 1 1.4-1.4l2.1 2.1 5.5-5.5a1 1 0 0 1 1.4 0Z" />
+    </svg>
+  )
+}
+{
+  name === "menubar" && (
+    <svg class="size-8 fill-current sm:size-10" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M6 8h20a2 2 0 0 1 2 2v3H4v-3a2 2 0 0 1 2-2Zm-2 7h24v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9Zm4-5.2a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Zm3.5 0a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Zm3.5 0a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z" />
+    </svg>
+  )
+}
+{
+  name === "spacers" && (
+    <svg class="size-8 fill-current sm:size-10" viewBox="0 0 32 32" aria-hidden="true">
+      <rect x="4" y="12" width="8" height="8" rx="2" />
+      <rect x="20" y="12" width="8" height="8" rx="2" />
+      <rect x="15" y="10" width="2" height="12" rx="1" />
+    </svg>
+  )
+}
+{
+  name === "reorder" && (
+    <svg class="size-8 fill-current sm:size-10" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M10 7.5 6 11.5h3V20h2v-8.5h3L10 7.5Zm12 17 4-4h-3V12h-2v8.5h-3l4 4Z" />
+    </svg>
+  )
+}
+{
+  name === "export" && (
+    <svg class="size-8 fill-current sm:size-10" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 5v14l5-5 1.4 1.4L16 22.8l-6.4-6.4L11 15l5 5V5h0ZM7 24h18v2H7v-2Z" />
+    </svg>
+  )
+}
+{
+  name === "trial" && (
+    <svg class="size-8 fill-current sm:size-10" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 5a11 11 0 1 1 0 22 11 11 0 0 1 0-22Zm0 2a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm1 4v5.2l3.4 2a1 1 0 1 1-1 1.8l-4.1-2.4A1 1 0 0 1 14.5 16V11a1 1 0 1 1 2 0Z" />
+    </svg>
+  )
+}
+{
+  name === "native" && (
+    <svg class="size-8 fill-current sm:size-10" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M17.2 4 8 18h7l-1.2 10L24 14h-7L17.2 4Z" />
+    </svg>
+  )
+}

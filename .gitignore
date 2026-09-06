@@ -35,5 +35,10 @@ license-api/.env.*
 license-api/node_modules/
 license-api/.wrangler/
 
+# Marketing site
+web/node_modules/
+web/dist/
+web/.astro/
+
 # Local disk images (do not commit unsigned tester builds)
 dist/
