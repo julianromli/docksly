@@ -1,8 +1,8 @@
 export const site = {
   name: "Docksly",
   version: "1.0",
-  headline: "Organize Dock",
-  headlineLine2: "for your",
+  headline: "Dock Organizer",
+  headlineLine2: "for Your",
   highlight: "Mac",
   description:
     "Save named Dock layouts and apply them in one click. Finder and Trash stay. Open apps stay open.",
