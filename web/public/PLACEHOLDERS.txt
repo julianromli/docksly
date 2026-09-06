@@ -1,6 +1,5 @@
-Drop these files here when you have them:
+Drop this file here when you have it:
 
 - Docksly.dmg   public download for /download
-- hero.mp4      demo video for the home mockup
 
-The site works without them. The hero keeps the dock mockup. The download page says the file is not published yet.
+The download page says the file is not published yet until you add it.

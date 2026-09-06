@@ -44,6 +44,11 @@ const image = new URL(ogImage, site.url).href;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icon.png" />
     <link rel="preload" as="image" href="/icon.png" />
+    {
+      (current === "home" || current === "download") && (
+        <link rel="preload" as="image" href="/hero.jpg" />
+      )
+    }
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -71,7 +76,7 @@ const image = new URL(ogImage, site.url).href;
   <body class="flex min-h-svh flex-col">
     <a
       href="#content"
-      class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-stone-800 focus:px-3 focus:py-2 focus:text-orange-75"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-ink focus:px-3 focus:py-2 focus:text-paper"
     >
       Skip to content
     </a>

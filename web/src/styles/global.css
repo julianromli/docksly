@@ -4,24 +4,15 @@
 
 @theme {
   --font-sans: system-ui, -apple-system, sans-serif;
-  --color-orange-25: #fffaf4;
-  --color-orange-50: oklch(0.98 0.016 73.684);
-  --color-orange-75: #fff0df;
-  --color-orange-100: oklch(0.954 0.038 75.164);
-  --color-orange-400: oklch(0.75 0.183 55.934);
-  --color-orange-500: oklch(0.705 0.213 47.604);
-  --color-orange-800: oklch(0.47 0.157 37.304);
-  --color-orange-900: oklch(0.408 0.123 38.172);
-  --color-orange-950: oklch(0.266 0.079 36.259);
-  --color-stone-300: oklch(0.869 0.005 56.366);
-  --color-stone-500: oklch(0.553 0.013 58.071);
-  --color-stone-600: oklch(0.444 0.011 73.639);
-  --color-stone-800: oklch(0.268 0.007 34.298);
-  --color-stone-900: oklch(0.216 0.006 56.043);
-  --color-stone-950: oklch(0.147 0.004 49.25);
-  --color-rose-300: oklch(0.81 0.117 11.638);
-  --color-purple-300: oklch(0.827 0.119 306.383);
-  --color-teal-400: oklch(0.777 0.152 181.912);
+  --color-paper: oklch(1 0 0);
+  --color-canvas: oklch(0.971 0.003 286.35);
+  --color-wash: oklch(0.932 0.007 286.269);
+  --color-ink: oklch(0.232 0.004 286.099);
+  --color-ink-muted: oklch(0.545 0 0);
+  --color-midnight: oklch(0.33 0.024 258.363);
+  --color-accent: oklch(0.563 0.193 256.156);
+  --color-accent-link: oklch(0.522 0.177 255.83);
+  --color-mark: oklch(0.877 0.027 17.675);
   --radius-5xl: 2.5rem;
   --container-screen-3xl: 108rem;
   --aspect-2/1: 2;
@@ -48,18 +39,16 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scrollbar-width: thin;
-    scrollbar-color: color-mix(in oklab, var(--color-orange-950) 10%, transparent)
-      transparent;
+    scrollbar-color: color-mix(in oklab, var(--color-ink) 10%, transparent) transparent;
   }
 
   html.dark {
-    scrollbar-color: color-mix(in oklab, var(--color-orange-75) 12%, transparent)
-      transparent;
+    scrollbar-color: color-mix(in oklab, var(--color-paper) 12%, transparent) transparent;
   }
 
   body {
-    background-color: var(--color-orange-75);
-    color: var(--color-stone-800);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     min-height: 100svh;
     overflow-x: hidden;
@@ -69,20 +58,20 @@
   }
 
   html.dark body {
-    background-color: var(--color-stone-900);
-    color: var(--color-orange-75);
+    background-color: var(--color-midnight);
+    color: var(--color-paper);
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-orange-950) 10%, transparent);
+    background-color: color-mix(in oklab, var(--color-ink) 10%, transparent);
   }
 
   html.dark ::selection {
-    background-color: color-mix(in oklab, var(--color-orange-75) 10%, transparent);
+    background-color: color-mix(in oklab, var(--color-paper) 10%, transparent);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-teal-400);
+    outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
 
@@ -120,11 +109,11 @@ html.seen-intro .intro-nav {
   display: block;
   font-size: clamp(4.5rem, 28vw, 20rem);
   line-height: 1;
-  color: color-mix(in oklab, var(--color-orange-950) 4%, transparent);
+  color: color-mix(in oklab, var(--color-ink) 4%, transparent);
 }
 
 html.dark .footer-mark::after {
-  color: color-mix(in oklab, var(--color-orange-75) 4%, transparent);
+  color: color-mix(in oklab, var(--color-paper) 4%, transparent);
 }
 
 @media (prefers-reduced-motion: no-preference) {

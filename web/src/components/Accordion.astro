@@ -7,26 +7,26 @@ interface Props {
 const { title, meta } = Astro.props;
 ---
 
-<details class="group border-b border-orange-75/10 last:border-b-0">
+<details class="group border-b border-paper/10 last:border-b-0">
   <summary
-    class="flex cursor-pointer list-none items-baseline gap-3 py-5 text-lg font-medium text-orange-75/90 marker:content-none [&::-webkit-details-marker]:hidden"
+    class="flex cursor-pointer list-none items-baseline gap-3 py-5 text-lg font-medium text-paper/90 marker:content-none [&::-webkit-details-marker]:hidden"
   >
     <span
-      class="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center text-xl leading-none font-medium text-orange-75/60 transition-transform duration-200 group-open:rotate-45"
+      class="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center text-xl leading-none font-medium text-paper/60 transition-transform duration-200 group-open:rotate-45"
       aria-hidden="true">+</span
     >
     <span class="flex min-w-0 flex-1 items-baseline justify-between gap-4">
       <span>{title}</span>
       {
         meta && (
-          <span class="shrink-0 text-sm font-normal text-orange-75/50 tabular-nums">{meta}</span>
+          <span class="shrink-0 text-sm font-normal text-paper/60 tabular-nums">{meta}</span>
         )
       }
     </span>
   </summary>
   <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-200 ease-out group-open:grid-rows-[1fr]">
     <div class="min-h-0 overflow-hidden">
-      <div class="pt-0 pb-6 pl-8 text-base leading-normal text-orange-75/70">
+      <div class="pt-0 pb-6 pl-8 text-base leading-normal text-paper/70">
         <slot />
       </div>
     </div>

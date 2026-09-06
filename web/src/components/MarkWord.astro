@@ -8,13 +8,13 @@ const { class: className } = Astro.props;
 
 <mark
   class:list={[
-    "relative inline-block bg-transparent px-1 font-extrabold text-stone-800 dark:text-orange-75",
+    "relative inline-block bg-transparent px-1 font-extrabold text-ink dark:text-paper",
     className,
   ]}
 >
   <slot />
   <span
     aria-hidden="true"
-    class="pointer-events-none absolute inset-x-0 -bottom-1 -z-10 h-[0.5em] rounded-xs bg-rose-300/90 md:-bottom-2"
+    class="pointer-events-none absolute inset-x-0 -bottom-1 -z-10 h-[0.5em] rounded-xs bg-mark md:-bottom-2"
   ></span>
 </mark>

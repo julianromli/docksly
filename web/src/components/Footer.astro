@@ -14,11 +14,11 @@ const { compact = false } = Astro.props;
       <div class="flex justify-center">
         <a
           href="/download"
-          class="btn-press relative inline-flex items-center justify-center rounded-2xl bg-stone-800 py-4 pr-5 pl-[52px] text-lg font-bold text-orange-75 shadow-md shadow-orange-950/20"
+          class="btn-press relative inline-flex items-center justify-center rounded-2xl bg-accent py-4 pr-5 pl-[52px] text-lg font-bold text-paper shadow-md shadow-ink/20"
         >
           <span class="absolute top-1/2 left-5 size-[22px] -translate-y-1/2" aria-hidden="true">
             <svg viewBox="0 0 24 24" class="size-full fill-current">
-              <path d="M4.5 6.25C4.5 5.007 5.507 4 6.75 4h10.5C18.493 4 19.5 5.007 19.5 6.25v8.5c0 1.243-1.007 2.25-2.25 2.25H13.5v1.25h2.25a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1 0-1.5H10.5V17H6.75A2.25 2.25 0 0 1 4.5 14.75v-8.5Zm1.5 0v8.5c0 .414.336.75.75.75h10.5a.75.75 0 0 0 .75-.75v-8.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75Z" />
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
             </svg>
           </span>
           Download for Mac
@@ -30,7 +30,7 @@ const { compact = false } = Astro.props;
   <div class="mt-10 flex items-center justify-center gap-3 sm:mt-12">
     <a
       href={site.twitter}
-      class="btn-press inline-flex size-11 items-center justify-center rounded-xl bg-orange-950/5 text-orange-950/50 dark:bg-orange-75/5 dark:text-orange-75/50"
+      class="btn-press inline-flex size-11 items-center justify-center rounded-xl bg-ink/5 text-ink-muted dark:bg-paper/5 dark:text-paper/50"
       aria-label="X (Twitter)"
     >
       <svg class="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -41,7 +41,7 @@ const { compact = false } = Astro.props;
     </a>
     <a
       href={`mailto:${site.email}`}
-      class="btn-press inline-flex size-11 items-center justify-center rounded-xl bg-orange-950/5 text-orange-950/50 dark:bg-orange-75/5 dark:text-orange-75/50"
+      class="btn-press inline-flex size-11 items-center justify-center rounded-xl bg-ink/5 text-ink-muted dark:bg-paper/5 dark:text-paper/50"
       aria-label={`Email ${site.email}`}
     >
       <svg class="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
