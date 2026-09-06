@@ -28,7 +28,7 @@ Useful options:
 
 Login at login is reliable only after `--install` (or after you drag Docksly into `/Applications`).
 
-Private testers can use an unsigned disk image while you wait for Apple Developer approval:
+Private testers can use an unsigned disk image:
 
 ```bash
 ./scripts/build-tester-dmg.sh
@@ -36,7 +36,15 @@ Private testers can use an unsigned disk image while you wait for Apple Develope
 
 The file is `dist/Docksly-1.0.0-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
 
-The tester disk image uses a Docksly-styled window (dark shelf, drag arrow). That build needs `dmgbuild`:
+A public download needs a Developer ID Application certificate and the `docksly-notarize` notarytool profile:
+
+```bash
+./scripts/build-release-dmg.sh
+```
+
+The file is `dist/Docksly-1.0.0.dmg`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
+
+Both disk images use a Docksly-styled window (dark shelf, drag arrow). That build needs `dmgbuild`:
 
 ```bash
 python3 -m pip install --user dmgbuild
