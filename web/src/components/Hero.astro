@@ -1,7 +1,6 @@
 ---
 import { site } from "../content/site";
 import DownloadButton from "./DownloadButton.astro";
-import PurchaseButton from "./PurchaseButton.astro";
 ---
 
 <section class="mx-auto max-w-[52rem] px-5 pt-10 text-center sm:pt-14">
@@ -24,8 +23,7 @@ import PurchaseButton from "./PurchaseButton.astro";
     </span>
   </h1>
 
-  <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:mt-10 sm:flex-row sm:gap-4">
+  <div class="mt-8 flex justify-center sm:mt-10">
     <DownloadButton variant="solid" />
-    <PurchaseButton />
   </div>
 </section>
