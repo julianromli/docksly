@@ -11,8 +11,8 @@ Build Docksly from this repository on a Mac. You do not need a paid Apple Develo
 You need a Mac with macOS 13 or later and Xcode 14.1 or later. Open Xcode once after you install it.
 
 ```bash
-git clone <this-repository>
-cd dockfolio
+git clone https://github.com/julianromli/docksly.git
+cd docksly
 chmod +x scripts/build-from-source.sh
 ./scripts/build-from-source.sh
 ```
@@ -120,7 +120,7 @@ It keeps the last 10 backups.
 - Missing apps show a warning badge on the tile. Apply still writes the last known path.
 - Gatekeeper may block an unsigned local build. Use your team certificate, or right-click Open the first time.
 
-## Manual test checklist (Faiz, on your Mac)
+## Manual test checklist
 
 Build and run from Xcode. Then walk this list.
 
@@ -200,14 +200,7 @@ Docksly does not keep a Mayar API key in the Mac app. A Cloudflare Worker in `li
 
 The Worker calls `POST /software/v2/license/verify`. It grants access only when Mayar returns `isLicenseActive == true` and `licenseCode.status == ACTIVE`.
 
-Sandbox (current):
-
-- Product: Docksly Lifetime Key — Rp49.000
-- Product ID: `bed86a57-d037-4ed6-b552-ec2cbcd7776c`
-- Checkout: https://faizintifada.myr.wtf/pl/docksly-lifetime-key
-- Coupon `F41Z` — 99% off, reusable
-- License API: https://docksly-license-api.faizintifada.workers.dev
-- Marketing site: https://docksly.faizintifada.com
+Production endpoints live in `Docksly/Info.plist` (`DockslyLicenseAPIURL`, `DockslyCheckoutURL`). Product ID and API key stay in Worker secrets.
 
 Local files:
 
@@ -235,4 +228,6 @@ license-api/             Cloudflare Worker for Mayar software license verify
 
 ## License
 
-Use and change this source for personal or internal work. Do not present it as Dockset.
+Docksly is open source under the [MIT License](LICENSE).
+
+The name "Docksly" and the app icon are not covered by that grant. This project is independent and is not affiliated with Dockset. Do not present it as Dockset.
