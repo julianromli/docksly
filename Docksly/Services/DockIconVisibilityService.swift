@@ -12,10 +12,30 @@ enum DockIconVisibilityService {
 
     static func setVisible(_ visible: Bool) {
         UserDefaults.standard.set(visible, forKey: key)
-        apply()
+        if visible {
+            apply()
+            NSApp.activate(ignoringOtherApps: true)
+        } else {
+            // Switching to accessory hides the Settings window. Bring it back.
+            NSApp.setActivationPolicy(.accessory)
+            NSApp.activate(ignoringOtherApps: true)
+            DispatchQueue.main.async {
+                NSApp.activate(ignoringOtherApps: true)
+                NSApp.windows.forEach { $0.makeKeyAndOrderFront(nil) }
+                showSettings()
+            }
+        }
     }
 
     static func apply() {
         NSApp.setActivationPolicy(isVisible ? .regular : .accessory)
+    }
+
+    private static func showSettings() {
+        if #available(macOS 14.0, *) {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        } else {
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
     }
 }
