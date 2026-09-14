@@ -86,7 +86,6 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .frame(width: 420, height: 640)
-        .bindsSettingsOpener()
         .onAppear {
             NSApp.activate(ignoringOtherApps: true)
             refresh()

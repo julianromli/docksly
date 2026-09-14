@@ -98,30 +98,20 @@ enum AppWindowPresentation {
     }
 }
 
-/// Opens the SwiftUI Settings scene.
-/// macOS 14+: `OpenSettingsAction` bound from a live view. Do not send `showSettingsWindow:`.
-/// macOS 13: `showPreferencesWindow:`.
-func openSettingsWindow() {
-    AppWindowPresentation.activate()
-    if #available(macOS 14.0, *) {
-        SettingsOpener.open()
-    } else {
-        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-    }
-    DispatchQueue.main.async {
-        AppWindowPresentation.activate()
-        AppWindowPresentation.orderFrontSettings()
-    }
-}
-
-/// Menu bar Settings item. `SettingsLink` is required in a menu-style `MenuBarExtra` on macOS 14+.
+/// Menu bar Settings item. `SettingsLink` opens Settings on macOS 14+.
+/// Do not send `showSettingsWindow:`.
 struct MenuSettingsButton: View {
     var body: some View {
         if #available(macOS 14.0, *) {
             MenuSettingsLink()
         } else {
             Button("Settings…") {
-                openSettingsWindow()
+                AppWindowPresentation.activate()
+                NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+                DispatchQueue.main.async {
+                    AppWindowPresentation.activate()
+                    AppWindowPresentation.orderFrontSettings()
+                }
             }
             .keyboardShortcut(",", modifiers: .command)
         }
@@ -142,51 +132,5 @@ private struct MenuSettingsLink: View {
             }
         })
         .keyboardShortcut(",", modifiers: .command)
-    }
-}
-
-enum SettingsOpener {
-    private static var boxedAction: Any?
-
-    @available(macOS 14.0, *)
-    static func bind(_ action: OpenSettingsAction) {
-        boxedAction = action
-    }
-
-    @available(macOS 14.0, *)
-    static func open() {
-        AppWindowPresentation.activate()
-        if let action = boxedAction as? OpenSettingsAction {
-            action()
-        }
-        AppWindowPresentation.orderFrontSettings()
-    }
-}
-
-struct SettingsOpenerBinder: ViewModifier {
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if #available(macOS 14.0, *) {
-            content.modifier(SettingsOpenerBinder14())
-        } else {
-            content
-        }
-    }
-}
-
-@available(macOS 14.0, *)
-private struct SettingsOpenerBinder14: ViewModifier {
-    @Environment(\.openSettings) private var openSettings
-
-    func body(content: Content) -> some View {
-        content.onAppear {
-            SettingsOpener.bind(openSettings)
-        }
-    }
-}
-
-extension View {
-    func bindsSettingsOpener() -> some View {
-        modifier(SettingsOpenerBinder())
     }
 }
