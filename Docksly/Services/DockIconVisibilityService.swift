@@ -13,17 +13,14 @@ enum DockIconVisibilityService {
 
     static func setVisible(_ visible: Bool) {
         UserDefaults.standard.set(visible, forKey: key)
+        apply()
         if visible {
-            apply()
-            NSApp.activate(ignoringOtherApps: true)
+            AppWindowPresentation.activate()
         } else {
-            // Switching to accessory hides the Settings window. Bring it back.
-            NSApp.setActivationPolicy(.accessory)
-            NSApp.activate(ignoringOtherApps: true)
+            // Menu-bar-only: do not reopen Settings. Leave a clean accessory state.
+            AppWindowPresentation.hideUserWindows()
             DispatchQueue.main.async {
-                NSApp.activate(ignoringOtherApps: true)
-                NSApp.windows.forEach { $0.makeKeyAndOrderFront(nil) }
-                openSettingsWindow()
+                AppWindowPresentation.hideUserWindows()
             }
         }
     }
@@ -33,15 +30,94 @@ enum DockIconVisibilityService {
     }
 }
 
+enum AppWindowPresentation {
+    static func activate() {
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    /// Hide the editor and Settings. Keep menu-bar chrome.
+    static func hideUserWindows() {
+        for window in NSApp.windows where isUserWindow(window) {
+            window.orderOut(nil)
+        }
+    }
+
+    static func presentEditor(using openWindow: OpenWindowAction) {
+        activate()
+        openWindow(id: "main")
+        DispatchQueue.main.async {
+            activate()
+            orderFrontEditor()
+            let visible = NSApp.windows.contains {
+                $0.identifier?.rawValue == "main" && $0.isVisible
+            }
+            if !visible {
+                openWindow(id: "main")
+                DispatchQueue.main.async {
+                    activate()
+                    orderFrontEditor()
+                }
+            }
+        }
+    }
+
+    static func orderFrontEditor() {
+        for window in NSApp.windows where window.identifier?.rawValue == "main" {
+            window.collectionBehavior.insert(.moveToActiveSpace)
+            window.makeKeyAndOrderFront(nil)
+        }
+    }
+
+    static func orderFrontSettings() {
+        var didFront = false
+        for window in NSApp.windows where isSettingsWindow(window) {
+            window.collectionBehavior.insert(.moveToActiveSpace)
+            window.makeKeyAndOrderFront(nil)
+            didFront = true
+        }
+        if didFront { return }
+        for window in NSApp.windows where isUserWindow(window) && window.identifier?.rawValue != "main" {
+            window.collectionBehavior.insert(.moveToActiveSpace)
+            window.makeKeyAndOrderFront(nil)
+        }
+    }
+
+    static func isUserWindow(_ window: NSWindow) -> Bool {
+        if isMenuBarChrome(window) { return false }
+        return window.canBecomeKey || window.canBecomeMain
+    }
+
+    static func isMenuBarChrome(_ window: NSWindow) -> Bool {
+        let name = window.className
+        if name.contains("StatusBar") || name.contains("NSStatus") || name.contains("MenuBarExtra") {
+            return true
+        }
+        return window.level == .statusBar
+    }
+
+    static func isSettingsWindow(_ window: NSWindow) -> Bool {
+        if isMenuBarChrome(window) { return false }
+        if window.identifier?.rawValue == "main" { return false }
+        let id = window.identifier?.rawValue ?? ""
+        if id.localizedCaseInsensitiveContains("settings") { return true }
+        return window.title.localizedCaseInsensitiveContains("settings")
+            || window.title.localizedCaseInsensitiveContains("preferences")
+    }
+}
+
 /// Opens the SwiftUI Settings scene.
 /// macOS 14+: `OpenSettingsAction` bound from a live view. Do not send `showSettingsWindow:`.
 /// macOS 13: `showPreferencesWindow:`.
 func openSettingsWindow() {
-    SettingsOpener.activateApp()
+    AppWindowPresentation.activate()
     if #available(macOS 14.0, *) {
         SettingsOpener.open()
     } else {
         NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+    }
+    DispatchQueue.main.async {
+        AppWindowPresentation.activate()
+        AppWindowPresentation.orderFrontSettings()
     }
 }
 
@@ -49,13 +125,7 @@ func openSettingsWindow() {
 struct MenuSettingsButton: View {
     var body: some View {
         if #available(macOS 14.0, *) {
-            SettingsLink {
-                Text("Settings…")
-            }
-            .simultaneousGesture(TapGesture().onEnded {
-                SettingsOpener.activateApp()
-            })
-            .keyboardShortcut(",", modifiers: .command)
+            MenuSettingsLink()
         } else {
             Button("Settings…") {
                 openSettingsWindow()
@@ -65,12 +135,35 @@ struct MenuSettingsButton: View {
     }
 }
 
+@available(macOS 14.0, *)
+private struct MenuSettingsLink: View {
+    @Environment(\.openSettings) private var openSettings
+
+    var body: some View {
+        SettingsLink {
+            Text("Settings…")
+        }
+        .simultaneousGesture(TapGesture().onEnded {
+            present()
+        })
+        .keyboardShortcut(",", modifiers: .command)
+        .onAppear {
+            SettingsOpener.bind(openSettings)
+        }
+    }
+
+    private func present() {
+        AppWindowPresentation.activate()
+        openSettings()
+        DispatchQueue.main.async {
+            AppWindowPresentation.activate()
+            AppWindowPresentation.orderFrontSettings()
+        }
+    }
+}
+
 enum SettingsOpener {
     private static var boxedAction: Any?
-
-    static func activateApp() {
-        NSApp.activate(ignoringOtherApps: true)
-    }
 
     @available(macOS 14.0, *)
     static func bind(_ action: OpenSettingsAction) {
@@ -79,21 +172,11 @@ enum SettingsOpener {
 
     @available(macOS 14.0, *)
     static func open() {
-        activateApp()
+        AppWindowPresentation.activate()
         if let action = boxedAction as? OpenSettingsAction {
             action()
         }
-        for window in NSApp.windows where isSettingsWindow(window) {
-            window.makeKeyAndOrderFront(nil)
-            return
-        }
-    }
-
-    private static func isSettingsWindow(_ window: NSWindow) -> Bool {
-        let id = window.identifier?.rawValue ?? ""
-        if id.localizedCaseInsensitiveContains("settings") { return true }
-        return window.title.localizedCaseInsensitiveContains("settings")
-            || window.title.localizedCaseInsensitiveContains("preferences")
+        AppWindowPresentation.orderFrontSettings()
     }
 }
 

@@ -29,6 +29,7 @@ struct DockslyApp: App {
             MenuBarContentView()
                 .environmentObject(store)
                 .environmentObject(license)
+                .bindsSettingsOpener()
         } label: {
             MenuBarLabel()
         }
