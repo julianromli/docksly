@@ -33,11 +33,7 @@ struct MenuBarContentView: View {
             openWindow(id: "main")
         }
 
-        Button("Settings…") {
-            NSApp.activate(ignoringOtherApps: true)
-            openSettingsWindow()
-        }
-        .keyboardShortcut(",", modifiers: .command)
+        MenuSettingsButton()
 
         Divider()
 
