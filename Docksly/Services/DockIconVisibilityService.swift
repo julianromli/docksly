@@ -37,7 +37,7 @@ enum DockIconVisibilityService {
 /// macOS 14+: `OpenSettingsAction` bound from a live view. Do not send `showSettingsWindow:`.
 /// macOS 13: `showPreferencesWindow:`.
 func openSettingsWindow() {
-    NSApp.activate(ignoringOtherApps: true)
+    SettingsOpener.activateApp()
     if #available(macOS 14.0, *) {
         SettingsOpener.open()
     } else {
@@ -52,6 +52,9 @@ struct MenuSettingsButton: View {
             SettingsLink {
                 Text("Settings…")
             }
+            .simultaneousGesture(TapGesture().onEnded {
+                SettingsOpener.activateApp()
+            })
             .keyboardShortcut(",", modifiers: .command)
         } else {
             Button("Settings…") {
@@ -65,6 +68,10 @@ struct MenuSettingsButton: View {
 enum SettingsOpener {
     private static var boxedAction: Any?
 
+    static func activateApp() {
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
     @available(macOS 14.0, *)
     static func bind(_ action: OpenSettingsAction) {
         boxedAction = action
@@ -72,6 +79,7 @@ enum SettingsOpener {
 
     @available(macOS 14.0, *)
     static func open() {
+        activateApp()
         if let action = boxedAction as? OpenSettingsAction {
             action()
         }
