@@ -26,9 +26,9 @@ struct SettingsView: View {
                 Toggle("Open Docksly at login", isOn: launchBinding)
                     .help("Uses the macOS login-item service. Put the app in Applications for a reliable result.")
                 Toggle("Show Docksly in Dock", isOn: showInDockBinding)
-                    .help("Hide the Docksly icon in the Dock. The app stays in the menu bar.")
+                    .help("When off, Docksly stays in the menu bar only. There is no Dock icon for the running app.")
                 if !showInDock {
-                    Text("When off, Docksly stays in the menu bar only. Use Manage Docks… or Settings… to open it.")
+                    Text("When off, Docksly stays in the menu bar only. Close the window at any time. The app stays running. Use Manage Docks… or Settings… in the menu bar to open it again. A Docksly tile in a dock layout is separate from this toggle.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -85,8 +85,7 @@ struct SettingsView: View {
             #endif
         }
         .formStyle(.grouped)
-        .frame(width: 420, height: 580)
-        .bindsSettingsOpener()
+        .frame(width: 420, height: 640)
         .onAppear {
             NSApp.activate(ignoringOtherApps: true)
             refresh()

@@ -11,7 +11,6 @@ struct DockslyApp: App {
             EditorWindowView()
                 .environmentObject(store)
                 .environmentObject(license)
-                .bindsSettingsOpener()
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)

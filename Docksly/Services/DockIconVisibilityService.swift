@@ -13,17 +13,14 @@ enum DockIconVisibilityService {
 
     static func setVisible(_ visible: Bool) {
         UserDefaults.standard.set(visible, forKey: key)
+        apply()
         if visible {
-            apply()
-            NSApp.activate(ignoringOtherApps: true)
+            AppWindowPresentation.activate()
         } else {
-            // Switching to accessory hides the Settings window. Bring it back.
-            NSApp.setActivationPolicy(.accessory)
-            NSApp.activate(ignoringOtherApps: true)
+            // Menu-bar-only: do not reopen Settings. Leave a clean accessory state.
+            AppWindowPresentation.hideUserWindows()
             DispatchQueue.main.async {
-                NSApp.activate(ignoringOtherApps: true)
-                NSApp.windows.forEach { $0.makeKeyAndOrderFront(nil) }
-                openSettingsWindow()
+                AppWindowPresentation.hideUserWindows()
             }
         }
     }
@@ -33,63 +30,67 @@ enum DockIconVisibilityService {
     }
 }
 
-/// Opens the SwiftUI Settings scene.
-/// macOS 14+: `OpenSettingsAction` bound from a live view. Do not send `showSettingsWindow:`.
-/// macOS 13: `showPreferencesWindow:`.
-func openSettingsWindow() {
-    SettingsOpener.activateApp()
-    if #available(macOS 14.0, *) {
-        SettingsOpener.open()
-    } else {
-        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-    }
-}
-
-/// Menu bar Settings item. `SettingsLink` is required in a menu-style `MenuBarExtra` on macOS 14+.
-struct MenuSettingsButton: View {
-    var body: some View {
-        if #available(macOS 14.0, *) {
-            SettingsLink {
-                Text("Settings…")
-            }
-            .simultaneousGesture(TapGesture().onEnded {
-                SettingsOpener.activateApp()
-            })
-            .keyboardShortcut(",", modifiers: .command)
-        } else {
-            Button("Settings…") {
-                openSettingsWindow()
-            }
-            .keyboardShortcut(",", modifiers: .command)
-        }
-    }
-}
-
-enum SettingsOpener {
-    private static var boxedAction: Any?
-
-    static func activateApp() {
+enum AppWindowPresentation {
+    static func activate() {
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    @available(macOS 14.0, *)
-    static func bind(_ action: OpenSettingsAction) {
-        boxedAction = action
+    /// Hide the editor and Settings. Keep menu-bar chrome.
+    static func hideUserWindows() {
+        for window in NSApp.windows where isUserWindow(window) {
+            window.orderOut(nil)
+        }
     }
 
-    @available(macOS 14.0, *)
-    static func open() {
-        activateApp()
-        if let action = boxedAction as? OpenSettingsAction {
-            action()
+    static func presentEditor(using openWindow: OpenWindowAction) {
+        activate()
+        openWindow(id: "main")
+        DispatchQueue.main.async {
+            activate()
+            orderFrontEditor()
+            let visible = NSApp.windows.contains {
+                $0.identifier?.rawValue == "main" && $0.isVisible
+            }
+            if !visible {
+                openWindow(id: "main")
+                DispatchQueue.main.async {
+                    activate()
+                    orderFrontEditor()
+                }
+            }
         }
-        for window in NSApp.windows where isSettingsWindow(window) {
+    }
+
+    static func orderFrontEditor() {
+        for window in NSApp.windows where window.identifier?.rawValue == "main" {
+            window.collectionBehavior.insert(.moveToActiveSpace)
             window.makeKeyAndOrderFront(nil)
-            return
         }
     }
 
-    private static func isSettingsWindow(_ window: NSWindow) -> Bool {
+    static func orderFrontSettings() {
+        for window in NSApp.windows where isSettingsWindow(window) {
+            window.collectionBehavior.insert(.moveToActiveSpace)
+            window.makeKeyAndOrderFront(nil)
+        }
+    }
+
+    static func isUserWindow(_ window: NSWindow) -> Bool {
+        if isMenuBarChrome(window) { return false }
+        return window.canBecomeKey || window.canBecomeMain
+    }
+
+    static func isMenuBarChrome(_ window: NSWindow) -> Bool {
+        let name = window.className
+        if name.contains("StatusBar") || name.contains("NSStatus") || name.contains("MenuBarExtra") {
+            return true
+        }
+        return window.level == .statusBar
+    }
+
+    static func isSettingsWindow(_ window: NSWindow) -> Bool {
+        if isMenuBarChrome(window) { return false }
+        if window.identifier?.rawValue == "main" { return false }
         let id = window.identifier?.rawValue ?? ""
         if id.localizedCaseInsensitiveContains("settings") { return true }
         return window.title.localizedCaseInsensitiveContains("settings")
@@ -97,30 +98,39 @@ enum SettingsOpener {
     }
 }
 
-struct SettingsOpenerBinder: ViewModifier {
-    @ViewBuilder
-    func body(content: Content) -> some View {
+/// Menu bar Settings item. `SettingsLink` opens Settings on macOS 14+.
+/// Do not send `showSettingsWindow:`.
+struct MenuSettingsButton: View {
+    var body: some View {
         if #available(macOS 14.0, *) {
-            content.modifier(SettingsOpenerBinder14())
+            MenuSettingsLink()
         } else {
-            content
+            Button("Settings…") {
+                AppWindowPresentation.activate()
+                NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+                DispatchQueue.main.async {
+                    AppWindowPresentation.activate()
+                    AppWindowPresentation.orderFrontSettings()
+                }
+            }
+            .keyboardShortcut(",", modifiers: .command)
         }
     }
 }
 
 @available(macOS 14.0, *)
-private struct SettingsOpenerBinder14: ViewModifier {
-    @Environment(\.openSettings) private var openSettings
-
-    func body(content: Content) -> some View {
-        content.onAppear {
-            SettingsOpener.bind(openSettings)
+private struct MenuSettingsLink: View {
+    var body: some View {
+        SettingsLink {
+            Text("Settings…")
         }
-    }
-}
-
-extension View {
-    func bindsSettingsOpener() -> some View {
-        modifier(SettingsOpenerBinder())
+        .simultaneousGesture(TapGesture().onEnded {
+            AppWindowPresentation.activate()
+            DispatchQueue.main.async {
+                AppWindowPresentation.activate()
+                AppWindowPresentation.orderFrontSettings()
+            }
+        })
+        .keyboardShortcut(",", modifiers: .command)
     }
 }

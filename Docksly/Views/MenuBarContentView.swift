@@ -29,8 +29,7 @@ struct MenuBarContentView: View {
         Divider()
 
         Button("Manage Docks…") {
-            NSApp.activate(ignoringOtherApps: true)
-            openWindow(id: "main")
+            AppWindowPresentation.presentEditor(using: openWindow)
         }
 
         MenuSettingsButton()
@@ -52,8 +51,7 @@ struct MenuBarLabel: View {
             .renderingMode(.template)
             .accessibilityLabel("Docksly")
             .onReceive(NotificationCenter.default.publisher(for: .dockslyOpenEditor)) { _ in
-                NSApp.activate(ignoringOtherApps: true)
-                openWindow(id: "main")
+                AppWindowPresentation.presentEditor(using: openWindow)
             }
     }
 }
