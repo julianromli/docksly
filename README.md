@@ -82,7 +82,7 @@ Do **not** enable App Sandbox. Docksly writes the `com.apple.dock` preference do
 - **Menu bar extra** — List of docks (checkmark on the active one), Manage Docks…, Settings…, Quit. A click in the menu bar applies a dock without opening the editor.
 - **Local persistence** — JSON in `~/Library/Application Support/Docksly/library.json`. No account, cloud, or analytics.
 - **Export / import** — JSON for one dock or the whole library (Edit Dock menu).
-- **Settings** — Open at login through `SMAppService`. This is reliable after you copy the app into `/Applications`.
+- **Settings** — Open at login through `SMAppService`. This is reliable after you copy the app into `/Applications`. Show Docksly in Dock toggle hides the app icon from the Dock and leaves the menu bar extra.
 - **Trial and license** — First launch starts a 24-hour trial. After that, apply, save, create, delete, import, and export stay locked until you paste a Mayar software license key. Buy License opens the Mayar product page.
 
 Out of scope: Focus Filters and cloud sync.

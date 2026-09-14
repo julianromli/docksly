@@ -6,6 +6,7 @@ struct SettingsView: View {
     @EnvironmentObject private var license: LicenseStore
     @State private var launchAtLogin = LaunchAtLoginService.isEnabled
     @State private var status = LaunchAtLoginService.statusDescription
+    @State private var showInDock = DockIconVisibilityService.isVisible
     @State private var errorMessage: String?
 
     var body: some View {
@@ -24,6 +25,14 @@ struct SettingsView: View {
             Section {
                 Toggle("Open Docksly at login", isOn: launchBinding)
                     .help("Uses the macOS login-item service. Put the app in Applications for a reliable result.")
+                Toggle("Show Docksly in Dock", isOn: showInDockBinding)
+                    .help("Hide the Docksly icon in the Dock. The app stays in the menu bar.")
+                if !showInDock {
+                    Text("When off, Docksly stays in the menu bar only. Use Manage Docks… or Settings… to open it.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 Text(status)
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -97,9 +106,20 @@ struct SettingsView: View {
         )
     }
 
+    private var showInDockBinding: Binding<Bool> {
+        Binding(
+            get: { showInDock },
+            set: { newValue in
+                DockIconVisibilityService.setVisible(newValue)
+                showInDock = DockIconVisibilityService.isVisible
+            }
+        )
+    }
+
     private func refresh() {
         launchAtLogin = LaunchAtLoginService.isEnabled
         status = LaunchAtLoginService.statusDescription
+        showInDock = DockIconVisibilityService.isVisible
     }
 
     private func openLoginItems() {
