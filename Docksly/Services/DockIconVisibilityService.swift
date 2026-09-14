@@ -22,7 +22,7 @@ enum DockIconVisibilityService {
             DispatchQueue.main.async {
                 NSApp.activate(ignoringOtherApps: true)
                 NSApp.windows.forEach { $0.makeKeyAndOrderFront(nil) }
-                showSettings()
+                openSettingsWindow()
             }
         }
     }
@@ -30,12 +30,12 @@ enum DockIconVisibilityService {
     static func apply() {
         NSApp.setActivationPolicy(isVisible ? .regular : .accessory)
     }
+}
 
-    private static func showSettings() {
-        if #available(macOS 14.0, *) {
-            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        } else {
-            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-        }
+func openSettingsWindow() {
+    if #available(macOS 14.0, *) {
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    } else {
+        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
     }
 }
