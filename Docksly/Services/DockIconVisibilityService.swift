@@ -69,14 +69,7 @@ enum AppWindowPresentation {
     }
 
     static func orderFrontSettings() {
-        var didFront = false
         for window in NSApp.windows where isSettingsWindow(window) {
-            window.collectionBehavior.insert(.moveToActiveSpace)
-            window.makeKeyAndOrderFront(nil)
-            didFront = true
-        }
-        if didFront { return }
-        for window in NSApp.windows where isUserWindow(window) && window.identifier?.rawValue != "main" {
             window.collectionBehavior.insert(.moveToActiveSpace)
             window.makeKeyAndOrderFront(nil)
         }
@@ -137,28 +130,18 @@ struct MenuSettingsButton: View {
 
 @available(macOS 14.0, *)
 private struct MenuSettingsLink: View {
-    @Environment(\.openSettings) private var openSettings
-
     var body: some View {
         SettingsLink {
             Text("Settings…")
         }
         .simultaneousGesture(TapGesture().onEnded {
-            present()
+            AppWindowPresentation.activate()
+            DispatchQueue.main.async {
+                AppWindowPresentation.activate()
+                AppWindowPresentation.orderFrontSettings()
+            }
         })
         .keyboardShortcut(",", modifiers: .command)
-        .onAppear {
-            SettingsOpener.bind(openSettings)
-        }
-    }
-
-    private func present() {
-        AppWindowPresentation.activate()
-        openSettings()
-        DispatchQueue.main.async {
-            AppWindowPresentation.activate()
-            AppWindowPresentation.orderFrontSettings()
-        }
     }
 }
 
