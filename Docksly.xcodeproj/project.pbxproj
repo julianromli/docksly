@@ -14,6 +14,7 @@
 		30BB0E60EC7518925FA0BC30 /* AppIconService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E73EE626ABF2297BFA7912F /* AppIconService.swift */; };
 		389AAACB82A9624F6BA04149 /* DockApplicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22567E86ABEE057F0ADF72DF /* DockApplicator.swift */; };
 		38A3DD4F125148CFD7B37D2B /* LicenseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D7C8D2C647E5440DE48CBF /* LicenseStore.swift */; };
+		497076E8AF96456CD8FD2DD7 /* DockIconVisibilityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF753D9491B1E3968C7090F /* DockIconVisibilityService.swift */; };
 		50D87EE28F0800ED513D8F7F /* LicenseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D15279D80DB0AD82BA874700 /* LicenseClient.swift */; };
 		581B4730C8E9E79AE3C4FD30 /* LicenseLockSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF5BABE87565E4BAE549F3A /* LicenseLockSheet.swift */; };
 		5A048A5962D239BE0A1D024E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C1D1E18628DE4D1868A664 /* SettingsView.swift */; };
@@ -45,6 +46,7 @@
 		424CF6D092FCB2D7BC6ACA69 /* DockslyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockslyApp.swift; sourceTree = "<group>"; };
 		47BD01F897C2498E01B5653C /* ColorDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDot.swift; sourceTree = "<group>"; };
 		4AE7F9E60A6EA59104128AF9 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+		4DF753D9491B1E3968C7090F /* DockIconVisibilityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconVisibilityService.swift; sourceTree = "<group>"; };
 		5CF5BABE87565E4BAE549F3A /* LicenseLockSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseLockSheet.swift; sourceTree = "<group>"; };
 		634DD1DEF1CDA8E4BDA25E46 /* VisualEffectBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBackground.swift; sourceTree = "<group>"; };
 		6419E266B7FAC466A5CDEEA6 /* DockslyCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockslyCommands.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				22567E86ABEE057F0ADF72DF /* DockApplicator.swift */,
 				1E73EE626ABF2297BFA7912F /* AppIconService.swift */,
 				FB70D8BB51D336ADCEF36269 /* LaunchAtLoginService.swift */,
+				4DF753D9491B1E3968C7090F /* DockIconVisibilityService.swift */,
 				D15279D80DB0AD82BA874700 /* LicenseClient.swift */,
 			);
 			path = Services;
@@ -240,6 +243,7 @@
 				389AAACB82A9624F6BA04149 /* DockApplicator.swift in Sources */,
 				30BB0E60EC7518925FA0BC30 /* AppIconService.swift in Sources */,
 				6A463769695693C3C468292E /* LaunchAtLoginService.swift in Sources */,
+				497076E8AF96456CD8FD2DD7 /* DockIconVisibilityService.swift in Sources */,
 				50D87EE28F0800ED513D8F7F /* LicenseClient.swift in Sources */,
 				E24C3D011D670965BEB78630 /* VisualEffectBackground.swift in Sources */,
 				69762AC378AB14518E205A45 /* ColorDot.swift in Sources */,

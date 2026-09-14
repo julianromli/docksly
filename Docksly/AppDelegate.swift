@@ -6,8 +6,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         false
     }
 
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        // Apply hidden policy early to avoid a brief Dock icon flash.
+        if !DockIconVisibilityService.isVisible {
+            DockIconVisibilityService.apply()
+        }
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.regular)
+        DockIconVisibilityService.apply()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

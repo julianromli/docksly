@@ -23,6 +23,7 @@ SWIFT_FILES = [
     ("Services/DockApplicator.swift", "services"),
     ("Services/AppIconService.swift", "services"),
     ("Services/LaunchAtLoginService.swift", "services"),
+    ("Services/DockIconVisibilityService.swift", "services"),
     ("Services/LicenseClient.swift", "services"),
     ("Views/VisualEffectBackground.swift", "views"),
     ("Views/ColorDot.swift", "views"),
