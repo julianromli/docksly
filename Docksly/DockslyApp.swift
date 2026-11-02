@@ -23,6 +23,7 @@ struct DockslyApp: App {
             SettingsView()
                 .environmentObject(license)
         }
+        .windowResizability(.contentSize)
 
         MenuBarExtra {
             MenuBarContentView()
