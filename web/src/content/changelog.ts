@@ -12,6 +12,25 @@ export type ChangelogItem = {
 
 export const releases: ChangelogItem[] = [
   {
+    version: "1.1.0",
+    id: "v1-1-0",
+    date: new Date("2026-11-02"),
+    notes: "Switch docks from anywhere: a keyboard shortcut, the Shortcuts app, or a Focus.",
+    features: [
+      "A global keyboard shortcut for each dock, set in Settings → Keyboard Shortcuts",
+      "A Switch to Next Dock shortcut that cycles through your docks",
+      "A short notice with the dock name after a switch (you can turn it off)",
+      "Shortcuts app actions: Use Dock and Get Current Dock",
+      "Focus filter: a Focus can switch to a dock, and the dock from before returns when the Focus turns off",
+      "Save Current Dock as New Dock, in the menu bar and the dock menu",
+      "The menu bar shows the shortcut for each dock",
+      "The free trial is now 7 days",
+    ],
+    fixes: [
+      "A shortcut for the dock that is already on the Dock does not restart the Dock",
+    ],
+  },
+  {
     version: "1.0.1",
     id: "v1-0-1",
     date: new Date("2026-11-02"),

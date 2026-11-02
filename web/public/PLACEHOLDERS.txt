@@ -1,6 +1,6 @@
 Public download:
 
-- Docksly.dmg   notarized 1.0.1 image for /download
+- Docksly.dmg   notarized 1.1.0 image for /download
 
 The release script copies the stapled disk image here:
 

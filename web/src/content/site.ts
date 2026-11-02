@@ -1,6 +1,6 @@
 export const site = {
   name: "Docksly",
-  version: "1.0",
+  version: "1.1",
   headline: "Dock Organizer",
   headlineLine2: "for Your",
   highlight: "Mac",
@@ -15,7 +15,7 @@ export const site = {
   price: "Rp49.000",
   downloadPath: "/Docksly.dmg",
   macos: "macOS 13 or later",
-  trial: "24-hour trial",
+  trial: "7-day trial",
 } as const;
 
 export type NavId = "home" | "faqs" | "changelog" | "privacy" | "recover" | "download";
