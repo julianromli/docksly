@@ -1,4 +1,4 @@
-export const changelogUpdated = "Updated September 2026";
+export const changelogUpdated = "Updated November 2026";
 
 export type ChangelogItem = {
   version: string;
@@ -11,6 +11,23 @@ export type ChangelogItem = {
 };
 
 export const releases: ChangelogItem[] = [
+  {
+    version: "1.0.1",
+    id: "v1-0-1",
+    date: new Date("2026-11-02"),
+    notes: "Docksly can now stay in the menu bar only, and Settings is easier to read.",
+    features: [
+      "Show Docksly in Dock setting: the icon shows only while a Docksly window is open",
+      "Close the last window and Docksly keeps running in the menu bar",
+      "A one-time notice tells you that Docksly is still running after you close it",
+      "When macOS opens Docksly at login, it starts in the menu bar with no window",
+      "Settings has General, License, and Data sections in one pane, and shows the app version",
+    ],
+    fixes: [
+      "Settings shows the login-item status only when there is a problem",
+      "Open Docksly from Finder or Spotlight while it runs, and the editor opens",
+    ],
+  },
   {
     version: "1.0",
     id: "v1-0",
