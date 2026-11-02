@@ -12,6 +12,23 @@ export type ChangelogItem = {
 
 export const releases: ChangelogItem[] = [
   {
+    version: "1.2.0",
+    id: "v1-2-0",
+    date: new Date("2026-11-02"),
+    notes: "Each dock now owns the right side of the Dock, and a dock can carry its own Dock settings.",
+    features: [
+      "Folders, files, and web links on the right side of the Dock, for each dock",
+      "Folder options: Display as, Sort by, and View content as",
+      "Add Link with a web address and an optional name",
+      "Dock Appearance for each dock: icon size, magnification, position, auto-hide, and recent apps (off by default)",
+      "Copy from Current Dock fills in the live Dock settings",
+      "Backups now also keep the right side of the Dock",
+    ],
+    fixes: [
+      "After the update, every dock keeps the folders you have on the Dock now",
+    ],
+  },
+  {
     version: "1.1.0",
     id: "v1-1-0",
     date: new Date("2026-11-02"),

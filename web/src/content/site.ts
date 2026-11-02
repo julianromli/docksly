@@ -1,6 +1,6 @@
 export const site = {
   name: "Docksly",
-  version: "1.1",
+  version: "1.2",
   headline: "Dock Organizer",
   headlineLine2: "for Your",
   highlight: "Mac",
