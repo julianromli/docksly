@@ -12,11 +12,15 @@ final class DockStore: ObservableObject {
     @Published var draftName: String
     @Published var draftColor: ProfileColor
     @Published var draftItems: [DockItem]
+    @Published var draftOthers: [DockOtherItem]
+    @Published var draftAppearance: DockAppearance?
     @Published var lastError: String?
     @Published var isApplying = false
     @Published var liveSignature: String = ""
     @Published var wantsNewDockName = false
     @Published var wantsAddApp = false
+    @Published var wantsAddLink = false
+    @Published var wantsAppearance = false
 
     private let fileURL: URL
     private let backupsDirectory: URL
@@ -32,6 +36,8 @@ final class DockStore: ObservableObject {
     var isDirty: Bool {
         let saved = selectedProfile
         return saved.items != draftItems
+            || (saved.otherItems ?? []) != draftOthers
+            || saved.appearance != draftAppearance
             || saved.name != draftName
             || saved.color != draftColor
     }
@@ -45,11 +51,15 @@ final class DockStore: ObservableObject {
         isSelectedActive
             && !isDirty
             && !liveSignature.isEmpty
-            && liveSignature == draftItems.layoutSignature
+            && liveSignature == draftSignature
+    }
+
+    var draftSignature: String {
+        DockLayout.signature(apps: draftItems, others: draftOthers)
     }
 
     var statusText: String {
-        let count = draftItems.count
+        let count = draftItems.count + draftOthers.count
         let noun = count == 1 ? "item" : "items"
         if isApplying {
             return "Applying… · \(count) \(noun)"
@@ -83,7 +93,10 @@ final class DockStore: ObservableObject {
         if let data = try? Data(contentsOf: fileURL),
            var loaded = try? decoder.decode(DockLibrary.self, from: data),
            !loaded.profiles.isEmpty {
-            loaded.migrate()
+            loaded.migrate(currentOthers: DockApplicator.readOtherItems)
+            // An older Docksly can save this file and drop the right side. Fill it
+            // again on every load, so an apply never clears the right side by mistake.
+            loaded.fillMissingOthers(with: DockApplicator.readOtherItems)
             loadedLibrary = loaded
         } else {
             loadedLibrary = DockStore.makeFirstLaunchLibrary()
@@ -96,6 +109,8 @@ final class DockStore: ObservableObject {
         draftName = profile.name
         draftColor = profile.color
         draftItems = profile.items
+        draftOthers = profile.otherItems ?? []
+        draftAppearance = profile.appearance
         persist()
         refreshLiveSignature()
     }
@@ -118,6 +133,8 @@ final class DockStore: ObservableObject {
         draftName = profile.name
         draftColor = profile.color
         draftItems = profile.items
+        draftOthers = profile.otherItems ?? []
+        draftAppearance = profile.appearance
     }
 
     // MARK: - Mutations
@@ -187,10 +204,69 @@ final class DockStore: ObservableObject {
         return true
     }
 
+    // MARK: - Right side (folders, files, links)
+
+    func addFolder(path: String) {
+        addOther(.folder(path: path))
+    }
+
+    func addFile(path: String) {
+        addOther(.file(path: path))
+    }
+
+    /// Returns false when the text is not a usable URL.
+    @discardableResult
+    func addLink(_ text: String, label: String?) -> Bool {
+        guard let url = DockOtherItem.normalizedLinkURL(text) else {
+            lastError = "Enter a full web address, for example https://example.com."
+            return false
+        }
+        let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines)
+        addOther(.link(url: url, label: (trimmed?.isEmpty ?? true) ? nil : trimmed))
+        return true
+    }
+
+    private func addOther(_ item: DockOtherItem) {
+        guard !rejectIfLocked() else { return }
+        let key = (item.path ?? item.url)?.lowercased()
+        if draftOthers.contains(where: { $0.kind == item.kind && ($0.path ?? $0.url)?.lowercased() == key }) {
+            lastError = "“\(item.title)” is already in this dock."
+            return
+        }
+        draftOthers.append(item)
+        lastError = nil
+    }
+
+    func removeOther(id: UUID) {
+        guard !rejectIfLocked() else { return }
+        draftOthers.removeAll { $0.id == id }
+    }
+
+    func moveOther(id: UUID, toIndex dest: Int) {
+        guard !rejectIfLocked() else { return }
+        guard let from = draftOthers.firstIndex(where: { $0.id == id }) else { return }
+        let clamped = min(max(dest, 0), draftOthers.count - 1)
+        guard from != clamped else { return }
+        let item = draftOthers.remove(at: from)
+        draftOthers.insert(item, at: clamped)
+    }
+
+    func updateOther(id: UUID, _ change: (inout DockOtherItem) -> Void) {
+        guard !rejectIfLocked() else { return }
+        guard let index = draftOthers.firstIndex(where: { $0.id == id }) else { return }
+        change(&draftOthers[index])
+    }
+
+    func setDraftAppearance(_ appearance: DockAppearance?) {
+        guard !rejectIfLocked() else { return }
+        draftAppearance = appearance?.clamped()
+    }
+
     func captureLiveDockIntoDraft() {
         guard !rejectIfLocked() else { return }
         do {
             draftItems = try DockApplicator.readPinnedItems()
+            draftOthers = DockApplicator.readOtherItems()
             lastError = nil
         } catch {
             lastError = error.localizedDescription
@@ -205,10 +281,12 @@ final class DockStore: ObservableObject {
         if rejectIfLocked() { return nil }
         do {
             let items = try DockApplicator.readPinnedItems()
-            let profile = createDock(named: name, items: items)
+            let others = DockApplicator.readOtherItems()
+            let profile = createDock(named: name, items: items, others: others)
+            let signature = DockLayout.signature(apps: items, others: others)
             library.activeProfileID = profile.id
-            library.lastAppliedSignature = items.layoutSignature
-            liveSignature = items.layoutSignature
+            library.lastAppliedSignature = signature
+            liveSignature = signature
             persist()
             lastError = nil
             return profile
@@ -219,7 +297,11 @@ final class DockStore: ObservableObject {
     }
 
     @discardableResult
-    func createDock(named name: String? = nil, items: [DockItem]? = nil) -> DockProfile {
+    func createDock(
+        named name: String? = nil,
+        items: [DockItem]? = nil,
+        others: [DockOtherItem]? = nil
+    ) -> DockProfile {
         if rejectIfLocked() {
             return selectedProfile
         }
@@ -238,7 +320,9 @@ final class DockStore: ObservableObject {
         let profile = DockProfile(
             name: label,
             color: color,
-            items: items ?? draftItems
+            items: items ?? draftItems,
+            otherItems: others ?? draftOthers,
+            appearance: items == nil ? draftAppearance : nil
         )
         library.upsert(profile)
         selectedProfileID = profile.id
@@ -271,6 +355,8 @@ final class DockStore: ObservableObject {
         profile.name = draftName.isEmpty ? "Untitled Dock" : draftName
         profile.color = draftColor
         profile.items = draftItems
+        profile.otherItems = draftOthers
+        profile.appearance = draftAppearance
         profile.updatedAt = Date()
         library.upsert(profile)
         persist()
@@ -285,7 +371,7 @@ final class DockStore: ObservableObject {
         if saveFirst {
             saveDraft(applyIfActive: false)
         }
-        apply(profileID: selectedProfileID, items: draftItems)
+        apply(profileID: selectedProfileID, useDraft: true)
     }
 
     func clearError() {
@@ -297,7 +383,7 @@ final class DockStore: ObservableObject {
         guard library.activeProfileID == profileID,
               let profile = library.profile(id: profileID) else { return false }
         refreshLiveSignature()
-        return !liveSignature.isEmpty && liveSignature == profile.items.layoutSignature
+        return !liveSignature.isEmpty && liveSignature == profile.layoutSignature
     }
 
     /// Saves unsaved edits in the editor so a switch from outside the editor does not drop them.
@@ -312,18 +398,28 @@ final class DockStore: ObservableObject {
         persist()
     }
 
-    func apply(profileID: UUID, items: [DockItem]? = nil) {
+    /// Writes a dock to the real Dock. With `useDraft`, the editor's unsaved
+    /// layout is written instead of the saved one.
+    func apply(profileID: UUID, useDraft: Bool = false) {
         guard !rejectIfLocked() else { return }
         guard let profile = library.profile(id: profileID) else { return }
-        let layout = items ?? profile.items
+        let draft = useDraft && profileID == selectedProfileID
+        let items = draft ? draftItems : profile.items
+        // Nil means "no right-side data": leave the right side of the Dock as it is.
+        let others: [DockOtherItem]? = draft ? draftOthers : profile.otherItems
+        let appearance = draft ? draftAppearance : profile.appearance
+        let signature = DockLayout.signature(
+            apps: items,
+            others: others ?? DockApplicator.readOtherItems()
+        )
         isApplying = true
         lastError = nil
         do {
             writeDockBackup()
-            try DockApplicator.apply(layout)
+            try DockApplicator.apply(items, others: others, appearance: appearance)
             library.activeProfileID = profileID
-            library.lastAppliedSignature = layout.layoutSignature
-            liveSignature = layout.layoutSignature
+            library.lastAppliedSignature = signature
+            liveSignature = signature
             persist()
             if selectedProfileID != profileID {
                 selectedProfileID = profileID
@@ -338,7 +434,7 @@ final class DockStore: ObservableObject {
 
     func refreshLiveSignature() {
         do {
-            liveSignature = try DockApplicator.readPinnedItems().layoutSignature
+            liveSignature = try DockApplicator.readLiveSignature()
         } catch {
             liveSignature = ""
         }
@@ -359,6 +455,8 @@ final class DockStore: ObservableObject {
         snapshot.name = draftName
         snapshot.color = draftColor
         snapshot.items = draftItems
+        snapshot.otherItems = draftOthers
+        snapshot.appearance = draftAppearance
         snapshot.updatedAt = Date()
         let data = try encoder.encode(snapshot)
         try data.write(to: url, options: Data.WritingOptions.atomic)
@@ -367,7 +465,9 @@ final class DockStore: ObservableObject {
     func `import`(from url: URL) throws {
         try requireAccess()
         let data = try Data(contentsOf: url)
-        if let incoming = try? decoder.decode(DockLibrary.self, from: data), !incoming.profiles.isEmpty {
+        if var incoming = try? decoder.decode(DockLibrary.self, from: data), !incoming.profiles.isEmpty {
+            // Exports from before 1.2 have no right side. Use the live right side for them.
+            incoming.fillMissingOthers(with: DockApplicator.readOtherItems)
             var lastImportedID: UUID?
             for var profile in incoming.profiles {
                 if library.profile(id: profile.id) != nil {
@@ -385,6 +485,9 @@ final class DockStore: ObservableObject {
             return
         }
         var profile = try decoder.decode(DockProfile.self, from: data)
+        if profile.otherItems == nil {
+            profile.otherItems = DockApplicator.readOtherItems()
+        }
         if library.profile(id: profile.id) != nil {
             profile.id = UUID()
         }
@@ -420,12 +523,15 @@ final class DockStore: ObservableObject {
     }
 
     private func writeDockBackup() {
-        let tiles = DockApplicator.readRawPersistentApps()
+        let tiles: [String: Any] = [
+            "persistent-apps": DockApplicator.readRawPersistentApps(),
+            "persistent-others": DockApplicator.readRawPersistentOthers()
+        ]
         let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
         // Dock tiles include bookmark NSData and sometimes CFURL values.
         // JSONSerialization raises NSInvalidArgumentException for those.
         // Prefer XML plist; fall back to a JSON snapshot of parsed items.
-        if !tiles.isEmpty, PropertyListSerialization.propertyList(tiles, isValidFor: .xml) {
+        if PropertyListSerialization.propertyList(tiles, isValidFor: .xml) {
             let url = backupsDirectory.appendingPathComponent("dock-\(stamp).plist")
             do {
                 let data = try PropertyListSerialization.data(
@@ -507,15 +613,17 @@ final class DockStore: ObservableObject {
 
     private static func makeFirstLaunchLibrary() -> DockLibrary {
         let items = (try? DockApplicator.readPinnedItems()) ?? []
+        let others = DockApplicator.readOtherItems()
         let main = DockProfile(
             name: "Main",
             color: ProfileColor.palette[0],
-            items: items
+            items: items,
+            otherItems: others
         )
         return DockLibrary(
             profiles: [main],
             activeProfileID: main.id,
-            lastAppliedSignature: items.layoutSignature
+            lastAppliedSignature: DockLayout.signature(apps: items, others: others)
         )
     }
 }

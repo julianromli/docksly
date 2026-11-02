@@ -44,10 +44,47 @@ final class LibraryMigrationTests: XCTestCase {
 
     func testMigrateBringsLegacyFileToCurrentVersion() throws {
         var library = try decoder().decode(DockLibrary.self, from: Data(legacyJSON.utf8))
-        let before = library.profiles
-        library.migrate()
+        let before = library.profiles[0].items
+        library.migrate(currentOthers: { [.folder(path: "/Users/me/Downloads")] })
         XCTAssertEqual(library.schemaVersion, DockLibrary.currentSchemaVersion)
-        XCTAssertEqual(library.profiles, before)
+        XCTAssertEqual(library.profiles[0].items, before)
+    }
+
+    /// 1.2: every old dock gets a copy of the live right side, so nothing changes on screen.
+    func testMigrateCopiesLiveRightSideIntoEveryOldDock() throws {
+        var library = try decoder().decode(DockLibrary.self, from: Data(legacyJSON.utf8))
+        library.profiles.append(DockProfile(name: "Work", otherItems: nil))
+        XCTAssertNil(library.profiles[0].otherItems)
+        var reads = 0
+        library.migrate(currentOthers: {
+            reads += 1
+            return [.folder(path: "/Users/me/Downloads", display: .stack, sort: .dateAdded, view: .grid)]
+        })
+        XCTAssertEqual(reads, 1, "Docksly reads the live Dock once, not once per dock")
+        for profile in library.profiles {
+            XCTAssertEqual(profile.otherItems?.map(\.layoutSignature), ["folder:/users/me/downloads:0,2,2"])
+        }
+        XCTAssertNotEqual(library.profiles[0].otherItems?[0].id, library.profiles[1].otherItems?[0].id)
+    }
+
+    func testMigrateKeepsRightSideThatIsAlreadySet() {
+        var library = DockLibrary(profiles: [DockProfile(name: "Main", otherItems: [])])
+        library.schemaVersion = 2
+        library.migrate(currentOthers: {
+            XCTFail("No dock needs the live right side")
+            return []
+        })
+        XCTAssertEqual(library.profiles[0].otherItems, [])
+        XCTAssertEqual(library.schemaVersion, 3)
+    }
+
+    func testDockWithoutNewFieldsDecodes() throws {
+        let json = """
+        {"color":{"hex":"0A84FF"},"createdAt":"2026-09-06T10:00:00Z","id":"6F9619FF-8B86-D011-B42D-00C04FC964FF","items":[],"name":"Old","updatedAt":"2026-09-06T10:00:00Z"}
+        """
+        let profile = try decoder().decode(DockProfile.self, from: Data(json.utf8))
+        XCTAssertNil(profile.otherItems)
+        XCTAssertNil(profile.appearance)
     }
 
     func testRoundTripKeepsNewFields() throws {

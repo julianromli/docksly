@@ -15,6 +15,7 @@
 		1CF00C6596F33D4A4F307C48 /* DockLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C892D510600761CFFD12C84D /* DockLibrary.swift */; };
 		754399E53B8097EF631C939C /* ProfileColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A5B13DB28E33E7D40BE09C /* ProfileColor.swift */; };
 		992FFE4D1CB50A3BD16E5824 /* LicenseRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = F83C747B37E88D1A0E7637DD /* LicenseRecord.swift */; };
+		EA1D5EC583ADE9515AD5ABA2 /* DockOtherItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55670A7C78F4692E59F3F67C /* DockOtherItem.swift */; };
 		8E99ADA596FB7CABB9899575 /* DockStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4EA6C162300E4C4F15C945 /* DockStore.swift */; };
 		38A3DD4F125148CFD7B37D2B /* LicenseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D7C8D2C647E5440DE48CBF /* LicenseStore.swift */; };
 		389AAACB82A9624F6BA04149 /* DockApplicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22567E86ABEE057F0ADF72DF /* DockApplicator.swift */; };
@@ -37,11 +38,15 @@
 		581B4730C8E9E79AE3C4FD30 /* LicenseLockSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CF5BABE87565E4BAE549F3A /* LicenseLockSheet.swift */; };
 		BF7E125A6EC06CFE461A6413 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE7F9E60A6EA59104128AF9 /* MenuBarContentView.swift */; };
 		794A4376DF6318ACC0373886 /* SaveLiveDockPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AF2516ADF09EC769ADB881 /* SaveLiveDockPrompt.swift */; };
+		454043FB1D8E85E8A5036973 /* OtherTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF83C8C90B22AE954BE6EF7A /* OtherTileView.swift */; };
+		B9B0899AF00A4BD2F01FA7D8 /* AddLinkSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6DFB4DFAF3B97C4BC0BF6D1 /* AddLinkSheet.swift */; };
+		747F031F4D2F320BB5F74E66 /* DockAppearanceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70C5BEFE1C06B0D8255CAC7 /* DockAppearanceSheet.swift */; };
 		222F0DBFFE5EB23DCD3FD16F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6C36FFE920F24CEDB7CFDBFC /* Assets.xcassets */; };
 		9C89DCA228620E171AECC895 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = A01D6AEEDD0EBC19F2AAF5C9 /* KeyboardShortcuts */; };
 		9E5372223E5E5304430DF2EF /* LibraryMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CD4B3767CF1C96268CC779 /* LibraryMigrationTests.swift */; };
 		1196BF10C16FAA1961B01CB8 /* TrialClockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA3C01E696363F678362CCD /* TrialClockTests.swift */; };
 		1D3578B81C16729D7BA0A7B1 /* DockSwitcherLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C43398BEF17334CB213CC05 /* DockSwitcherLogicTests.swift */; };
+		BE3280C00EEEC398F38B27E1 /* DockTileEncodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66B58E57AC55A43E921D7020 /* DockTileEncodingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +58,7 @@
 		C892D510600761CFFD12C84D /* DockLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockLibrary.swift; sourceTree = "<group>"; };
 		71A5B13DB28E33E7D40BE09C /* ProfileColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileColor.swift; sourceTree = "<group>"; };
 		F83C747B37E88D1A0E7637DD /* LicenseRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseRecord.swift; sourceTree = "<group>"; };
+		55670A7C78F4692E59F3F67C /* DockOtherItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockOtherItem.swift; sourceTree = "<group>"; };
 		CE4EA6C162300E4C4F15C945 /* DockStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockStore.swift; sourceTree = "<group>"; };
 		25D7C8D2C647E5440DE48CBF /* LicenseStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseStore.swift; sourceTree = "<group>"; };
 		22567E86ABEE057F0ADF72DF /* DockApplicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockApplicator.swift; sourceTree = "<group>"; };
@@ -75,6 +81,9 @@
 		5CF5BABE87565E4BAE549F3A /* LicenseLockSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseLockSheet.swift; sourceTree = "<group>"; };
 		4AE7F9E60A6EA59104128AF9 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
 		16AF2516ADF09EC769ADB881 /* SaveLiveDockPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLiveDockPrompt.swift; sourceTree = "<group>"; };
+		AF83C8C90B22AE954BE6EF7A /* OtherTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherTileView.swift; sourceTree = "<group>"; };
+		E6DFB4DFAF3B97C4BC0BF6D1 /* AddLinkSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLinkSheet.swift; sourceTree = "<group>"; };
+		D70C5BEFE1C06B0D8255CAC7 /* DockAppearanceSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockAppearanceSheet.swift; sourceTree = "<group>"; };
 		6C36FFE920F24CEDB7CFDBFC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		68E77A9D7BC78A97D4F4E27B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8509ABF17E9E3CEE9F5D0453 /* Docksly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Docksly.entitlements; sourceTree = "<group>"; };
@@ -82,6 +91,7 @@
 		45CD4B3767CF1C96268CC779 /* LibraryMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryMigrationTests.swift; sourceTree = "<group>"; };
 		BAA3C01E696363F678362CCD /* TrialClockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialClockTests.swift; sourceTree = "<group>"; };
 		7C43398BEF17334CB213CC05 /* DockSwitcherLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockSwitcherLogicTests.swift; sourceTree = "<group>"; };
+		66B58E57AC55A43E921D7020 /* DockTileEncodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockTileEncodingTests.swift; sourceTree = "<group>"; };
 		7612CCAD1CBFA9739724E673 /* DockslyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DockslyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -154,6 +164,7 @@
 				45CD4B3767CF1C96268CC779 /* LibraryMigrationTests.swift */,
 				BAA3C01E696363F678362CCD /* TrialClockTests.swift */,
 				7C43398BEF17334CB213CC05 /* DockSwitcherLogicTests.swift */,
+				66B58E57AC55A43E921D7020 /* DockTileEncodingTests.swift */,
 			);
 			path = DockslyTests;
 			sourceTree = "<group>";
@@ -166,6 +177,7 @@
 				C892D510600761CFFD12C84D /* DockLibrary.swift */,
 				71A5B13DB28E33E7D40BE09C /* ProfileColor.swift */,
 				F83C747B37E88D1A0E7637DD /* LicenseRecord.swift */,
+				55670A7C78F4692E59F3F67C /* DockOtherItem.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -208,6 +220,9 @@
 				5CF5BABE87565E4BAE549F3A /* LicenseLockSheet.swift */,
 				4AE7F9E60A6EA59104128AF9 /* MenuBarContentView.swift */,
 				16AF2516ADF09EC769ADB881 /* SaveLiveDockPrompt.swift */,
+				AF83C8C90B22AE954BE6EF7A /* OtherTileView.swift */,
+				E6DFB4DFAF3B97C4BC0BF6D1 /* AddLinkSheet.swift */,
+				D70C5BEFE1C06B0D8255CAC7 /* DockAppearanceSheet.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -335,6 +350,7 @@
 				1CF00C6596F33D4A4F307C48 /* DockLibrary.swift in Sources */,
 				754399E53B8097EF631C939C /* ProfileColor.swift in Sources */,
 				992FFE4D1CB50A3BD16E5824 /* LicenseRecord.swift in Sources */,
+				EA1D5EC583ADE9515AD5ABA2 /* DockOtherItem.swift in Sources */,
 				8E99ADA596FB7CABB9899575 /* DockStore.swift in Sources */,
 				38A3DD4F125148CFD7B37D2B /* LicenseStore.swift in Sources */,
 				389AAACB82A9624F6BA04149 /* DockApplicator.swift in Sources */,
@@ -357,6 +373,9 @@
 				581B4730C8E9E79AE3C4FD30 /* LicenseLockSheet.swift in Sources */,
 				BF7E125A6EC06CFE461A6413 /* MenuBarContentView.swift in Sources */,
 				794A4376DF6318ACC0373886 /* SaveLiveDockPrompt.swift in Sources */,
+				454043FB1D8E85E8A5036973 /* OtherTileView.swift in Sources */,
+				B9B0899AF00A4BD2F01FA7D8 /* AddLinkSheet.swift in Sources */,
+				747F031F4D2F320BB5F74E66 /* DockAppearanceSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -367,6 +386,7 @@
 				9E5372223E5E5304430DF2EF /* LibraryMigrationTests.swift in Sources */,
 				1196BF10C16FAA1961B01CB8 /* TrialClockTests.swift in Sources */,
 				1D3578B81C16729D7BA0A7B1 /* DockSwitcherLogicTests.swift in Sources */,
+				BE3280C00EEEC398F38B27E1 /* DockTileEncodingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -420,7 +440,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Docksly/Info.plist;
@@ -429,7 +449,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -447,7 +467,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Docksly/Info.plist;
@@ -456,7 +476,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

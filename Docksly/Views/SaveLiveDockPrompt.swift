@@ -4,7 +4,8 @@ import AppKit
 /// An `NSAlert` works from the menu bar too, when no Docksly window is open.
 @MainActor
 enum SaveLiveDockPrompt {
-    static func run(store: DockStore = .shared) {
+    static func run(store: DockStore? = nil) {
+        let store = store ?? .shared
         guard LicenseStore.shared.hasAccess else {
             presentMessage("Docksly is locked", LicenseStore.lockedMessage)
             return

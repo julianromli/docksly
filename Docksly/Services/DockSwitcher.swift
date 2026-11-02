@@ -18,7 +18,8 @@ enum DockSwitcher {
     }
 
     @discardableResult
-    static func switchTo(profileID: UUID, store: DockStore = .shared) -> Outcome {
+    static func switchTo(profileID: UUID, store: DockStore? = nil) -> Outcome {
+        let store = store ?? .shared
         guard LicenseStore.shared.hasAccess else { return .locked }
         guard let profile = store.library.profile(id: profileID) else { return .missing }
         store.saveDraftIfDirty()
@@ -36,7 +37,8 @@ enum DockSwitcher {
 
     /// Cycles to the dock after the active one, in list order.
     @discardableResult
-    static func switchToNext(store: DockStore = .shared) -> Outcome {
+    static func switchToNext(store: DockStore? = nil) -> Outcome {
+        let store = store ?? .shared
         guard let next = store.library.profile(after: store.library.activeProfileID) else {
             return .missing
         }
@@ -47,7 +49,8 @@ enum DockSwitcher {
 
     /// A Focus with a Docksly filter turned on. Remembers the dock to restore later.
     @discardableResult
-    static func focusDidSelect(profileID: UUID, store: DockStore = .shared) -> Outcome {
+    static func focusDidSelect(profileID: UUID, store: DockStore? = nil) -> Outcome {
+        let store = store ?? .shared
         let restore = FocusRestorePlan.restoreTarget(
             current: store.library.focusRestoreProfileID,
             active: store.library.activeProfileID,
@@ -59,7 +62,8 @@ enum DockSwitcher {
 
     /// The Focus turned off. Goes back to the dock that was active before it.
     @discardableResult
-    static func focusDidEnd(store: DockStore = .shared) -> Outcome {
+    static func focusDidEnd(store: DockStore? = nil) -> Outcome {
+        let store = store ?? .shared
         guard let restore = store.library.focusRestoreProfileID else { return .missing }
         store.setFocusRestoreProfileID(nil)
         guard store.library.profile(id: restore) != nil else { return .missing }

@@ -19,7 +19,8 @@ enum HotkeyService {
     private static var registeredIDs: Set<UUID> = []
     private static var cancellable: AnyCancellable?
 
-    static func start(store: DockStore = .shared) {
+    static func start(store: DockStore? = nil) {
+        let store = store ?? .shared
         guard cancellable == nil else { return }
         KeyboardShortcuts.onKeyUp(for: .nextDock) {
             beepIfLocked(DockSwitcher.switchToNext())

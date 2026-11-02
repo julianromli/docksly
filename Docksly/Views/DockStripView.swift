@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct DockStripView: View {
@@ -26,7 +27,7 @@ struct DockStripView: View {
 
     var body: some View {
         Group {
-            if store.draftItems.isEmpty {
+            if store.draftItems.isEmpty && store.draftOthers.isEmpty {
                 emptyState
             } else {
                 strip
@@ -72,6 +73,8 @@ struct DockStripView: View {
                         .buttonStyle(QuietCapsuleButtonStyle())
                     Button("Add Spacer") { store.addSpacer() }
                         .buttonStyle(QuietCapsuleButtonStyle())
+                    Button("Add Folder…") { DockStripView.addFolder(to: store) }
+                        .buttonStyle(QuietCapsuleButtonStyle())
                 }
             }
         }
@@ -82,9 +85,12 @@ struct DockStripView: View {
 
     private var stripContentWidth: CGFloat {
         let tiles = store.draftItems.reduce(CGFloat(0)) { $0 + tileWidth($1) }
-        let gaps = CGFloat(store.draftItems.count) * itemSpacing
-        return tiles + gaps + 52
+        let gaps = CGFloat(store.draftItems.count + store.draftOthers.count + 2) * itemSpacing
+        let others = CGFloat(store.draftOthers.count) * DockslyStyle.tileWidth
+        return tiles + gaps + others + 52 + sideDividerWidth + 52
     }
+
+    private let sideDividerWidth: CGFloat = 9
 
     private var strip: some View {
         GeometryReader { geo in
@@ -129,13 +135,43 @@ struct DockStripView: View {
                                 reduceMotion: reduceMotion
                             ))
                     }
+
+                    if license.hasAccess || !store.draftOthers.isEmpty {
+                        sideDivider
+                    }
+
+                    ForEach(Array(store.draftOthers.enumerated()), id: \.element.id) { index, item in
+                        OtherTileView(
+                            item: item,
+                            allowsEditing: license.hasAccess && draggingID == nil,
+                            onRemove: { store.removeOther(id: item.id) },
+                            onMoveLeft: index > 0
+                                ? { store.moveOther(id: item.id, toIndex: index - 1) }
+                                : nil,
+                            onMoveRight: index < store.draftOthers.count - 1
+                                ? { store.moveOther(id: item.id, toIndex: index + 1) }
+                                : nil,
+                            onChange: { change in store.updateOther(id: item.id, change) }
+                        )
+                        .modifier(DockSwitchStagger(
+                            index: displayItems.count + 1 + index,
+                            playEnter: isSwitchingDock && !reduceMotion,
+                            profileID: store.selectedProfileID,
+                            restaggerOnProfileChange: false,
+                            reduceMotion: reduceMotion
+                        ))
+                    }
+
+                    if license.hasAccess {
+                        addOtherTile
+                    }
                 }
                 .padding(.vertical, DockslyStyle.shelfInner)
                 .padding(.leading, DockslyStyle.shelfInner)
                 .padding(.trailing, overflows ? DockslyStyle.overflowPeek : DockslyStyle.shelfInner)
                 .animation(
                     (reduceMotion || isSwitchingDock) ? nil : DockslyStyle.defaultSpring,
-                    value: displayItems.map(\.id)
+                    value: displayItems.map(\.id) + store.draftOthers.map(\.id)
                 )
                 .overlay(alignment: .topLeading) {
                     floatingTile
@@ -177,6 +213,65 @@ struct DockStripView: View {
         .buttonStyle(PressableButtonStyle(focusShape: .rounded(DockslyStyle.addTileCorner)))
         .help("Add Application")
         .accessibilityLabel("Add Application")
+    }
+
+    /// The thin line between apps and the right side, like the real Dock.
+    private var sideDivider: some View {
+        Capsule()
+            .fill(Color.primary.opacity(0.22))
+            .frame(width: 1, height: 44)
+            .frame(width: sideDividerWidth, height: 60)
+            .accessibilityHidden(true)
+    }
+
+    private var addOtherTile: some View {
+        Menu {
+            Button("Add Folder…") { Self.addFolder(to: store) }
+            Button("Add File…") { Self.addFile(to: store) }
+            Button("Add Link…") { store.wantsAddLink = true }
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: DockslyStyle.addTileCorner, style: .continuous)
+                    .fill(Color.primary.opacity(0.08))
+                Image(systemName: "plus")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(width: 52, height: 52)
+            .contentShape(Rectangle())
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .frame(width: 52, height: 52)
+        .help("Add Folder, File, or Link")
+        .accessibilityLabel("Add Folder, File, or Link")
+    }
+
+    static func addFolder(to store: DockStore) {
+        let panel = NSOpenPanel()
+        panel.title = "Add a folder to this dock"
+        panel.prompt = "Add Folder"
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = true
+        panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
+        panel.begin { response in
+            guard response == .OK else { return }
+            for url in panel.urls { store.addFolder(path: url.path) }
+        }
+    }
+
+    static func addFile(to store: DockStore) {
+        let panel = NSOpenPanel()
+        panel.title = "Add a file to this dock"
+        panel.prompt = "Add File"
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = true
+        panel.begin { response in
+            guard response == .OK else { return }
+            for url in panel.urls { store.addFile(path: url.path) }
+        }
     }
 
     @ViewBuilder

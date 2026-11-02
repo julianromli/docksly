@@ -31,9 +31,10 @@ enum DockApplicatorError: LocalizedError, Equatable {
 /// - `persistent-apps` — pinned applications and spacers on the left of the divider
 /// - `persistent-others` — folders, stacks, and files on the right
 ///
-/// Finder (left) and Trash (right) are **not** in `persistent-apps`. This service
-/// only replaces `persistent-apps`. It does not change Dock size, magnification,
-/// position, recent apps, or `persistent-others`.
+/// Finder (left) and Trash (right) are in neither list. This service replaces
+/// `persistent-apps` and, from 1.2, `persistent-others` (folders, files, links).
+/// It changes Dock size, magnification, position, auto-hide, and recent apps only
+/// when a dock turns on its own Dock settings.
 ///
 /// Writes go through `CFPreferencesSetAppValue` + `CFPreferencesAppSynchronize`
 /// so `cfprefsd` owns the file. A raw edit of `~/Library/Preferences/com.apple.dock.plist`
@@ -48,11 +49,12 @@ enum DockApplicatorError: LocalizedError, Equatable {
 /// - `killall Dock` is the documented community method (dockutil and similar tools).
 ///   It is not a published AppKit contract.
 ///
-/// Before each apply, the previous `persistent-apps` array is copied into
-/// Application Support so you can restore it by hand if needed.
+/// Before each apply, the previous `persistent-apps` and `persistent-others`
+/// arrays are copied into Application Support so you can restore them by hand.
 enum DockApplicator {
     static let dockDomain = "com.apple.dock" as CFString
     static let persistentAppsKey = "persistent-apps" as CFString
+    static let persistentOthersKey = "persistent-others" as CFString
 
     // MARK: - Read
 
@@ -62,31 +64,103 @@ enum DockApplicator {
         return array.compactMap(parseTile(_:))
     }
 
+    /// Folders, files, and links on the right side of the live Dock.
+    static func readOtherItems() -> [DockOtherItem] {
+        readRawPersistentOthers().compactMap(parseOtherTile(_:))
+    }
+
+    /// Compare key for the whole live Dock. Empty when the Dock cannot be read.
+    static func readLiveSignature() throws -> String {
+        let apps = try readPinnedItems()
+        return DockLayout.signature(apps: apps, others: readOtherItems())
+    }
+
     /// Raw `persistent-apps` tiles, for backup only.
-    ///
+    static func readRawPersistentApps() -> [[String: Any]] {
+        readRawArray("persistent-apps")
+    }
+
+    /// Raw `persistent-others` tiles, for backup only.
+    static func readRawPersistentOthers() -> [[String: Any]] {
+        readRawArray("persistent-others")
+    }
+
     /// Reads through `UserDefaults(suiteName:)` after a CFPreferences sync so the
     /// Swift overlay does not have to take an `Unmanaged` retain from
     /// `CFPreferencesCopyAppValue` (the import type changed across Xcode versions).
-    static func readRawPersistentApps() -> [[String: Any]] {
+    private static func readRawArray(_ key: String) -> [[String: Any]] {
         CFPreferencesAppSynchronize(dockDomain)
         let defaults = UserDefaults(suiteName: "com.apple.dock")
         defaults?.synchronize()
-        if let array = defaults?.array(forKey: "persistent-apps") as? [[String: Any]] {
+        if let array = defaults?.array(forKey: key) as? [[String: Any]] {
             return array
         }
         return []
     }
 
+    /// The Dock settings that a dock can carry, as they are now.
+    static func readAppearance() -> DockAppearance {
+        CFPreferencesAppSynchronize(dockDomain)
+        let defaults = UserDefaults(suiteName: "com.apple.dock")
+        let fallback = DockAppearance.systemDefault
+        func number(_ key: String) -> Double? {
+            (defaults?.object(forKey: key) as? NSNumber)?.doubleValue
+        }
+        func flag(_ key: String, _ value: Bool) -> Bool {
+            (defaults?.object(forKey: key) as? NSNumber)?.boolValue ?? value
+        }
+        let position = (defaults?.string(forKey: "orientation")).flatMap(DockAppearance.Position.init(rawValue:))
+        return DockAppearance(
+            isEnabled: true,
+            tileSize: number("tilesize") ?? fallback.tileSize,
+            magnification: flag("magnification", fallback.magnification),
+            largeSize: number("largesize") ?? fallback.largeSize,
+            position: position ?? fallback.position,
+            autohide: flag("autohide", fallback.autohide),
+            showRecents: flag("show-recents", fallback.showRecents)
+        ).clamped()
+    }
+
     // MARK: - Write
 
-    /// Replaces pinned apps and spacers, then restarts Dock.
+    /// Replaces pinned apps and spacers, the right side (when `others` is not nil),
+    /// and the Dock settings (when `appearance` is on). Then restarts Dock once.
     ///
     /// Does not quit open applications. Apps that are running but not in `items`
     /// can still appear in the Dock until you quit them — that is normal Dock behavior.
-    static func apply(_ items: [DockItem]) throws {
+    static func apply(
+        _ items: [DockItem],
+        others: [DockOtherItem]? = nil,
+        appearance: DockAppearance? = nil
+    ) throws {
         let tiles = items.compactMap { makeTile(from: $0) }
-        try writePersistentApps(tiles)
+        CFPreferencesSetAppValue(persistentAppsKey, tiles as CFArray, dockDomain)
+        if let others {
+            let otherTiles = others.compactMap { makeOtherTile(from: $0) }
+            CFPreferencesSetAppValue(persistentOthersKey, otherTiles as CFArray, dockDomain)
+        }
+        if let appearance, appearance.isEnabled {
+            for (key, value) in appearanceValues(appearance) {
+                CFPreferencesSetAppValue(key as CFString, value, dockDomain)
+            }
+        }
+        guard CFPreferencesAppSynchronize(dockDomain) else {
+            throw DockApplicatorError.preferenceWriteFailed
+        }
         try restartDock()
+    }
+
+    /// The `com.apple.dock` keys and values for a set of Dock settings.
+    static func appearanceValues(_ appearance: DockAppearance) -> [(String, CFPropertyList)] {
+        let value = appearance.clamped()
+        return [
+            ("tilesize", NSNumber(value: value.tileSize)),
+            ("magnification", NSNumber(value: value.magnification)),
+            ("largesize", NSNumber(value: value.largeSize)),
+            ("orientation", value.position.rawValue as NSString),
+            ("autohide", NSNumber(value: value.autohide)),
+            ("show-recents", NSNumber(value: value.showRecents)),
+        ]
     }
 
     static func writePersistentApps(_ tiles: [[String: Any]]) throws {
@@ -119,6 +193,82 @@ enum DockApplicator {
     }
 
     // MARK: - Tile encode / decode
+
+    /// Right-side tile in the same form that `dockutil` writes.
+    static func makeOtherTile(from item: DockOtherItem) -> [String: Any]? {
+        let guid = Int.random(in: 1 ... Int.max)
+        switch item.kind {
+        case .folder, .file:
+            guard let path = item.path, !path.isEmpty else { return nil }
+            let isFolder = item.kind == .folder
+            let fileURL = URL(fileURLWithPath: path, isDirectory: isFolder)
+            var tileData: [String: Any] = [
+                "file-data": [
+                    "_CFURLString": fileURL.absoluteString,
+                    "_CFURLStringType": 15
+                ] as [String: Any],
+                "file-label": item.title,
+                "file-type": isFolder ? 2 : 41
+            ]
+            if isFolder {
+                tileData["directory"] = 1
+                tileData["displayas"] = (item.display ?? .folder).rawValue
+                tileData["arrangement"] = (item.sort ?? .dateModified).rawValue
+                tileData["showas"] = (item.view ?? .automatic).rawValue
+            }
+            return [
+                "GUID": guid,
+                "tile-type": isFolder ? "directory-tile" : "file-tile",
+                "tile-data": tileData
+            ]
+        case .link:
+            guard let url = item.url, !url.isEmpty else { return nil }
+            return [
+                "GUID": guid,
+                "tile-type": "url-tile",
+                "tile-data": [
+                    "label": item.title,
+                    "url": [
+                        "_CFURLString": url,
+                        "_CFURLStringType": 15
+                    ] as [String: Any]
+                ] as [String: Any]
+            ]
+        }
+    }
+
+    /// Reads a right-side tile. Returns nil for tile types that Docksly does not know.
+    static func parseOtherTile(_ dict: [String: Any]) -> DockOtherItem? {
+        let tileType = (dict["tile-type"] as? String) ?? ""
+        guard let tileData = dict["tile-data"] as? [String: Any] else { return nil }
+        switch tileType {
+        case "url-tile":
+            let urlData = tileData["url"] as? [String: Any]
+            guard let url = urlData?["_CFURLString"] as? String, !url.isEmpty else { return nil }
+            return .link(url: url, label: tileData["label"] as? String)
+        case "directory-tile", "file-tile":
+            let fileData = tileData["file-data"] as? [String: Any]
+            let urlType = fileData?["_CFURLStringType"] as? Int ?? 0
+            guard let path = normalizePath(fileData?["_CFURLString"] as? String, type: urlType) else {
+                return nil
+            }
+            let label = tileData["file-label"] as? String
+            let fileType = tileData["file-type"] as? Int
+            let isFolder = tileType == "directory-tile" || fileType == 2 || fileType == 3
+            if isFolder {
+                return .folder(
+                    path: path,
+                    label: label,
+                    display: (tileData["displayas"] as? Int).flatMap(DockOtherItem.FolderDisplay.init(rawValue:)) ?? .folder,
+                    sort: (tileData["arrangement"] as? Int).flatMap(DockOtherItem.FolderSort.init(rawValue:)) ?? .dateModified,
+                    view: (tileData["showas"] as? Int).flatMap(DockOtherItem.FolderView.init(rawValue:)) ?? .automatic
+                )
+            }
+            return .file(path: path, label: label)
+        default:
+            return nil
+        }
+    }
 
     private static func makeTile(from item: DockItem) -> [String: Any]? {
         switch item.kind {

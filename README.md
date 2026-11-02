@@ -42,7 +42,7 @@ Private testers can use an unsigned disk image:
 ./scripts/build-tester-dmg.sh
 ```
 
-The file is `dist/Docksly-1.1.0-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
+The file is `dist/Docksly-1.2.0-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
 
 A public download needs a Developer ID Application certificate and the `docksly-notarize` notarytool profile:
 
@@ -50,7 +50,7 @@ A public download needs a Developer ID Application certificate and the `docksly-
 ./scripts/build-release-dmg.sh
 ```
 
-The file is `dist/Docksly-1.1.0.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
+The file is `dist/Docksly-1.2.0.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
 
 Then run `./scripts/publish-release.sh "Release notes"`. It creates the GitHub release with the DMG and updates the cask in [julianromli/homebrew-tap](https://github.com/julianromli/homebrew-tap).
 
@@ -85,6 +85,8 @@ Do **not** enable App Sandbox. Docksly writes the `com.apple.dock` preference do
 ## What the MVP does
 
 - **Editor window** — Horizontal icon strip for apps and spacers. Drag to reorder. Add an application, add a spacer, or remove a tile. Spacers have a context menu: Move Left, Move Right, Remove.
+- **Right side of the Dock** — After a divider, the strip shows the dock's folders, files, and web links. Add them with the second **+** (Add Folder…, Add File…, Add Link…). Right-click a folder for Display as, Sort by, and View content as. Right-click any item for Move Left, Move Right, and Remove. Each dock owns its right side.
+- **Dock Appearance** — Edit Dock → Dock Appearance…. Turn on **Use these Dock settings** to give a dock its own icon size, magnification, position, auto-hide, and recent apps. Off by default: Docksly then leaves these settings alone.
 - **Status** — `Current · N items`, `Unsaved · N items`, or `Not active · N items`.
 - **Save Changes** — Appears when the draft differs from the saved profile. If that profile is the active Dock, save also applies it.
 - **Use This Dock** — Appears when you view a saved layout that is not the live Dock.
@@ -172,6 +174,18 @@ Build and run from Xcode. Then walk this list.
 - [ ] Choose **Settings…**. The settings window opens.
 - [ ] Choose **Quit Docksly**. The menu extra disappears.
 
+### Right side and Dock settings (1.2)
+
+- [ ] After the update, open the editor. Each dock shows the folders on the right of a divider, the same as your Dock now (for example Downloads).
+- [ ] Second **+** → Add Folder… → pick a folder. Right-click it → Display as Stack, Sort by Name, View content as Grid. Save. The real Dock shows the folder with those options.
+- [ ] Add File… → pick a file. Add Link… → `example.com` and a name. Save. The Dock shows the file and a globe link. A click on the link opens the browser.
+- [ ] Right-click a right-side item → Move Left / Move Right / Remove. Save. The Dock matches.
+- [ ] Make a second dock with different folders. Switch between the two docks. The right side changes with each dock.
+- [ ] Edit Dock → Dock Appearance… → turn on **Use these Dock settings** → change size and position → Done → Save Changes. The Dock changes size and moves.
+- [ ] Switch to a dock with Dock settings off. The size and position stay as they are.
+- [ ] Copy from Current Dock in the sheet fills in the live settings.
+- [ ] A backup file under `~/Library/Application Support/Docksly/backups/` has both `persistent-apps` and `persistent-others`.
+
 ### Switch from anywhere (1.1)
 
 - [ ] Settings → Keyboard Shortcuts. Record a shortcut for two docks and for **Switch to Next Dock**.
@@ -204,7 +218,7 @@ Build and run from Xcode. Then walk this list.
 
 - [ ] Apply a dock. Confirm Finder is still on the left and Trash is still on the right.
 - [ ] Leave an unpinned app running. Apply a dock that does not include it. The app stays running.
-- [ ] Folders or stacks on the right of the divider stay.
+- [ ] A dock that you have not edited since the update keeps the right side of the Dock as it was.
 
 ### License lock
 

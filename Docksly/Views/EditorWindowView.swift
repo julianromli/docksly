@@ -35,6 +35,14 @@ struct EditorWindowView: View {
             AddAppSheet()
                 .environmentObject(store)
         }
+        .sheet(isPresented: $store.wantsAddLink) {
+            AddLinkSheet()
+                .environmentObject(store)
+        }
+        .sheet(isPresented: $store.wantsAppearance) {
+            DockAppearanceSheet()
+                .environmentObject(store)
+        }
         .sheet(isPresented: lockBinding) {
             LicenseLockSheet()
                 .environmentObject(license)
@@ -146,6 +154,15 @@ struct EditorWindowView: View {
             Button("Add Application…") { store.wantsAddApp = true }
                 .disabled(!license.hasAccess)
             Button("Add Spacer") { store.addSpacer() }
+                .disabled(!license.hasAccess)
+            Button("Add Folder…") { DockStripView.addFolder(to: store) }
+                .disabled(!license.hasAccess)
+            Button("Add File…") { DockStripView.addFile(to: store) }
+                .disabled(!license.hasAccess)
+            Button("Add Link…") { store.wantsAddLink = true }
+                .disabled(!license.hasAccess)
+            Divider()
+            Button("Dock Appearance…") { store.wantsAppearance = true }
                 .disabled(!license.hasAccess)
             Divider()
             Button("Capture Current Dock") { store.captureLiveDockIntoDraft() }

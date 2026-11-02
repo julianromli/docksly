@@ -6,6 +6,10 @@ struct DockProfile: Identifiable, Codable, Equatable, Hashable {
     var name: String
     var color: ProfileColor
     var items: [DockItem]
+    /// Folders, files, and links on the right side. Nil only in files from before 1.2.
+    var otherItems: [DockOtherItem]?
+    /// Dock settings for this dock. Nil or `isEnabled == false` means Docksly leaves them alone.
+    var appearance: DockAppearance?
     var createdAt: Date
     var updatedAt: Date
 
@@ -14,6 +18,8 @@ struct DockProfile: Identifiable, Codable, Equatable, Hashable {
         name: String,
         color: ProfileColor = .default,
         items: [DockItem] = [],
+        otherItems: [DockOtherItem]? = [],
+        appearance: DockAppearance? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -21,9 +27,15 @@ struct DockProfile: Identifiable, Codable, Equatable, Hashable {
         self.name = name
         self.color = color
         self.items = items
+        self.otherItems = otherItems
+        self.appearance = appearance
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
 
-    var itemCount: Int { items.count }
+    var itemCount: Int { items.count + (otherItems?.count ?? 0) }
+
+    var layoutSignature: String {
+        DockLayout.signature(apps: items, others: otherItems ?? [])
+    }
 }

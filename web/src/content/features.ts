@@ -30,6 +30,18 @@ export const features = [
     icon: "reorder",
   },
   {
+    title: "Folders",
+    subtitle: "and links",
+    label: "Folders and links",
+    icon: "folders",
+  },
+  {
+    title: "Dock settings",
+    subtitle: "per dock",
+    label: "Dock settings per dock",
+    icon: "appearance",
+  },
+  {
     title: "Global",
     subtitle: "hotkeys",
     label: "Global hotkeys",
