@@ -30,15 +30,39 @@ export const features = [
     icon: "reorder",
   },
   {
+    title: "Global",
+    subtitle: "hotkeys",
+    label: "Global hotkeys",
+    icon: "hotkeys",
+  },
+  {
+    title: "Shortcuts",
+    subtitle: "actions",
+    label: "Shortcuts actions",
+    icon: "shortcuts",
+  },
+  {
+    title: "Focus",
+    subtitle: "filters",
+    label: "Focus filters",
+    icon: "focus",
+  },
+  {
+    title: "Save the",
+    subtitle: "current Dock",
+    label: "Save the current Dock",
+    icon: "capture",
+  },
+  {
     title: "Export",
     subtitle: "and import",
     label: "Export and import",
     icon: "export",
   },
   {
-    title: "24-hour",
+    title: "7-day",
     subtitle: "trial",
-    label: "24-hour trial",
+    label: "7-day trial",
     icon: "trial",
   },
   {

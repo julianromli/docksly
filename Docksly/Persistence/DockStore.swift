@@ -81,8 +81,9 @@ final class DockStore: ObservableObject {
 
         let loadedLibrary: DockLibrary
         if let data = try? Data(contentsOf: fileURL),
-           let loaded = try? decoder.decode(DockLibrary.self, from: data),
+           var loaded = try? decoder.decode(DockLibrary.self, from: data),
            !loaded.profiles.isEmpty {
+            loaded.migrate()
             loadedLibrary = loaded
         } else {
             loadedLibrary = DockStore.makeFirstLaunchLibrary()
@@ -198,8 +199,27 @@ final class DockStore: ObservableObject {
 
     // MARK: - Profiles
 
+    /// Creates a dock from what the real Dock shows now, then selects it.
     @discardableResult
-    func createDock(named name: String? = nil) -> DockProfile {
+    func createDockFromLiveDock(named name: String) -> DockProfile? {
+        if rejectIfLocked() { return nil }
+        do {
+            let items = try DockApplicator.readPinnedItems()
+            let profile = createDock(named: name, items: items)
+            library.activeProfileID = profile.id
+            library.lastAppliedSignature = items.layoutSignature
+            liveSignature = items.layoutSignature
+            persist()
+            lastError = nil
+            return profile
+        } catch {
+            lastError = error.localizedDescription
+            return nil
+        }
+    }
+
+    @discardableResult
+    func createDock(named name: String? = nil, items: [DockItem]? = nil) -> DockProfile {
         if rejectIfLocked() {
             return selectedProfile
         }
@@ -218,7 +238,7 @@ final class DockStore: ObservableObject {
         let profile = DockProfile(
             name: label,
             color: color,
-            items: draftItems
+            items: items ?? draftItems
         )
         library.upsert(profile)
         selectedProfileID = profile.id
@@ -270,6 +290,26 @@ final class DockStore: ObservableObject {
 
     func clearError() {
         lastError = nil
+    }
+
+    /// True when `profileID` is the last applied dock and the real Dock still matches it.
+    func isProfileOnDock(_ profileID: UUID) -> Bool {
+        guard library.activeProfileID == profileID,
+              let profile = library.profile(id: profileID) else { return false }
+        refreshLiveSignature()
+        return !liveSignature.isEmpty && liveSignature == profile.items.layoutSignature
+    }
+
+    /// Saves unsaved edits in the editor so a switch from outside the editor does not drop them.
+    func saveDraftIfDirty() {
+        guard isDirty, LicenseStore.shared.hasAccess else { return }
+        saveDraft(applyIfActive: false)
+    }
+
+    func setFocusRestoreProfileID(_ id: UUID?) {
+        guard library.focusRestoreProfileID != id else { return }
+        library.focusRestoreProfileID = id
+        persist()
     }
 
     func apply(profileID: UUID, items: [DockItem]? = nil) {

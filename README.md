@@ -8,7 +8,7 @@ Build Docksly from this repository on a Mac. You do not need a paid Apple Develo
 
 ## Build from source
 
-You need a Mac with macOS 13 or later and Xcode 14.1 or later. Open Xcode once after you install it.
+You need a Mac with macOS 13 or later and Xcode 26 or later. The `KeyboardShortcuts` package needs Swift 6.2. Xcode downloads it on the first build. Open Xcode once after you install it.
 
 ```bash
 git clone https://github.com/julianromli/docksly.git
@@ -34,7 +34,7 @@ Private testers can use an unsigned disk image:
 ./scripts/build-tester-dmg.sh
 ```
 
-The file is `dist/Docksly-1.0.1-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
+The file is `dist/Docksly-1.1.0-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
 
 A public download needs a Developer ID Application certificate and the `docksly-notarize` notarytool profile:
 
@@ -42,7 +42,7 @@ A public download needs a Developer ID Application certificate and the `docksly-
 ./scripts/build-release-dmg.sh
 ```
 
-The file is `dist/Docksly-1.0.1.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
+The file is `dist/Docksly-1.1.0.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
 
 Both disk images use a Docksly-styled window (dark shelf, drag arrow). That build needs `dmgbuild`:
 
@@ -79,13 +79,17 @@ Do **not** enable App Sandbox. Docksly writes the `com.apple.dock` preference do
 - **Save Changes** — Appears when the draft differs from the saved profile. If that profile is the active Dock, save also applies it.
 - **Use This Dock** — Appears when you view a saved layout that is not the live Dock.
 - **Multiple docks** — Named profiles with a color dot. Switch from the pill menu. Create or delete a dock. You must keep at least one.
-- **Menu bar extra** — List of docks (checkmark on the active one), Manage Docks…, Settings…, Quit. A click in the menu bar applies a dock without opening the editor.
+- **Menu bar extra** — List of docks (checkmark on the active one, and each dock's shortcut), Save Current Dock as New Dock…, Manage Docks…, Settings…, Quit. A click in the menu bar applies a dock without opening the editor.
+- **Keyboard shortcuts** — One global shortcut per dock and one for Switch to Next Dock. Set them in Settings → Keyboard Shortcuts. A short notice shows the dock name after a switch. You can turn it off.
+- **Shortcuts app** — Actions **Use Dock** and **Get Current Dock**.
+- **Focus filter** — System Settings → Focus → a Focus → Add Filter → Docksly. Pick a dock. When the Focus turns off, Docksly goes back to the dock that was active before.
+- **Save Current Dock as New Dock** — Saves the live Dock as a new dock. In the menu bar and the dock pill menu.
 - **Local persistence** — JSON in `~/Library/Application Support/Docksly/library.json`. No account, cloud, or analytics.
 - **Export / import** — JSON for one dock or the whole library (Edit Dock menu).
 - **Settings** — Open at login through `SMAppService`. This is reliable after you copy the app into `/Applications`. Show Docksly in Dock can hide the app icon. When it is off, Docksly stays in the menu bar only. Close windows at any time. Use Manage Docks… or Settings… in the menu bar to open a window again. A Docksly tile in a dock layout is not this toggle.
-- **Trial and license** — First launch starts a 24-hour trial. After that, apply, save, create, delete, import, and export stay locked until you paste a Mayar software license key. Buy License opens the Mayar product page.
+- **Trial and license** — First launch starts a 7-day trial. After that, apply, save, create, delete, import, and export stay locked until you paste a Mayar software license key. Buy License opens the Mayar product page.
 
-Out of scope: Focus Filters and cloud sync.
+Out of scope: cloud sync. See [docs/roadmap.md](docs/roadmap.md) for planned features.
 
 ## How Dock switching works
 
@@ -158,12 +162,26 @@ Build and run from Xcode. Then walk this list.
 - [ ] Choose **Settings…**. The settings window opens.
 - [ ] Choose **Quit Docksly**. The menu extra disappears.
 
+### Switch from anywhere (1.1)
+
+- [ ] Settings → Keyboard Shortcuts. Record a shortcut for two docks and for **Switch to Next Dock**.
+- [ ] Press a dock's shortcut in another app. The Dock switches. A notice with the dock name shows for about a second.
+- [ ] Press the same shortcut again. The Dock does not restart. The notice shows again.
+- [ ] Press **Switch to Next Dock** a few times. The docks cycle in list order.
+- [ ] The menu bar list shows each dock's shortcut.
+- [ ] Turn off **Show a notice when the dock changes**. The next switch shows no notice.
+- [ ] Delete a dock that has a shortcut. The shortcut no longer does anything.
+- [ ] Shortcuts app → new shortcut → search Docksly. **Use Dock** and **Get Current Dock** are there. Run each one.
+- [ ] System Settings → Focus → a Focus → Add Filter → Docksly → pick a dock. Turn the Focus on: the Dock switches. Turn it off: the dock from before returns.
+- [ ] Menu bar → **Save Current Dock as New Dock…**. Enter a name. A new dock with the live Dock's apps appears, with a checkmark.
+- [ ] With the trial ended, shortcuts, Shortcuts actions, and the Focus filter do not switch the Dock. The Shortcuts app shows a short error.
+
 ### Settings and files
 
 - [ ] Toggle **Open Docksly at login**. Read the status line. If registration fails, move the app to `/Applications` and try again.
 - [ ] Confirm `~/Library/Application Support/Docksly/library.json` exists and lists your docks.
 - [ ] After an apply, confirm a file exists under `~/Library/Application Support/Docksly/backups/`.
-- [ ] Settings → License shows `Trial · N hours left` on a new install.
+- [ ] Settings → License shows `Trial · 7 days left` on a new install.
 - [ ] After you set `DockslyLicenseAPIURL` and deploy the Worker, Activate a valid Mayar sandbox key. Status becomes `Licensed`.
 - [ ] Activate a bad key. The form shows a short error. The app does not unlock.
 
@@ -221,10 +239,18 @@ Docksly/
     AppIconService.swift NSWorkspace icons
     LaunchAtLoginService.swift
     LicenseClient.swift  Worker verify client
+    DockSwitcher.swift   Switches from hotkeys, Shortcuts, and Focus
+    HotkeyService.swift  Global shortcuts (KeyboardShortcuts package)
+    SwitchHUD.swift      Notice after a switch
+  Intents/               Shortcuts actions and the Focus filter (App Intents)
   Views/                 Editor, strip, tiles, add-app sheet, settings, license
   Assets.xcassets        Original app icon + template menu-bar glyph
+DockslyTests/            Unit tests (library migration, trial clock, switch rules)
+docs/roadmap.md          Plan for 1.1 – 1.3
 license-api/             Cloudflare Worker for Mayar software license verify
 ```
+
+Run the tests with `xcodebuild -project Docksly.xcodeproj -scheme Docksly -destination 'platform=macOS' test`. They read the Dock but never write it.
 
 ## License
 

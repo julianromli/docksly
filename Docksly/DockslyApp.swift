@@ -21,6 +21,7 @@ struct DockslyApp: App {
 
         Settings {
             SettingsView()
+                .environmentObject(store)
                 .environmentObject(license)
         }
         .windowResizability(.contentSize)

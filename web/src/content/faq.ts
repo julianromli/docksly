@@ -29,7 +29,7 @@ export const faqs = [
   {
     question: "Can I try Docksly before I buy it?",
     answer:
-      "Yes. The first launch starts a 24-hour trial. After the trial, apply, save, create, delete, import, and export stay locked until you paste a key.",
+      "Yes. The first launch starts a 7-day trial. After the trial, apply, save, create, delete, import, and export stay locked until you paste a key.",
   },
   {
     question: "Can I get a refund?",

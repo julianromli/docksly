@@ -6,10 +6,14 @@ options:
   xcodeVersion: "14.0"
   createIntermediateGroups: true
   developmentLanguage: en
+packages:
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts
+    from: 3.1.0
 settings:
   base:
-    MARKETING_VERSION: 1.0.1
-    CURRENT_PROJECT_VERSION: 2
+    MARKETING_VERSION: 1.1.0
+    CURRENT_PROJECT_VERSION: 3
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "13.0"
     SWIFT_STRICT_CONCURRENCY: minimal
@@ -21,6 +25,8 @@ targets:
       - path: Docksly
         excludes:
           - "**/.DS_Store"
+    dependencies:
+      - package: KeyboardShortcuts
     settings:
       base:
         PRODUCT_NAME: Docksly
@@ -44,3 +50,16 @@ targets:
         SWIFT_EMIT_LOC_STRINGS: YES
     entitlements:
       path: Docksly/Docksly.entitlements
+  DockslyTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: DockslyTests
+    dependencies:
+      - target: Docksly
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.docksly.DockslyTests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Docksly.app/Contents/MacOS/Docksly"
+        BUNDLE_LOADER: "$(TEST_HOST)"

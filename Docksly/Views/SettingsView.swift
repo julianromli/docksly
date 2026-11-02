@@ -1,9 +1,12 @@
 import AppKit
+import KeyboardShortcuts
 import ServiceManagement
 import SwiftUI
 
 struct SettingsView: View {
+    @EnvironmentObject private var store: DockStore
     @EnvironmentObject private var license: LicenseStore
+    @State private var showSwitchHUD = SwitchHUD.isEnabled
     @State private var launchAtLogin = LaunchAtLoginService.isEnabled
     @State private var loginStatus = SMAppService.mainApp.status
     @State private var showInDock = DockIconVisibilityService.isVisible
@@ -46,6 +49,33 @@ struct SettingsView: View {
             }
 
             Section {
+                ForEach(store.library.profiles) { profile in
+                    HStack {
+                        Label {
+                            Text(profile.name)
+                                .lineLimit(1)
+                        } icon: {
+                            ColorDot(color: profile.color.color, diameter: 8)
+                        }
+                        Spacer()
+                        KeyboardShortcuts.Recorder(for: .dock(profile.id))
+                    }
+                }
+                HStack {
+                    Text("Switch to Next Dock")
+                    Spacer()
+                    KeyboardShortcuts.Recorder(for: .nextDock)
+                }
+                Toggle("Show a notice when the dock changes", isOn: $showSwitchHUD)
+                    .onChange(of: showSwitchHUD) { SwitchHUD.isEnabled = $0 }
+            } header: {
+                Text("Keyboard Shortcuts")
+            } footer: {
+                Text("Shortcuts work in any app. The notice shows after a switch from a shortcut, the Shortcuts app, or a Focus.")
+            }
+            .disabled(!license.hasAccess)
+
+            Section {
                 if license.isLicensed {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.seal.fill")
@@ -68,7 +98,7 @@ struct SettingsView: View {
                 Text("License")
             } footer: {
                 if !license.isLicensed {
-                    Text("The trial starts the first time you open Docksly. After 24 hours, enter a license key from Mayar. License checks use the Mayar service.")
+                    Text("The trial starts the first time you open Docksly. After 7 days, enter a license key from Mayar. License checks use the Mayar service.")
                 }
             }
 

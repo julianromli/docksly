@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import KeyboardShortcuts
 
 struct MenuBarContentView: View {
     @EnvironmentObject private var store: DockStore
@@ -23,8 +24,16 @@ struct MenuBarContentView: View {
                     }
                 }
             }
+            .globalKeyboardShortcut(.dock(profile.id))
             .disabled(store.isApplying || !license.hasAccess)
         }
+
+        Divider()
+
+        Button("Save Current Dock as New Dock…") {
+            SaveLiveDockPrompt.run(store: store)
+        }
+        .disabled(!license.hasAccess)
 
         Divider()
 

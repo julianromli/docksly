@@ -25,6 +25,10 @@ SWIFT_FILES = [
     ("Services/LaunchAtLoginService.swift", "services"),
     ("Services/DockIconVisibilityService.swift", "services"),
     ("Services/LicenseClient.swift", "services"),
+    ("Services/DockSwitcher.swift", "services"),
+    ("Services/HotkeyService.swift", "services"),
+    ("Services/SwitchHUD.swift", "services"),
+    ("Intents/DockIntents.swift", "intents"),
     ("Views/VisualEffectBackground.swift", "views"),
     ("Views/ColorDot.swift", "views"),
     ("Views/DockTileView.swift", "views"),
@@ -35,6 +39,18 @@ SWIFT_FILES = [
     ("Views/SettingsView.swift", "views"),
     ("Views/LicenseLockSheet.swift", "views"),
     ("Views/MenuBarContentView.swift", "views"),
+    ("Views/SaveLiveDockPrompt.swift", "views"),
+]
+
+TEST_FILES = [
+    "DockslyTests/LibraryMigrationTests.swift",
+    "DockslyTests/TrialClockTests.swift",
+    "DockslyTests/DockSwitcherLogicTests.swift",
+]
+
+# Swift packages: (name, url, minimum version, product).
+PACKAGES = [
+    ("KeyboardShortcuts", "https://github.com/sindresorhus/KeyboardShortcuts", "3.1.0", "KeyboardShortcuts"),
 ]
 
 
@@ -83,6 +99,40 @@ def main() -> None:
     debug_target = hid("xcbuild:target:debug")
     release_target = hid("xcbuild:target:release")
     product_ref = hid("product:Docksly.app")
+    group_intents = hid("group:intents")
+
+    tests = [
+        {
+            "path": path,
+            "name": Path(path).name,
+            "ref": hid(f"file:{path}"),
+            "build": hid(f"build:{path}"),
+        }
+        for path in TEST_FILES
+    ]
+    group_tests = hid("group:tests")
+    test_target_ref = hid("target:DockslyTests")
+    test_product_ref = hid("product:DockslyTests.xctest")
+    test_sources_phase = hid("phase:tests:sources")
+    test_frameworks_phase = hid("phase:tests:frameworks")
+    test_config_list = hid("xcconfiglist:tests")
+    test_debug = hid("xcbuild:tests:debug")
+    test_release = hid("xcbuild:tests:release")
+    test_dependency = hid("dependency:tests:app")
+    test_proxy = hid("proxy:tests:app")
+
+    packages = [
+        {
+            "name": name,
+            "url": url,
+            "version": version,
+            "product": product,
+            "ref": hid(f"package:{name}"),
+            "product_ref": hid(f"package-product:{product}"),
+            "build": hid(f"build:package-product:{product}"),
+        }
+        for name, url, version, product in PACKAGES
+    ]
 
     file_entries = []
     build_entries = []
@@ -108,6 +158,53 @@ def main() -> None:
     )
     build_entries.append(
         f"\t\t{assets_build} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {assets_ref} /* Assets.xcassets */; }};"
+    )
+    for package in packages:
+        build_entries.append(
+            f"\t\t{package['build']} /* {package['product']} in Frameworks */ = {{isa = PBXBuildFile; productRef = {package['product_ref']} /* {package['product']} */; }};"
+        )
+    for item in tests:
+        file_entries.append(
+            f"\t\t{item['ref']} /* {item['name']} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = {item['name']}; sourceTree = \"<group>\"; }};"
+        )
+        build_entries.append(
+            f"\t\t{item['build']} /* {item['name']} in Sources */ = {{isa = PBXBuildFile; fileRef = {item['ref']} /* {item['name']} */; }};"
+        )
+    file_entries.append(
+        f"\t\t{test_product_ref} /* DockslyTests.xctest */ = {{isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DockslyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; }};"
+    )
+
+    package_frameworks = "\n".join(
+        f"\t\t\t\t{package['build']} /* {package['product']} in Frameworks */," for package in packages
+    )
+    package_products = "\n".join(
+        f"\t\t\t\t{package['product_ref']} /* {package['product']} */," for package in packages
+    )
+    package_refs = "\n".join(
+        f"\t\t\t\t{package['ref']} /* XCRemoteSwiftPackageReference \"{package['name']}\" */," for package in packages
+    )
+    package_ref_entries = "\n".join(
+        f"""\t\t{package['ref']} /* XCRemoteSwiftPackageReference "{package['name']}" */ = {{
+\t\t\tisa = XCRemoteSwiftPackageReference;
+\t\t\trepositoryURL = "{package['url']}";
+\t\t\trequirement = {{
+\t\t\t\tkind = upToNextMajorVersion;
+\t\t\t\tminimumVersion = {package['version']};
+\t\t\t}};
+\t\t}};"""
+        for package in packages
+    )
+    package_product_entries = "\n".join(
+        f"""\t\t{package['product_ref']} /* {package['product']} */ = {{
+\t\t\tisa = XCSwiftPackageProductDependency;
+\t\t\tpackage = {package['ref']} /* XCRemoteSwiftPackageReference "{package['name']}" */;
+\t\t\tproductName = {package['product']};
+\t\t}};"""
+        for package in packages
+    )
+    test_children = "\n".join(f"\t\t\t\t{item['ref']} /* {item['name']} */," for item in tests)
+    test_sources_list = "\n".join(
+        f"\t\t\t\t{item['build']} /* {item['name']} in Sources */," for item in tests
     )
 
     def children(group_name: str) -> str:
@@ -140,6 +237,14 @@ def main() -> None:
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+{package_frameworks}
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		}};
+		{test_frameworks_phase} /* Frameworks */ = {{
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
@@ -150,6 +255,7 @@ def main() -> None:
 			isa = PBXGroup;
 			children = (
 				{group_app} /* Docksly */,
+				{group_tests} /* DockslyTests */,
 				{group_products} /* Products */,
 			);
 			sourceTree = "<group>";
@@ -158,6 +264,7 @@ def main() -> None:
 			isa = PBXGroup;
 			children = (
 				{product_ref} /* Docksly.app */,
+				{test_product_ref} /* DockslyTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -166,6 +273,7 @@ def main() -> None:
 			isa = PBXGroup;
 			children = (
 {children("app")}
+				{group_intents} /* Intents */,
 				{group_models} /* Models */,
 				{group_persistence} /* Persistence */,
 				{group_services} /* Services */,
@@ -175,6 +283,22 @@ def main() -> None:
 				{entitlements_ref} /* Docksly.entitlements */,
 			);
 			path = Docksly;
+			sourceTree = "<group>";
+		}};
+		{group_intents} /* Intents */ = {{
+			isa = PBXGroup;
+			children = (
+{children("intents")}
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		}};
+		{group_tests} /* DockslyTests */ = {{
+			isa = PBXGroup;
+			children = (
+{test_children}
+			);
+			path = DockslyTests;
 			sourceTree = "<group>";
 		}};
 		{group_models} /* Models */ = {{
@@ -225,11 +349,49 @@ def main() -> None:
 			dependencies = (
 			);
 			name = Docksly;
+			packageProductDependencies = (
+{package_products}
+			);
 			productName = Docksly;
 			productReference = {product_ref} /* Docksly.app */;
 			productType = "com.apple.product-type.application";
 		}};
+		{test_target_ref} /* DockslyTests */ = {{
+			isa = PBXNativeTarget;
+			buildConfigurationList = {test_config_list} /* Build configuration list for PBXNativeTarget "DockslyTests" */;
+			buildPhases = (
+				{test_sources_phase} /* Sources */,
+				{test_frameworks_phase} /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				{test_dependency} /* PBXTargetDependency */,
+			);
+			name = DockslyTests;
+			productName = DockslyTests;
+			productReference = {test_product_ref} /* DockslyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		}};
 /* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		{test_proxy} /* PBXContainerItemProxy */ = {{
+			isa = PBXContainerItemProxy;
+			containerPortal = {project_ref} /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = {target_ref};
+			remoteInfo = Docksly;
+		}};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		{test_dependency} /* PBXTargetDependency */ = {{
+			isa = PBXTargetDependency;
+			target = {target_ref} /* Docksly */;
+			targetProxy = {test_proxy} /* PBXContainerItemProxy */;
+		}};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		{project_ref} /* Project object */ = {{
@@ -242,6 +404,10 @@ def main() -> None:
 					{target_ref} = {{
 						CreatedOnToolsVersion = 15.0;
 					}};
+					{test_target_ref} = {{
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = {target_ref};
+					}};
 				}};
 			}};
 			buildConfigurationList = {config_list_project} /* Build configuration list for PBXProject "Docksly" */;
@@ -253,11 +419,15 @@ def main() -> None:
 				Base,
 			);
 			mainGroup = {group_main};
+			packageReferences = (
+{package_refs}
+			);
 			productRefGroup = {group_products} /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				{target_ref} /* Docksly */,
+				{test_target_ref} /* DockslyTests */,
 			);
 		}};
 /* End PBXProject section */
@@ -279,6 +449,14 @@ def main() -> None:
 			buildActionMask = 2147483647;
 			files = (
 {sources_list}
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		}};
+		{test_sources_phase} /* Sources */ = {{
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+{test_sources_list}
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		}};
@@ -332,7 +510,7 @@ def main() -> None:
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Docksly/Info.plist;
@@ -341,7 +519,7 @@ def main() -> None:
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -359,7 +537,7 @@ def main() -> None:
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Docksly/Info.plist;
@@ -368,13 +546,45 @@ def main() -> None:
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+			}};
+			name = Release;
+		}};
+		{test_debug} /* Debug */ = {{
+			isa = XCBuildConfiguration;
+			buildSettings = {{
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.DockslyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Docksly.app/Contents/MacOS/Docksly";
+			}};
+			name = Debug;
+		}};
+		{test_release} /* Release */ = {{
+			isa = XCBuildConfiguration;
+			buildSettings = {{
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.DockslyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Docksly.app/Contents/MacOS/Docksly";
 			}};
 			name = Release;
 		}};
@@ -399,7 +609,24 @@ def main() -> None:
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		}};
+		{test_config_list} /* Build configuration list for PBXNativeTarget "DockslyTests" */ = {{
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				{test_debug} /* Debug */,
+				{test_release} /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		}};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+{package_ref_entries}
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+{package_product_entries}
+/* End XCSwiftPackageProductDependency section */
 	}};
 	rootObject = {project_ref} /* Project object */;
 }}
@@ -442,6 +669,18 @@ def main() -> None:
               selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
               shouldUseLaunchSchemeArgsEnv = "YES"
               shouldAutocreateTestPlan = "YES">
+              <Testables>
+                 <TestableReference
+                    skipped = "NO">
+                    <BuildableReference
+                       BuildableIdentifier = "primary"
+                       BlueprintIdentifier = "{test_target_ref}"
+                       BuildableName = "DockslyTests.xctest"
+                       BlueprintName = "DockslyTests"
+                       ReferencedContainer = "container:Docksly.xcodeproj">
+                    </BuildableReference>
+                 </TestableReference>
+              </Testables>
            </TestAction>
            <LaunchAction
               buildConfiguration = "Debug"

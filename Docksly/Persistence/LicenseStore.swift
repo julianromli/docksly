@@ -7,7 +7,7 @@ import SwiftUI
 @MainActor
 final class LicenseStore: ObservableObject {
     static let shared = LicenseStore()
-    static let trialDuration: TimeInterval = 24 * 60 * 60
+    static let trialDuration: TimeInterval = 7 * 24 * 60 * 60
     static let lockedMessage = "Your trial has ended. Enter a license key in Settings to continue."
 
     @Published private(set) var record: LicenseRecord
@@ -69,12 +69,21 @@ final class LicenseStore: ObservableObject {
     }
 
     func trialRemainingText(now: Date = Date()) -> String {
-        let remaining = trialEndsAt.timeIntervalSince(now)
+        Self.trialRemainingText(endsAt: trialEndsAt, now: now)
+    }
+
+    /// Short status for the trial clock: days, then hours, then minutes.
+    nonisolated static func trialRemainingText(endsAt: Date, now: Date) -> String {
+        let remaining = endsAt.timeIntervalSince(now)
         if remaining <= 0 {
             return "Trial ended"
         }
+        let days = Int(remaining) / 86_400
         let hours = Int(remaining) / 3600
         let minutes = (Int(remaining) % 3600) / 60
+        if days >= 1 {
+            return days == 1 ? "Trial · 1 day left" : "Trial · \(days) days left"
+        }
         if hours >= 1 {
             return hours == 1 ? "Trial · 1 hour left" : "Trial · \(hours) hours left"
         }

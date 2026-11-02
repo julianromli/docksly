@@ -29,6 +29,10 @@ struct ProfilePickerButton: View {
                 store.wantsNewDockName = true
             }
             .disabled(!license.hasAccess)
+            Button("Save Current Dock as New Dock…") {
+                SaveLiveDockPrompt.run(store: store)
+            }
+            .disabled(!license.hasAccess)
         } label: {
             Image(systemName: "chevron.down")
                 .font(.system(size: 9, weight: .semibold))
