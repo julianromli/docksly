@@ -6,6 +6,14 @@ This project is an independent MVP. It is not Dockset. It does not use Dockset a
 
 Build Docksly from this repository on a Mac. You do not need a paid Apple Developer team for that path. A public `.dmg` still needs Developer ID and notarization.
 
+## Install with Homebrew
+
+```bash
+brew tap julianromli/tap
+brew trust julianromli/tap
+brew install --cask docksly
+```
+
 ## Build from source
 
 You need a Mac with macOS 13 or later and Xcode 26 or later. The `KeyboardShortcuts` package needs Swift 6.2. Xcode downloads it on the first build. Open Xcode once after you install it.
@@ -43,6 +51,8 @@ A public download needs a Developer ID Application certificate and the `docksly-
 ```
 
 The file is `dist/Docksly-1.1.0.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
+
+Then run `./scripts/publish-release.sh "Release notes"`. It creates the GitHub release with the DMG and updates the cask in [julianromli/homebrew-tap](https://github.com/julianromli/homebrew-tap).
 
 Both disk images use a Docksly-styled window (dark shelf, drag arrow). That build needs `dmgbuild`:
 
