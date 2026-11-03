@@ -42,6 +42,18 @@ export const features = [
     icon: "appearance",
   },
   {
+    title: "Display",
+    subtitle: "rules",
+    label: "Display rules",
+    icon: "displays",
+  },
+  {
+    title: "Open and",
+    subtitle: "quit apps",
+    label: "Open and quit apps",
+    icon: "launch",
+  },
+  {
     title: "Global",
     subtitle: "hotkeys",
     label: "Global hotkeys",

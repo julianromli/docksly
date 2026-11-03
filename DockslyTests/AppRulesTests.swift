@@ -59,6 +59,38 @@ final class AppRulesTests: XCTestCase {
         XCTAssertEqual(library.displayRules?.map(\.setKey), ["b"])
     }
 
+    // MARK: - Display change tracking
+
+    func testSameSetReportedAgainIsNotAChange() {
+        var tracker = DisplaySetTracker()
+        tracker.reset(to: "a")
+        XCTAssertFalse(tracker.isChange(to: "a"))
+        XCTAssertFalse(tracker.isChange(to: "a"))
+    }
+
+    func testPlugOrUnplugIsAChangeEachTime() {
+        var tracker = DisplaySetTracker()
+        tracker.reset(to: "built-in")
+        XCTAssertTrue(tracker.isChange(to: "built-in|studio"))
+        XCTAssertFalse(tracker.isChange(to: "built-in|studio"))
+        XCTAssertTrue(tracker.isChange(to: "built-in"))
+        XCTAssertEqual(tracker.lastKey, "built-in")
+    }
+
+    /// Simulates plugging a second display in and out. The rule for the full set should apply once per change.
+    func testPlugAndUnplugSequenceAppliesRuleOnlyForSetsWithRules() {
+        let rules = [DisplayRule(setKey: "built-in|studio", setName: "Both", profileID: UUID())]
+        var tracker = DisplaySetTracker()
+        tracker.reset(to: "built-in")
+        var applied: [UUID] = []
+        for key in ["built-in", "built-in|studio", "built-in|studio", "built-in", "built-in|studio"] {
+            guard tracker.isChange(to: key) else { continue }
+            if let id = DisplayRuleResolver.profileID(for: key, in: rules) { applied.append(id) }
+        }
+        XCTAssertEqual(applied.count, 2, "Plugging in twice applies the rule twice. Once per change.")
+        XCTAssertEqual(Set(applied).count, 1)
+    }
+
     // MARK: - Quit plan
 
     private func running(_ id: String?, regular: Bool = true) -> QuitPlan.RunningApp {

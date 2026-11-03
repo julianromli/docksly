@@ -3,14 +3,31 @@ import Foundation
 
 /// Applies a dock when the set of connected displays changes, if a rule exists for it.
 /// Also applies at a launch at login, using the displays connected then.
+/// Remembers the last display set and reports only real changes. Pure, so it can be tested.
+struct DisplaySetTracker {
+    private(set) var lastKey: String?
+
+    /// Starts from the set that is connected now, so the first change is the first real change.
+    mutating func reset(to key: String) {
+        lastKey = key
+    }
+
+    /// True when `key` is a new set. The same set reported again is not a change.
+    mutating func isChange(to key: String) -> Bool {
+        guard key != lastKey else { return false }
+        lastKey = key
+        return true
+    }
+}
+
 @MainActor
 enum DisplayWatcher {
-    private static var lastKey: String?
+    private static var tracker = DisplaySetTracker()
     private static var observer: NSObjectProtocol?
 
     static func start(store: DockStore? = nil) {
         guard observer == nil else { return }
-        lastKey = DisplaySetKey.make(DisplayIdentity.current())
+        tracker.reset(to: DisplaySetKey.make(DisplayIdentity.current()))
         observer = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
             object: nil,
@@ -26,7 +43,7 @@ enum DisplayWatcher {
     static func applyForCurrentDisplays(store: DockStore? = nil) {
         let store = store ?? .shared
         let key = DisplaySetKey.make(DisplayIdentity.current())
-        lastKey = key
+        tracker.reset(to: key)
         apply(for: key, store: store)
     }
 
@@ -34,8 +51,7 @@ enum DisplayWatcher {
         let store = store ?? .shared
         let key = DisplaySetKey.make(DisplayIdentity.current())
         // The notification can fire more than once for one change. Act only on a new set.
-        guard key != lastKey else { return }
-        lastKey = key
+        guard tracker.isChange(to: key) else { return }
         apply(for: key, store: store)
     }
 
