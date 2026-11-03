@@ -24,6 +24,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         DockIconVisibilityService.startObservingWindows()
         HotkeyService.start()
+        DisplayWatcher.start()
+        if launchedAtLogin {
+            DisplayWatcher.applyForCurrentDisplays()
+        }
         if launchedAtLogin {
             // Start in the menu bar only. SwiftUI opens the editor at launch, so close it.
             DockIconVisibilityService.suppressCloseHint = true

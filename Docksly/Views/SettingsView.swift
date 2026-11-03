@@ -7,6 +7,7 @@ struct SettingsView: View {
     @EnvironmentObject private var store: DockStore
     @EnvironmentObject private var license: LicenseStore
     @State private var showSwitchHUD = SwitchHUD.isEnabled
+    @State private var ruleDockID: UUID?
     @State private var launchAtLogin = LaunchAtLoginService.isEnabled
     @State private var loginStatus = SMAppService.mainApp.status
     @State private var showInDock = DockIconVisibilityService.isVisible
@@ -72,6 +73,67 @@ struct SettingsView: View {
                 Text("Keyboard Shortcuts")
             } footer: {
                 Text("Shortcuts work in any app. The notice shows after a switch from a shortcut, the Shortcuts app, or a Focus.")
+            }
+            .disabled(!license.hasAccess)
+
+            Section {
+                Text("Connected: \(DisplaySetKey.readableName(DisplayIdentity.current()))")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Picker("Dock", selection: $ruleDockID) {
+                    ForEach(store.library.profiles) { profile in
+                        Text(profile.name).tag(Optional(profile.id))
+                    }
+                }
+                Button("Use a Dock for This Display Setup") {
+                    saveDisplayRule()
+                }
+                .disabled(ruleDockID == nil || !license.hasAccess)
+                ForEach(store.library.displayRules ?? []) { rule in
+                    HStack {
+                        Text(rule.setName)
+                            .lineLimit(1)
+                        Spacer()
+                        Text(store.library.profile(id: rule.profileID)?.name ?? "Deleted dock")
+                            .foregroundStyle(.secondary)
+                        Button(role: .destructive) {
+                            store.removeDisplayRule(id: rule.id)
+                        } label: {
+                            Image(systemName: "minus.circle")
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel("Remove rule for \(rule.setName)")
+                    }
+                }
+            } header: {
+                Text("Displays")
+            } footer: {
+                Text("When this exact set of displays connects, Docksly uses its dock. A set with no rule changes nothing.")
+            }
+            .disabled(!license.hasAccess)
+
+            Section {
+                ForEach(store.library.alwaysKeepOpen ?? []) { app in
+                    HStack {
+                        Text(app.name)
+                        Spacer()
+                        Button(role: .destructive) {
+                            store.setAlwaysKeepOpen((store.library.alwaysKeepOpen ?? []).filter { $0 != app })
+                        } label: {
+                            Image(systemName: "minus.circle")
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel("Stop keeping \(app.name) open")
+                    }
+                }
+                Button("Add App…") {
+                    addKeepOpenApp()
+                }
+            } header: {
+                Text("Keep Open")
+            } footer: {
+                Text("Docksly never quits these apps when you switch docks. Finder and Docksly are always kept.")
             }
             .disabled(!license.hasAccess)
 
@@ -172,6 +234,33 @@ struct SettingsView: View {
         return "Docksly \(version) (\(build))"
     }
 
+    private func saveDisplayRule() {
+        guard let ruleDockID else { return }
+        let displays = DisplayIdentity.current()
+        store.upsertDisplayRule(DisplayRule(
+            setKey: DisplaySetKey.make(displays),
+            setName: DisplaySetKey.readableName(displays),
+            profileID: ruleDockID
+        ))
+        // Use the dock now, as the display rule would on a change.
+        DockSwitcher.switchTo(profileID: ruleDockID, store: store)
+    }
+
+    private func addKeepOpenApp() {
+        let panel = NSOpenPanel()
+        panel.title = "Keep this app open"
+        panel.allowedContentTypes = [.application]
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        guard panel.runModal() == .OK, let url = panel.url,
+              let id = DockApplicator.bundleIdentifier(at: url.path) else { return }
+        let app = KeepOpenApp(bundleIdentifier: id, name: DockApplicator.displayName(at: url.path))
+        let current = store.library.alwaysKeepOpen ?? []
+        guard !current.contains(app) else { return }
+        store.setAlwaysKeepOpen(current + [app])
+    }
+
     private var launchBinding: Binding<Bool> {
         Binding(
             get: { launchAtLogin },
@@ -201,6 +290,9 @@ struct SettingsView: View {
         launchAtLogin = LaunchAtLoginService.isEnabled
         loginStatus = SMAppService.mainApp.status
         showInDock = DockIconVisibilityService.isVisible
+        if ruleDockID == nil {
+            ruleDockID = store.selectedProfileID
+        }
     }
 
     private func openLoginItems() {

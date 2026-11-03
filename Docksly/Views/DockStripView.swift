@@ -114,7 +114,17 @@ struct DockStripView: View {
                                 ? { value in handleDrag(item, value) }
                                 : nil,
                             onDragEnded: license.hasAccess ? endDrag : nil,
-                            allowsEditing: license.hasAccess
+                            allowsEditing: license.hasAccess,
+                            onToggleOpen: license.hasAccess && item.kind == .application
+                                ? { store.updateItem(id: item.id) { $0.opensWhenUsed = !($0.opensWhenUsed ?? false) } }
+                                : nil,
+                            onChooseOpenTarget: license.hasAccess && item.kind == .application
+                                ? {
+                                    if let target = SwitchActions.chooseOpenTarget() {
+                                        store.updateItem(id: item.id) { $0.openTarget = target }
+                                    }
+                                }
+                                : nil
                         )
                         .modifier(DockSwitchStagger(
                             index: index,

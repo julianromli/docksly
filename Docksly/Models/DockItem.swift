@@ -14,6 +14,10 @@ struct DockItem: Identifiable, Codable, Equatable, Hashable {
     /// Last known filesystem path of the `.app` bundle.
     var bookmarkPath: String?
     var displayName: String?
+    /// 1.3: open this app when the dock is used.
+    var opensWhenUsed: Bool?
+    /// 1.3: an optional file, folder, or web address to open with the app.
+    var openTarget: String?
 
     static func application(
         id: UUID = UUID(),

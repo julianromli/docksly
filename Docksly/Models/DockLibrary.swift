@@ -3,7 +3,7 @@ import Foundation
 /// On-disk document for every saved dock plus which one was last applied.
 struct DockLibrary: Codable, Equatable {
     /// Version of this file format. Files from 1.0.x have no value and read as 1.
-    static let currentSchemaVersion = 3
+    static let currentSchemaVersion = 4
 
     var schemaVersion: Int
     var profiles: [DockProfile]
@@ -13,6 +13,10 @@ struct DockLibrary: Codable, Equatable {
     var lastAppliedSignature: String?
     /// Dock that was active before a Focus filter switched docks. Restored when the Focus turns off.
     var focusRestoreProfileID: UUID?
+    /// 1.3: "this exact set of displays → this dock". Nil or empty means no rules.
+    var displayRules: [DisplayRule]?
+    /// 1.3: apps that a dock switch never quits. Set in Settings.
+    var alwaysKeepOpen: [KeepOpenApp]?
 
     init(
         profiles: [DockProfile] = [],
@@ -33,6 +37,8 @@ struct DockLibrary: Codable, Equatable {
         case activeProfileID
         case lastAppliedSignature
         case focusRestoreProfileID
+        case displayRules
+        case alwaysKeepOpen
     }
 
     /// New fields are optional, so files from older versions still open.
@@ -43,6 +49,8 @@ struct DockLibrary: Codable, Equatable {
         activeProfileID = try container.decodeIfPresent(UUID.self, forKey: .activeProfileID)
         lastAppliedSignature = try container.decodeIfPresent(String.self, forKey: .lastAppliedSignature)
         focusRestoreProfileID = try container.decodeIfPresent(UUID.self, forKey: .focusRestoreProfileID)
+        displayRules = try container.decodeIfPresent([DisplayRule].self, forKey: .displayRules)
+        alwaysKeepOpen = try container.decodeIfPresent([KeepOpenApp].self, forKey: .alwaysKeepOpen)
     }
 
     /// Brings an older file up to `currentSchemaVersion`.
@@ -57,6 +65,10 @@ struct DockLibrary: Codable, Equatable {
             // every dock, so nothing on screen changes after the update.
             fillMissingOthers(with: currentOthers)
             schemaVersion = 3
+        }
+        if schemaVersion < 4 {
+            // 1.3 adds only optional fields (display rules, keep-open list, dock options).
+            schemaVersion = 4
         }
     }
 
@@ -94,6 +106,7 @@ struct DockLibrary: Codable, Equatable {
         if focusRestoreProfileID == id {
             focusRestoreProfileID = nil
         }
+        displayRules?.removeAll { $0.profileID == id }
     }
 
     /// The dock after `id` in list order, wrapping at the end.

@@ -10,6 +10,8 @@ struct DockProfile: Identifiable, Codable, Equatable, Hashable {
     var otherItems: [DockOtherItem]?
     /// Dock settings for this dock. Nil or `isEnabled == false` means Docksly leaves them alone.
     var appearance: DockAppearance?
+    /// 1.3: ask apps that are not in this dock to quit when it is used. Off by default.
+    var quitOthersOnSwitch: Bool?
     var createdAt: Date
     var updatedAt: Date
 
@@ -20,6 +22,7 @@ struct DockProfile: Identifiable, Codable, Equatable, Hashable {
         items: [DockItem] = [],
         otherItems: [DockOtherItem]? = [],
         appearance: DockAppearance? = nil,
+        quitOthersOnSwitch: Bool? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -29,6 +32,7 @@ struct DockProfile: Identifiable, Codable, Equatable, Hashable {
         self.items = items
         self.otherItems = otherItems
         self.appearance = appearance
+        self.quitOthersOnSwitch = quitOthersOnSwitch
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

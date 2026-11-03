@@ -75,7 +75,7 @@ final class LibraryMigrationTests: XCTestCase {
             return []
         })
         XCTAssertEqual(library.profiles[0].otherItems, [])
-        XCTAssertEqual(library.schemaVersion, 3)
+        XCTAssertEqual(library.schemaVersion, DockLibrary.currentSchemaVersion)
     }
 
     func testDockWithoutNewFieldsDecodes() throws {

@@ -164,6 +164,17 @@ struct EditorWindowView: View {
             Divider()
             Button("Dock Appearance…") { store.wantsAppearance = true }
                 .disabled(!license.hasAccess)
+            Toggle("Quit Apps Not in This Dock", isOn: Binding(
+                get: { store.draftQuitOthers },
+                set: { on in
+                    if !on {
+                        store.setDraftQuitOthers(false)
+                    } else if SwitchActions.confirmQuitOthers() {
+                        store.setDraftQuitOthers(true)
+                    }
+                }
+            ))
+            .disabled(!license.hasAccess)
             Divider()
             Button("Capture Current Dock") { store.captureLiveDockIntoDraft() }
                 .disabled(!license.hasAccess)

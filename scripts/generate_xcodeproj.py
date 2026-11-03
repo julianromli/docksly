@@ -19,6 +19,8 @@ SWIFT_FILES = [
     ("Models/ProfileColor.swift", "models"),
     ("Models/LicenseRecord.swift", "models"),
     ("Models/DockOtherItem.swift", "models"),
+    ("Models/DisplayRule.swift", "models"),
+    ("Models/AppActions.swift", "models"),
     ("Persistence/DockStore.swift", "persistence"),
     ("Persistence/LicenseStore.swift", "persistence"),
     ("Services/DockApplicator.swift", "services"),
@@ -29,6 +31,8 @@ SWIFT_FILES = [
     ("Services/DockSwitcher.swift", "services"),
     ("Services/HotkeyService.swift", "services"),
     ("Services/SwitchHUD.swift", "services"),
+    ("Services/SwitchActions.swift", "services"),
+    ("Services/DisplayWatcher.swift", "services"),
     ("Intents/DockIntents.swift", "intents"),
     ("Views/VisualEffectBackground.swift", "views"),
     ("Views/ColorDot.swift", "views"),
@@ -51,6 +55,7 @@ TEST_FILES = [
     "DockslyTests/TrialClockTests.swift",
     "DockslyTests/DockSwitcherLogicTests.swift",
     "DockslyTests/DockTileEncodingTests.swift",
+    "DockslyTests/AppRulesTests.swift",
 ]
 
 # Swift packages: (name, url, minimum version, product).
@@ -515,7 +520,7 @@ def main() -> None:
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Docksly/Info.plist;
@@ -524,7 +529,7 @@ def main() -> None:
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -542,7 +547,7 @@ def main() -> None:
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Docksly/Info.plist;
@@ -551,7 +556,7 @@ def main() -> None:
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.docksly.Docksly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

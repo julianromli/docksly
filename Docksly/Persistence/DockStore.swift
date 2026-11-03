@@ -14,6 +14,7 @@ final class DockStore: ObservableObject {
     @Published var draftItems: [DockItem]
     @Published var draftOthers: [DockOtherItem]
     @Published var draftAppearance: DockAppearance?
+    @Published var draftQuitOthers = false
     @Published var lastError: String?
     @Published var isApplying = false
     @Published var liveSignature: String = ""
@@ -38,6 +39,7 @@ final class DockStore: ObservableObject {
         return saved.items != draftItems
             || (saved.otherItems ?? []) != draftOthers
             || saved.appearance != draftAppearance
+            || (saved.quitOthersOnSwitch ?? false) != draftQuitOthers
             || saved.name != draftName
             || saved.color != draftColor
     }
@@ -111,6 +113,7 @@ final class DockStore: ObservableObject {
         draftItems = profile.items
         draftOthers = profile.otherItems ?? []
         draftAppearance = profile.appearance
+        draftQuitOthers = profile.quitOthersOnSwitch ?? false
         persist()
         refreshLiveSignature()
     }
@@ -135,6 +138,7 @@ final class DockStore: ObservableObject {
         draftItems = profile.items
         draftOthers = profile.otherItems ?? []
         draftAppearance = profile.appearance
+        draftQuitOthers = profile.quitOthersOnSwitch ?? false
     }
 
     // MARK: - Mutations
@@ -257,6 +261,38 @@ final class DockStore: ObservableObject {
         change(&draftOthers[index])
     }
 
+    /// Turning this on is confirmed by the caller first. See `SwitchActions.confirmQuitOthers`.
+    func setDraftQuitOthers(_ on: Bool) {
+        guard !rejectIfLocked() else { return }
+        draftQuitOthers = on
+    }
+
+    func updateItem(id: UUID, _ change: (inout DockItem) -> Void) {
+        guard !rejectIfLocked() else { return }
+        guard let index = draftItems.firstIndex(where: { $0.id == id }) else { return }
+        change(&draftItems[index])
+    }
+
+    // MARK: - Display rules and keep-open apps (1.3)
+
+    func upsertDisplayRule(_ rule: DisplayRule) {
+        guard !rejectIfLocked() else { return }
+        library.displayRules = DisplayRuleResolver.upsert(rule, into: library.displayRules ?? [])
+        persist()
+    }
+
+    func removeDisplayRule(id: UUID) {
+        guard !rejectIfLocked() else { return }
+        library.displayRules?.removeAll { $0.id == id }
+        persist()
+    }
+
+    func setAlwaysKeepOpen(_ apps: [KeepOpenApp]) {
+        guard !rejectIfLocked() else { return }
+        library.alwaysKeepOpen = apps
+        persist()
+    }
+
     func setDraftAppearance(_ appearance: DockAppearance?) {
         guard !rejectIfLocked() else { return }
         draftAppearance = appearance?.clamped()
@@ -357,6 +393,7 @@ final class DockStore: ObservableObject {
         profile.items = draftItems
         profile.otherItems = draftOthers
         profile.appearance = draftAppearance
+        profile.quitOthersOnSwitch = draftQuitOthers
         profile.updatedAt = Date()
         library.upsert(profile)
         persist()
@@ -408,6 +445,7 @@ final class DockStore: ObservableObject {
         // Nil means "no right-side data": leave the right side of the Dock as it is.
         let others: [DockOtherItem]? = draft ? draftOthers : profile.otherItems
         let appearance = draft ? draftAppearance : profile.appearance
+        let quitOthers = draft ? draftQuitOthers : (profile.quitOthersOnSwitch ?? false)
         let signature = DockLayout.signature(
             apps: items,
             others: others ?? DockApplicator.readOtherItems()
@@ -417,6 +455,7 @@ final class DockStore: ObservableObject {
         do {
             writeDockBackup()
             try DockApplicator.apply(items, others: others, appearance: appearance)
+            SwitchActions.run(items: items, quitOthers: quitOthers, keepOpen: library.alwaysKeepOpen ?? [])
             library.activeProfileID = profileID
             library.lastAppliedSignature = signature
             liveSignature = signature
@@ -457,6 +496,7 @@ final class DockStore: ObservableObject {
         snapshot.items = draftItems
         snapshot.otherItems = draftOthers
         snapshot.appearance = draftAppearance
+        snapshot.quitOthersOnSwitch = draftQuitOthers
         snapshot.updatedAt = Date()
         let data = try encoder.encode(snapshot)
         try data.write(to: url, options: Data.WritingOptions.atomic)

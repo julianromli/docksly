@@ -42,7 +42,7 @@ Private testers can use an unsigned disk image:
 ./scripts/build-tester-dmg.sh
 ```
 
-The file is `dist/Docksly-1.2.0-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
+The file is `dist/Docksly-1.3.0-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
 
 A public download needs a Developer ID Application certificate and the `docksly-notarize` notarytool profile:
 
@@ -50,7 +50,7 @@ A public download needs a Developer ID Application certificate and the `docksly-
 ./scripts/build-release-dmg.sh
 ```
 
-The file is `dist/Docksly-1.2.0.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
+The file is `dist/Docksly-1.3.0.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
 
 Then run `./scripts/publish-release.sh "Release notes"`. It creates the GitHub release with the DMG and updates the cask in [julianromli/homebrew-tap](https://github.com/julianromli/homebrew-tap).
 
@@ -173,6 +173,17 @@ Build and run from Xcode. Then walk this list.
 - [ ] Choose **Manage Docks…**. The editor returns.
 - [ ] Choose **Settings…**. The settings window opens.
 - [ ] Choose **Quit Docksly**. The menu extra disappears.
+
+### Automation (1.3)
+
+- [ ] Settings → Displays. The line "Connected:" names your display. Pick a dock and press **Use a Dock for This Display Setup**. The Dock switches now, and the rule appears in the list.
+- [ ] Remove the rule with the minus button. Nothing changes until the next display change.
+- [ ] Needs a second display (not tested yet): with a rule for both screens connected, unplug one screen. The rule for that set does not apply. Plug it back in. The dock for the full set applies.
+- [ ] Edit Dock → an app tile → right-click → **Open When This Dock Is Used**. A dot shows on the tile. Quit the app. Use the dock. The app opens. If it is already open, it comes to the front.
+- [ ] Right-click the same tile → **Also Open a File, Folder, or Web Address…** → enter `https://example.com`. Use the dock: the app opens that address.
+- [ ] Edit Dock → **Quit Apps Not in This Dock**. The first time, read the alert and press **Turn On**. Save Changes. Open two other apps, then use the dock. The apps not in the dock ask to quit (a document can ask you to save first). Finder and Docksly stay open.
+- [ ] Settings → Keep Open → **Add App…** → pick an app. Turn on Quit Apps Not in This Dock and use the dock. That app stays open.
+- [ ] Press Cancel on the first-time alert. The toggle stays off.
 
 ### Right side and Dock settings (1.2)
 

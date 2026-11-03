@@ -12,6 +12,8 @@ struct DockTileView: View {
     var onDragChanged: ((DragGesture.Value) -> Void)?
     var onDragEnded: (() -> Void)?
     var allowsEditing: Bool = true
+    var onToggleOpen: (() -> Void)?
+    var onChooseOpenTarget: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHoveringTile = false
@@ -34,7 +36,11 @@ struct DockTileView: View {
                     reorderGesture: reorderGesture,
                     onRemove: onRemove,
                     onMoveLeft: onMoveLeft,
-                    onMoveRight: onMoveRight
+                    onMoveRight: onMoveRight,
+                    onToggleOpen: onToggleOpen,
+                    onChooseOpenTarget: onChooseOpenTarget,
+                    opensWhenUsed: item.opensWhenUsed == true,
+                    hasOpenTarget: item.openTarget != nil
                 ))
                 .onHover { hovering in
                     isHoveringTile = hovering
@@ -146,6 +152,15 @@ struct DockTileView: View {
                     .accessibilityLabel("Application is missing")
             }
         }
+        .overlay(alignment: .bottomLeading) {
+            if item.opensWhenUsed == true {
+                Circle()
+                    .fill(Color.accentColor)
+                    .frame(width: 5, height: 5)
+                    .offset(x: 2, y: -2)
+                    .accessibilityHidden(true)
+            }
+        }
         .frame(width: DockslyStyle.tileWidth, height: 60)
         .help(missing ? "\(item.title) — missing on this Mac. Hover for Remove." : "\(item.title). Drag to reorder.")
     }
@@ -167,6 +182,10 @@ private struct TileEditGestures<G: Gesture>: ViewModifier {
     let onRemove: () -> Void
     let onMoveLeft: (() -> Void)?
     let onMoveRight: (() -> Void)?
+    var onToggleOpen: (() -> Void)?
+    var onChooseOpenTarget: (() -> Void)?
+    var opensWhenUsed: Bool = false
+    var hasOpenTarget: Bool = false
 
     @ViewBuilder
     func body(content: Content) -> some View {
@@ -183,6 +202,16 @@ private struct TileEditGestures<G: Gesture>: ViewModifier {
                     if onMoveLeft != nil || onMoveRight != nil {
                         Divider()
                     }
+                    if let onToggleOpen {
+                        Toggle("Open When This Dock Is Used", isOn: Binding(
+                            get: { opensWhenUsed },
+                            set: { _ in onToggleOpen() }
+                        ))
+                    }
+                    if let onChooseOpenTarget, opensWhenUsed {
+                        Button(hasOpenTarget ? "Change What It Opens…" : "Also Open a File, Folder, or Web Address…", action: onChooseOpenTarget)
+                    }
+                    Divider()
                     Button("Remove", role: .destructive, action: onRemove)
                 }
                 .accessibilityAction(named: "Remove", onRemove)

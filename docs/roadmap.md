@@ -74,13 +74,14 @@ Rp49.000 for a lifetime license with all future updates.
   to quit; never force. Never quit Finder, Docksly, or apps in the Settings
   **Always keep open** list. Confirm the first time it is turned on. No
   reopen later.
-- **Lock the Dock to a display** (off by default, display picker, default is
-  the main display). Ask for Accessibility permission only when turned on.
-  If testing shows that it does not work on current macOS, drop it and tell
-  the owner.
+- ~~Lock the Dock to a display~~ Moved to Later (2026-11-03). Not tested: the
+  owner has one display. Needs a two-display test before it returns.
 - Website: a dated **Docksly vs DockFlow** page with facts from DockFlow's
   public site only.
 
 ## Later
 
 - Submit the cask to the official `homebrew/cask` when Docksly has more users.
+- Lock the Dock to a display (event tap, needs Accessibility permission).
+  Test on two displays first: a spike that moves the cursor to the bottom
+  edge of the second display and checks where the Dock appears.
