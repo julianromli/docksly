@@ -42,7 +42,7 @@ Private testers can use an unsigned disk image:
 ./scripts/build-tester-dmg.sh
 ```
 
-The file is `dist/Docksly-1.3.1-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
+The file is `dist/Docksly-1.3.2-tester.dmg`. Do not commit it. Recipients who download it must use **Open Anyway** in Privacy & Security. Do not sell this file.
 
 A public download needs a Developer ID Application certificate and the `docksly-notarize` notarytool profile:
 
@@ -50,7 +50,7 @@ A public download needs a Developer ID Application certificate and the `docksly-
 ./scripts/build-release-dmg.sh
 ```
 
-The file is `dist/Docksly-1.3.1.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
+The file is `dist/Docksly-1.3.2.dmg`. The script also copies it to `web/public/Docksly.dmg` for the site download at `/download`. Apple signs, notarizes, and staples it. Recipients can open it without **Open Anyway**.
 
 Then run `./scripts/publish-release.sh "Release notes"`. It creates the GitHub release with the DMG and updates the cask in [julianromli/homebrew-tap](https://github.com/julianromli/homebrew-tap).
 

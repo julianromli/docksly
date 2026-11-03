@@ -12,6 +12,17 @@ export type ChangelogItem = {
 
 export const releases: ChangelogItem[] = [
   {
+    version: "1.3.2",
+    id: "v1-3-2",
+    date: new Date("2026-11-03"),
+    notes: "The Settings sidebar now uses the native macOS sidebar.",
+    fixes: [
+      "The Settings sidebar fills its full column, with no gaps around it",
+      "The version number sits inside the sidebar and is easier to read",
+      "The remove buttons in Displays and Keep Open are easier to click",
+    ],
+  },
+  {
     version: "1.3.1",
     id: "v1-3-1",
     date: new Date("2026-11-03"),
