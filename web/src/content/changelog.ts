@@ -12,6 +12,22 @@ export type ChangelogItem = {
 
 export const releases: ChangelogItem[] = [
   {
+    version: "1.3.0",
+    id: "v1-3-0",
+    date: new Date("2026-11-03"),
+    notes: "Docksly can now switch docks when your displays change, and open or quit apps when a dock is used.",
+    features: [
+      "Display rules: a dock for an exact set of connected displays, applied when the set changes and at a launch at login",
+      "Open When This Dock Is Used for each app, with an optional file, folder, or web address to open with it",
+      "Quit Apps Not in This Dock, per dock, off by default. Apps are asked to quit, never forced",
+      "Keep Open list in Settings: apps that a dock switch never quits",
+      "A dated comparison with DockFlow, based on its public website",
+    ],
+    fixes: [
+      "The lock to one screen is not in this release. It needs a test on several displays first",
+    ],
+  },
+  {
     version: "1.2.0",
     id: "v1-2-0",
     date: new Date("2026-11-02"),

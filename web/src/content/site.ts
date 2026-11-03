@@ -1,6 +1,6 @@
 export const site = {
   name: "Docksly",
-  version: "1.2",
+  version: "1.3",
   headline: "Dock Organizer",
   headlineLine2: "for Your",
   highlight: "Mac",
@@ -18,4 +18,4 @@ export const site = {
   trial: "7-day trial",
 } as const;
 
-export type NavId = "home" | "faqs" | "changelog" | "privacy" | "recover" | "download";
+export type NavId = "home" | "faqs" | "changelog" | "privacy" | "recover" | "download" | "compare";

@@ -1,0 +1,84 @@
+---
+import { site } from "../content/site";
+import SiteLayout from "../layouts/SiteLayout.astro";
+
+// Facts about DockFlow come only from its public website, read on 2026-11-02.
+// DockFlow may change its features or prices. Check its site before you decide.
+const asOf = "2 November 2026";
+
+const rows = [
+  ["Named Dock layouts, one click to switch", "Yes", "Yes"],
+  ["Spacers", "Yes", "Yes"],
+  ["Global hotkey per dock", "Yes", "Yes, plus Switch to Next Dock"],
+  ["Hotkey style", "Single key, key sequence, or multi-press", "One shortcut per dock"],
+  ["Shortcuts app actions", "Yes", "Yes: Use Dock and Get Current Dock"],
+  ["Focus mode switching", "Yes", "Yes, with a filter that goes back to the earlier dock"],
+  ["Folders, files, and web links on the right side", "Yes", "Yes, per dock"],
+  ["Dock size, position, and magnification per dock", "Not listed", "Yes, opt-in per dock"],
+  ["Switch by connected displays", "Not listed", "Yes, display rules"],
+  ["Open apps when a dock is used", "Yes (Dock actions)", "Yes, with an optional file, folder, or web address"],
+  ["Quit apps that are not in the dock", "Not listed", "Yes, opt-in per dock, with a keep-open list"],
+  ["Lock the Dock to one screen", "Yes", "Not in this version"],
+  ["Install with Homebrew", "Yes", "Yes: brew install --cask julianromli/tap/docksly"],
+  ["Requires macOS", "13.5 or later", "13 or later"],
+  ["Free trial", "Not listed on the pages we read", "7 days, no card"],
+  ["Price", "From $14.99 for one year; lifetime from $34.82 per Mac, with one year of updates", "Rp49.000 once, with all future updates"],
+] as const;
+---
+
+<SiteLayout
+  title={`${site.name} — Compared with DockFlow`}
+  description="A factual comparison of Docksly and DockFlow, based on their public websites."
+  surface="dark"
+  current="compare"
+  compactFooter
+>
+  <article class="mx-auto w-full max-w-[52rem] px-6 pt-16 pb-8 sm:pt-24">
+    <h1 class="text-center text-5xl font-bold tracking-tight text-balance text-paper sm:text-6xl">
+      Docksly compared with DockFlow
+    </h1>
+    <p class="mx-auto mt-8 max-w-2xl text-pretty text-center text-lg text-paper/80">
+      Both apps save Dock layouts and switch them. This table lists what each app's public website says.
+      Compared as of {asOf}. DockFlow may have changed since then.
+    </p>
+
+    <div class="mt-12 overflow-x-auto">
+      <table class="w-full min-w-[36rem] border-collapse text-left text-sm">
+        <thead>
+          <tr class="border-b border-paper/20 text-paper">
+            <th scope="col" class="py-3 pr-4 font-semibold">Feature</th>
+            <th scope="col" class="py-3 pr-4 font-semibold">DockFlow</th>
+            <th scope="col" class="py-3 font-semibold">{site.name}</th>
+          </tr>
+        </thead>
+        <tbody class="text-paper/75">
+          {rows.map(([feature, dockflow, docksly]) => (
+            <tr class="border-b border-paper/10 align-top">
+              <th scope="row" class="py-3 pr-4 font-medium text-paper">{feature}</th>
+              <td class="py-3 pr-4">{dockflow}</td>
+              <td class="py-3">{docksly}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="mt-16 text-2xl font-bold">What DockFlow has that Docksly does not</h2>
+    <p class="mt-3 text-pretty text-paper/70">
+      Key sequences and multi-press hotkeys, and locking the Dock to one screen. Docksly has a single
+      shortcut per dock. The lock is on the roadmap, but it needs more testing on several displays.
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold">Which one to pick</h2>
+    <p class="mt-3 text-pretty text-paper/70">
+      If you want key sequences or a locked screen, DockFlow covers that today. If you want display rules, per-dock
+      Dock settings, quitting other apps, and lifetime updates for a single payment, Docksly covers those.
+    </p>
+    <p class="mt-6 text-paper/50">
+      Corrections are welcome. <a
+        class="underline decoration-paper/30 underline-offset-4 hover:text-paper"
+        href={`mailto:${site.email}`}>Contact us</a
+      >.
+    </p>
+  </article>
+</SiteLayout>
