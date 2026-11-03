@@ -72,8 +72,8 @@ struct SettingsView: View {
     @State private var errorMessage: String?
 
     /// Fixed size, so the window never grows past a small screen. Long panes scroll.
-    private static let windowSize = CGSize(width: 660, height: 460)
-    private static let sidebarWidth: CGFloat = 180
+    private static let windowSize = CGSize(width: 700, height: 480)
+    private static let sidebarWidth: CGFloat = 200
 
     private var pane: SettingsPane {
         SettingsPane(rawValue: storedPane) ?? .general
@@ -87,14 +87,19 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
+        // NavigationSplitView gives the sidebar its full-height translucent column.
+        // A List with `.sidebar` style inside an HStack draws a floating box instead.
+        NavigationSplitView(columnVisibility: .constant(.all)) {
             sidebar
-            Divider()
+                .navigationSplitViewColumnWidth(Self.sidebarWidth)
+                .modifier(HidesSidebarToggle())
+        } detail: {
             detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .navigationTitle(pane.title)
         }
+        .navigationSplitViewStyle(.balanced)
         .frame(width: Self.windowSize.width, height: Self.windowSize.height)
-        .navigationTitle(pane.title)
         .onAppear {
             NSApp.activate(ignoringOtherApps: true)
             // With the trial ended, the license key is what the user came for.
@@ -123,15 +128,15 @@ struct SettingsView: View {
             }
         }
         .listStyle(.sidebar)
-        .frame(width: Self.sidebarWidth)
-        .safeAreaInset(edge: .bottom) {
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             Text(versionText)
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(.secondary)
                 .monospacedDigit()
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 12)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .accessibilityLabel("Version \(versionText)")
         }
     }
 
@@ -279,6 +284,8 @@ struct SettingsView: View {
                                 store.removeDisplayRule(id: rule.id)
                             } label: {
                                 Image(systemName: "minus.circle")
+                                    .frame(width: 28, height: 28)
+                                    .contentShape(Rectangle())
                             }
                             .buttonStyle(.borderless)
                             .help("Remove this rule")
@@ -310,6 +317,8 @@ struct SettingsView: View {
                                 store.setAlwaysKeepOpen(apps.filter { $0 != app })
                             } label: {
                                 Image(systemName: "minus.circle")
+                                    .frame(width: 28, height: 28)
+                                    .contentShape(Rectangle())
                             }
                             .buttonStyle(.borderless)
                             .help("Stop keeping this app open")
@@ -516,3 +525,54 @@ struct SettingsView: View {
         NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 }
+
+/// The sidebar must always show in Settings, so the toggle has no job. The API is macOS 14+.
+private struct HidesSidebarToggle: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 14.0, *) {
+            content.toolbar(removing: .sidebarToggle)
+        } else {
+            content
+        }
+    }
+}
+
+#if DEBUG
+/// Debug only: `Docksly -snapshotSettings <folder>` draws each Settings pane to a PNG, then quits.
+/// It lets a layout check run without Screen Recording permission.
+@MainActor
+enum SettingsSnapshot {
+    static func runIfRequested() {
+        let args = CommandLine.arguments
+        guard let index = args.firstIndex(of: "-snapshotSettings"), index + 1 < args.count else { return }
+        let folder = URL(fileURLWithPath: args[index + 1], isDirectory: true)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let previous = UserDefaults.standard.string(forKey: "settingsPane")
+        for pane in SettingsPane.allCases {
+            UserDefaults.standard.set(pane.rawValue, forKey: "settingsPane")
+            let root = SettingsView()
+                .environmentObject(DockStore.shared)
+                .environmentObject(LicenseStore.shared)
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 700, height: 480),
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            window.contentViewController = NSHostingController(rootView: root)
+            window.center()
+            window.orderFrontRegardless()
+            RunLoop.main.run(until: Date().addingTimeInterval(1.5))
+            if let frameView = window.contentView?.superview,
+               let rep = frameView.bitmapImageRepForCachingDisplay(in: frameView.bounds) {
+                frameView.cacheDisplay(in: frameView.bounds, to: rep)
+                let url = folder.appendingPathComponent("settings-\(pane.rawValue).png")
+                try? rep.representation(using: .png, properties: [:])?.write(to: url)
+            }
+            window.orderOut(nil)
+        }
+        UserDefaults.standard.set(previous, forKey: "settingsPane")
+        exit(0)
+    }
+}
+#endif
