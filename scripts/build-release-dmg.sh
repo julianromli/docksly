@@ -8,7 +8,7 @@
 set -eu
 
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-VERSION="1.3.0"
+VERSION="1.3.1"
 TEAM_ID="4YQMC7V3CB"
 NOTARY_PROFILE="docksly-notarize"
 VOLUME="Install Docksly"

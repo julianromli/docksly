@@ -12,6 +12,20 @@ export type ChangelogItem = {
 
 export const releases: ChangelogItem[] = [
   {
+    version: "1.3.1",
+    id: "v1-3-1",
+    date: new Date("2026-11-03"),
+    notes: "Settings has a sidebar now, so the window stays small on any screen.",
+    features: [
+      "Settings sidebar with General, Shortcuts, Displays, Keep Open, License, and Data",
+      "Settings opens on the pane you used last, or on License when the trial has ended",
+      "Displays and Keep Open show what to do when their lists are empty",
+    ],
+    fixes: [
+      "The Settings window no longer grows taller than the screen when you have many docks",
+    ],
+  },
+  {
     version: "1.3.0",
     id: "v1-3-0",
     date: new Date("2026-11-03"),
