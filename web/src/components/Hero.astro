@@ -1,4 +1,5 @@
 ---
+import { release } from "../content/release";
 import { site } from "../content/site";
 import DownloadButton from "./DownloadButton.astro";
 ---
@@ -26,4 +27,13 @@ import DownloadButton from "./DownloadButton.astro";
   <div class="mt-8 flex justify-center sm:mt-10">
     <DownloadButton variant="solid" />
   </div>
+
+  <p class="mt-4 text-sm text-pretty text-ink-muted">
+    Version {release.version}{release.dmg && <> · {release.dmg.size}</>} · Signed and notarized by Apple · {site.macos}
+  </p>
+  <p class="mt-1 text-sm text-pretty text-ink-muted">
+    By {release.developer} · Also on <a href={release.github} rel="noreferrer" class="underline underline-offset-4"
+      >GitHub</a
+    > and Homebrew
+  </p>
 </section>

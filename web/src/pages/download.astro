@@ -2,6 +2,7 @@
 import FeatureGrid from "../components/FeatureGrid.astro";
 import Hero from "../components/Hero.astro";
 import HeroMockup from "../components/HeroMockup.astro";
+import { release } from "../content/release";
 import { site } from "../content/site";
 import SiteLayout from "../layouts/SiteLayout.astro";
 ---
@@ -37,6 +38,40 @@ import SiteLayout from "../layouts/SiteLayout.astro";
         Download Docksly.dmg
       </a>
       <p class="mt-4 text-sm text-ink-muted">{site.macos}. {site.trial} included.</p>
+      <dl class="mt-6 grid gap-2 rounded-2xl bg-wash px-5 py-4 text-left text-sm">
+        <div class="flex justify-between gap-4">
+          <dt class="text-ink-muted">Version</dt>
+          <dd class="font-medium text-ink tabular-nums">{release.version}</dd>
+        </div>
+        {
+          release.dmg && (
+            <div class="flex justify-between gap-4">
+              <dt class="text-ink-muted">Size</dt>
+              <dd class="font-medium text-ink tabular-nums">{release.dmg.size}</dd>
+            </div>
+          )
+        }
+        <div class="flex justify-between gap-4">
+          <dt class="text-ink-muted">Developer</dt>
+          <dd class="text-right font-medium text-ink">{release.developer}</dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-ink-muted">Security</dt>
+          <dd class="text-right font-medium text-ink">Signed and notarized by Apple</dd>
+        </div>
+        {
+          release.dmg && (
+            <div>
+              <dt class="text-ink-muted">SHA-256</dt>
+              <dd class="mt-1 font-mono text-xs break-all text-ink">{release.dmg.sha256}</dd>
+            </div>
+          )
+        }
+      </dl>
+      <p class="mt-4 text-sm text-pretty text-ink-muted">
+        Also on <a href={release.github} rel="noreferrer" class="underline underline-offset-4">GitHub Releases</a>
+        or with <code class="font-mono text-xs">{release.brew}</code>
+      </p>
       <a
         id="download-close"
         href="/"
