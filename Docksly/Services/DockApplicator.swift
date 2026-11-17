@@ -71,7 +71,8 @@ enum DockApplicator {
         readRawPersistentOthers().compactMap(parseOtherTile(_:))
     }
 
-    /// Compare key for the whole live Dock. Empty when the Dock cannot be read.
+    /// Compare key for the whole live Dock.
+    /// Throws `preferenceReadFailed` when `persistent-apps` is missing or invalid.
     static func readLiveSignature() throws -> String {
         let apps = try readPinnedItems()
         return DockLayout.signature(apps: apps, others: readOtherItems())
