@@ -5,14 +5,13 @@ struct DockslyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @ObservedObject private var store = DockStore.shared
     @ObservedObject private var license = LicenseStore.shared
-    @ObservedObject private var cleanUp = CleanUpController.shared
 
     var body: some Scene {
         Window("Docksly", id: "main") {
             EditorWindowView()
                 .environmentObject(store)
                 .environmentObject(license)
-                .environmentObject(cleanUp)
+                .environmentObject(CleanUpController.shared)
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
@@ -32,7 +31,7 @@ struct DockslyApp: App {
             MenuBarContentView()
                 .environmentObject(store)
                 .environmentObject(license)
-                .environmentObject(cleanUp)
+                .environmentObject(CleanUpController.shared)
         } label: {
             MenuBarLabel()
         }

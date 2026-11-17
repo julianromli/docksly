@@ -1,7 +1,7 @@
 import XCTest
 @testable import Docksly
 
-final class CleanUpControllerTests: XCTestCase {
+final class CleanUpSelectionTests: XCTestCase {
     private func app(_ id: String, _ name: String) -> CleanUpApp {
         CleanUpApp(bundleIdentifier: id, name: name, path: nil)
     }
@@ -66,6 +66,7 @@ final class CleanUpControllerTests: XCTestCase {
         XCTAssertEqual(CleanUpCopy.quitTitle(4), "Quit 4 Apps")
         XCTAssertEqual(CleanUpCopy.asking(1), "Asking 1 app to quit…")
         XCTAssertEqual(CleanUpCopy.asking(4), "Asking 4 apps to quit…")
+        XCTAssertEqual(CleanUpCopy.resultTitle(quitCount: 0), "No apps quit")
         XCTAssertEqual(CleanUpCopy.resultTitle(quitCount: 1), "Quit 1 app")
         XCTAssertEqual(CleanUpCopy.resultTitle(quitCount: 3), "Quit 3 apps")
         XCTAssertEqual(CleanUpCopy.waitingMessage(names: ["Figma"]), "Figma is waiting for you to save.")

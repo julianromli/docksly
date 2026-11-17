@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import Foundation
+import SwiftUI
 
 /// One leftover app in a Clean Up review.
 struct CleanUpApp: Identifiable, Equatable, Hashable {
@@ -85,7 +86,8 @@ enum CleanUpCopy {
     }
 
     static func resultTitle(quitCount: Int) -> String {
-        quitCount == 1 ? "Quit 1 app" : "Quit \(quitCount) apps"
+        if quitCount <= 0 { return "No apps quit" }
+        return quitCount == 1 ? "Quit 1 app" : "Quit \(quitCount) apps"
     }
 
     static func waitingMessage(names: [String]) -> String {
@@ -138,7 +140,7 @@ enum CleanUpStyle {
         case .idle:
             return 0
         case .asking:
-            return header + 36 + footer + padding
+            return 36 + padding
         case .result:
             return header + listHeight(rowCount: max(rowCount, 1)) + footer + padding
         case .review:
@@ -235,7 +237,7 @@ final class CleanUpController: ObservableObject {
         guard LicenseStore.shared.hasAccess, phase == .review else { return }
         var list = DockStore.shared.library.alwaysKeepOpen ?? []
         let entry = KeepOpenApp(bundleIdentifier: app.bundleIdentifier, name: app.name)
-        if !list.contains(entry) {
+        if !list.contains(where: { $0.bundleIdentifier == entry.bundleIdentifier }) {
             list.append(entry)
             DockStore.shared.setAlwaysKeepOpen(list)
         }
@@ -244,7 +246,7 @@ final class CleanUpController: ObservableObject {
     }
 
     func beginReview() {
-        guard canStartReview else { return }
+        guard phase == .idle, canStartReview else { return }
         quitTask?.cancel()
         quitTask = nil
         requestedIDs = []
@@ -333,7 +335,7 @@ final class CleanUpController: ObservableObject {
         }
     }
 
-    /// Builds leftovers with `QuitPlan` against the active dock and the global Keep Open list.
+    /// Builds leftovers with `QuitPlan` against the active dock, live pinned apps, and the global Keep Open list.
     static func liveLeftovers(store: DockStore) -> (dockName: String, apps: [CleanUpApp]) {
         let profile = store.library.profiles.first { $0.id == store.library.activeProfileID }
         let dockName = profile?.name ?? "this dock"
@@ -344,7 +346,12 @@ final class CleanUpController: ObservableObject {
                 isRegularApp: $0.activationPolicy == .regular
             )
         }
-        let dockApps = Set((profile?.items ?? []).compactMap(\.bundleIdentifier))
+        var dockApps = Set((profile?.items ?? []).compactMap(\.bundleIdentifier))
+        if let liveItems = try? DockApplicator.readPinnedItems() {
+            dockApps.formUnion(liveItems.compactMap(\.bundleIdentifier))
+        } else if profile == nil {
+            return (dockName, [])
+        }
         let keepOpen = Set((store.library.alwaysKeepOpen ?? []).map(\.bundleIdentifier))
         let ids = QuitPlan.bundleIdentifiersToQuit(
             running: running,
@@ -406,6 +413,7 @@ final class CleanUpController: ObservableObject {
     private func pruneWaiting() {
         guard phase == .result, !waiting.isEmpty else { return }
         waiting = stillRunning(ids: waiting.map(\.bundleIdentifier))
+        quitCount = max(requestedIDs.count - waiting.count, 0)
         if waiting.isEmpty {
             selection.uncheckedIDs = []
             selection.keeping = []

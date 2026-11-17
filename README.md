@@ -193,8 +193,8 @@ Build and run from Xcode. Then walk this list.
 - [ ] Needs a second display (not tested yet): with a rule for both screens connected, unplug one screen. The rule for that set does not apply. Plug it back in. The dock for the full set applies.
 - [ ] Edit Dock → an app tile → right-click → **Open When This Dock Is Used**. A dot shows on the tile. Quit the app. Use the dock. The app opens. If it is already open, it comes to the front.
 - [ ] Right-click the same tile → **Also Open a File, Folder, or Web Address…** → enter `https://example.com`. Use the dock: the app opens that address.
-- [ ] Edit Dock → **Quit Apps Not in This Dock**. The first time, read the alert and press **Turn On**. Save Changes. Open two other apps, then use the dock. The apps not in the dock ask to quit (a document can ask you to save first). Finder and Docksly stay open.
-- [ ] Settings → Keep Open → **Add App…** → pick an app. Turn on Quit Apps Not in This Dock and use the dock. That app stays open.
+- [ ] Edit Dock → **Quit other apps when switching**. The first time, read the alert and press **Turn On**. Save Changes. Open two other apps, then use the dock. The apps not in the dock ask to quit (a document can ask you to save first). Finder and Docksly stay open.
+- [ ] Settings → Keep Open → **Add App…** → pick an app. Turn on Quit other apps when switching and use the dock. That app stays open.
 - [ ] Press Cancel on the first-time alert. The toggle stays off.
 
 ### Right side and Dock settings (1.2)

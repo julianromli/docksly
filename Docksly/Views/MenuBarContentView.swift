@@ -52,6 +52,7 @@ struct MenuBarContentView: View {
             menuDivider
 
             MenuBarRowButton("Save Current Dock as New Dock…", action: {
+                dismiss()
                 SaveLiveDockPrompt.run(store: store)
             })
             .disabled(!license.hasAccess)
@@ -63,7 +64,8 @@ struct MenuBarContentView: View {
                 dismiss()
             })
 
-            MenuSettingsRow()
+            MenuSettingsButton()
+                .buttonStyle(MenuBarRowButtonStyle())
 
             menuDivider
 
@@ -82,18 +84,20 @@ struct MenuBarContentView: View {
                 Text("Clean Up")
                     .font(.system(size: 13))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text(CleanUpCopy.countLabel(cleanUp.leftoverCount))
-                    .font(.system(size: 13).monospacedDigit())
-                    .foregroundStyle(.secondary)
+                MenuBarTrailingCount(text: CleanUpCopy.countLabel(cleanUp.leftoverCount))
             }
         }
         .buttonStyle(MenuBarRowButtonStyle())
         .disabled(!cleanUp.canStartReview)
         .accessibilityLabel("Clean Up")
         .accessibilityValue(CleanUpCopy.countLabel(cleanUp.leftoverCount))
-        .accessibilityHint(cleanUp.canStartReview
-            ? "Reviews running apps that are not in the current dock"
-            : "No apps to clean up")
+        .accessibilityHint(
+            !license.hasAccess
+                ? "Enter a license key to use Clean Up"
+                : (cleanUp.hasLeftovers
+                    ? "Reviews running apps that are not in the current dock"
+                    : "No apps to clean up")
+        )
     }
 
     private func dockRow(_ profile: DockProfile) -> some View {
@@ -138,34 +142,25 @@ private struct MenuBarRowButton: View {
     }
 }
 
-private struct MenuSettingsRow: View {
+private struct MenuBarRowHighlightedKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+private extension EnvironmentValues {
+    var menuBarRowHighlighted: Bool {
+        get { self[MenuBarRowHighlightedKey.self] }
+        set { self[MenuBarRowHighlightedKey.self] = newValue }
+    }
+}
+
+private struct MenuBarTrailingCount: View {
+    var text: String
+    @Environment(\.menuBarRowHighlighted) private var highlighted
+
     var body: some View {
-        if #available(macOS 14.0, *) {
-            SettingsLink {
-                Text("Settings…")
-                    .font(.system(size: 13))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(MenuBarRowButtonStyle())
-            .simultaneousGesture(TapGesture().onEnded {
-                AppWindowPresentation.activate()
-                DispatchQueue.main.async {
-                    AppWindowPresentation.activate()
-                    AppWindowPresentation.orderFrontSettings()
-                }
-            })
-            .keyboardShortcut(",", modifiers: .command)
-        } else {
-            MenuBarRowButton("Settings…") {
-                AppWindowPresentation.activate()
-                NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-                DispatchQueue.main.async {
-                    AppWindowPresentation.activate()
-                    AppWindowPresentation.orderFrontSettings()
-                }
-            }
-            .keyboardShortcut(",", modifiers: .command)
-        }
+        Text(text)
+            .font(.system(size: 13).monospacedDigit())
+            .foregroundStyle(highlighted ? Color.white.opacity(0.9) : Color.secondary)
     }
 }
 
@@ -176,6 +171,7 @@ private struct MenuBarRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         let highlighted = isEnabled && (isHovering || configuration.isPressed)
         return configuration.label
+            .environment(\.menuBarRowHighlighted, highlighted)
             .foregroundStyle(highlighted ? Color.white : Color.primary.opacity(isEnabled ? 1 : 0.4))
             .padding(.horizontal, 10)
             .frame(height: CleanUpStyle.menuRowHeight)

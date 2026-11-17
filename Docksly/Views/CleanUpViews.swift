@@ -107,22 +107,29 @@ struct CleanUpReviewView: View {
 
     private var reviewList: some View {
         let rows = cleanUp.reviewRows
-        return ScrollView {
-            LazyVStack(spacing: 0) {
-                ForEach(Array(rows.enumerated()), id: \.element.id) { index, app in
-                    CleanUpAppRow(
-                        app: app,
-                        layout: layout,
-                        isChecked: cleanUp.isChecked(app.id),
-                        isKeeping: cleanUp.isKeeping(app.id),
-                        isFocused: cleanUp.focusedIndex == index,
-                        onToggle: { cleanUp.toggleChecked(app.id) },
-                        onKeep: { cleanUp.alwaysKeep(app) }
-                    )
-                    .onTapGesture {
-                        cleanUp.focusedIndex = index
+        return ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(Array(rows.enumerated()), id: \.element.id) { index, app in
+                        CleanUpAppRow(
+                            app: app,
+                            layout: layout,
+                            isChecked: cleanUp.isChecked(app.id),
+                            isKeeping: cleanUp.isKeeping(app.id),
+                            isFocused: cleanUp.focusedIndex == index,
+                            onToggle: { cleanUp.toggleChecked(app.id) },
+                            onKeep: { cleanUp.alwaysKeep(app) }
+                        )
+                        .id(app.id)
+                        .onTapGesture {
+                            cleanUp.focusedIndex = index
+                        }
                     }
                 }
+            }
+            .onChange(of: cleanUp.focusedIndex) { index in
+                guard rows.indices.contains(index) else { return }
+                proxy.scrollTo(rows[index].id, anchor: .center)
             }
         }
         .frame(height: CleanUpStyle.listHeight(rowCount: rows.count))
