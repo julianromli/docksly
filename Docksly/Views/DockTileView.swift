@@ -16,6 +16,7 @@ struct DockTileView: View {
     var onChooseOpenTarget: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isHoveringTile = false
     @State private var isHoveringRemove = false
     @State private var allowsChromeMotion = false
@@ -166,11 +167,17 @@ struct DockTileView: View {
     }
 
     private var spacerTile: some View {
-        Capsule()
-            .fill(Color.primary.opacity(isHovering ? 0.34 : 0.20))
+        let opacity = isHovering
+            ? DockslyStyle.spacerHairlineHoverOpacity(colorScheme)
+            : DockslyStyle.spacerHairlineOpacity(colorScheme)
+        return Capsule()
+            .fill(Color.primary.opacity(opacity))
             .animation(reduceMotion ? nil : DockslyStyle.chromeFade, value: isHovering)
-            .frame(width: 4, height: 36)
-            .frame(width: DockslyStyle.spacerWidth, height: 60)
+            .frame(
+                width: DockslyStyle.spacerHairlineWidth,
+                height: DockslyStyle.spacerHairlineHeight
+            )
+            .frame(width: DockslyStyle.spacerWidth, height: DockslyStyle.tileRowHeight)
             .contentShape(Rectangle())
             .help("Spacer. Drag to reorder.")
     }

@@ -248,7 +248,21 @@ enum DockslyStyle {
     static let tileWidth: CGFloat = 56
     /// Desktop hit target for the remove control. The glyph stays 13pt.
     static let removeHitSize: CGFloat = 40
-    static let spacerWidth: CGFloat = 28
+    /// Slot for a small spacer, close to the native Dock divider next to Trash.
+    /// 16 pt is about 29% of `tileWidth` (56).
+    static let spacerWidth: CGFloat = 16
+    static let spacerHairlineWidth: CGFloat = 1
+    /// About 63% of `tileRowHeight` (60).
+    static let spacerHairlineHeight: CGFloat = 38
+
+    static func spacerHairlineOpacity(_ scheme: ColorScheme) -> Double {
+        scheme == .dark ? 0.25 : 0.20
+    }
+
+    static func spacerHairlineHoverOpacity(_ scheme: ColorScheme) -> Double {
+        scheme == .dark ? 0.40 : 0.34
+    }
+
     static let itemSpacing: CGFloat = 8
     static let dockStripSpace = "dockStrip"
 
