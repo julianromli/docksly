@@ -91,7 +91,8 @@ Do **not** enable App Sandbox. Docksly writes the `com.apple.dock` preference do
 - **Save Changes** — Appears when the draft differs from the saved profile. If that profile is the active Dock, save also applies it.
 - **Use This Dock** — Appears when you view a saved layout that is not the live Dock.
 - **Multiple docks** — Named profiles with a color dot. Switch from the pill menu. Create or delete a dock. You must keep at least one.
-- **Menu bar extra** — List of docks (checkmark on the active one, and each dock's shortcut), Save Current Dock as New Dock…, Manage Docks…, Settings…, Quit. A click in the menu bar applies a dock without opening the editor.
+- **Menu bar extra** — A compact popover that still looks like a menu: list of docks (checkmark on the active one, and each dock's shortcut), Clean Up with a live leftover count, Save Current Dock as New Dock…, Manage Docks…, Settings…, Quit. A click on a dock applies it without opening the editor.
+- **Clean Up** — From the menu bar or the editor (when you are viewing the dock that is On Dock), review running apps that are not in the current dock, minus Apps to Keep Open, Finder, and Docksly. Docksly asks them to quit and never force-quits. Always Keep adds an app to Settings → Apps to Keep Open. A leftover strip under the dock preview opens the same review in the editor window.
 - **Keyboard shortcuts** — One global shortcut per dock and one for Switch to Next Dock. Set them in Settings → Keyboard Shortcuts. A short notice shows the dock name after a switch. You can turn it off.
 - **Shortcuts app** — Actions **Use Dock** and **Get Current Dock**.
 - **Focus filter** — System Settings → Focus → a Focus → Add Filter → Docksly. Pick a dock. When the Focus turns off, Docksly goes back to the dock that was active before.
@@ -113,7 +114,7 @@ macOS does not publish an AppKit API that replaces the whole pinned-apps list. D
 4. `persistent-others` is left alone (folders and stacks on the right).
 5. Finder and Trash are not in `persistent-apps`. They stay.
 6. After a successful write, Docksly runs `/usr/bin/killall Dock`. Dock relaunches. A short flicker is normal.
-7. Docksly does not quit your apps. An app that is running but not pinned can still show in the Dock until you quit it. That is normal Dock behavior.
+7. By default, Docksly does not quit your apps. An app that is running but not pinned can still show in the Dock until you quit it. That is normal Dock behavior. Clean Up, and a dock with **Quit other apps when switching**, will ask leftover apps to quit. They never force-quit.
 
 Before each apply, Docksly copies the previous `persistent-apps` array to:
 
@@ -168,11 +169,22 @@ Build and run from Xcode. Then walk this list.
 ### Menu bar
 
 - [ ] Close the editor window. The process stays. The menu extra stays.
-- [ ] Open the menu extra. The active dock has a checkmark.
-- [ ] Choose another dock. The real Dock switches. The editor does not need to be open.
+- [ ] Open the menu extra. It looks like the old menu (280 pt, 13 pt type, color dots, checkmark gutter). The active dock has a checkmark.
+- [ ] Choose another dock. The real Dock switches. The editor does not need to be open. The popover closes.
 - [ ] Choose **Manage Docks…**. The editor returns.
 - [ ] Choose **Settings…**. The settings window opens.
 - [ ] Choose **Quit Docksly**. The menu extra disappears.
+
+### Clean Up
+
+- [ ] Open two or more regular apps that are not in the current dock. The menu bar **Clean Up** row shows a live count such as `6 apps`. The editor, when that dock is **On Dock**, shows a leftover strip under the preview: `N apps not in <name>`, up to 8 icons, and **Clean Up**.
+- [ ] With no leftover apps, the menu row says **None** and is disabled. The editor strip is hidden and the window stays at its usual height.
+- [ ] Open **Clean Up** in the menu bar. The review lists leftover apps, checked by default, with the footnote that Docksly never force quits. Uncheck one app; **Quit N Apps** updates. That uncheck is not remembered the next time you open Clean Up.
+- [ ] Press the pin on a row. The row reads **Keeping**, Settings → Apps to Keep Open lists that app, and the quit count drops. Finder and Docksly never appear in the list.
+- [ ] Press **Quit N Apps**. You see **Asking N apps to quit…**. An app with an unsaved document stays in the result as waiting, with **Show**, which brings that app forward. **Done** returns to the menu.
+- [ ] Return, Esc, arrow keys, and Space work in the review. VoiceOver names the count, checkboxes, Always Keep, Show, and Quit.
+- [ ] In the editor, press **Clean Up** on the strip or **Clean Up Now…** in the ⋯ menu. The same review opens in the window, and the window height animates (or snaps if Reduce Motion is on). Switch to a dock that is not On Dock: the strip and in-window review hide.
+- [ ] Edit Dock → **Quit other apps when switching**. The first time, read the alert and press **Turn On**. Save Changes. Open two other apps, then use the dock. Those apps ask to quit. Apps in Keep Open, Finder, and Docksly stay open. This list is the same one Clean Up uses.
 
 ### Automation (1.3)
 

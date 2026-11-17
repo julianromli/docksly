@@ -29,6 +29,7 @@
 		28A82D10CA512B448B5E652E /* HotkeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6987B07F9BF53EDEDCFA6BE4 /* HotkeyService.swift */; };
 		0A9E749EA960455C337E62ED /* SwitchHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EADF2D205FA3223B6DB1B2E /* SwitchHUD.swift */; };
 		2836B1948F6ACEE3BD196167 /* SwitchActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E1DA3A55B7C386A4860DFB /* SwitchActions.swift */; };
+		FF1016E7D29F0EF766560D0D /* CleanUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FE095663844D98F02B79C3 /* CleanUpController.swift */; };
 		496F37F8CD8802A4BAF12B28 /* DisplayWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0CBC736D97210E83BF4014 /* DisplayWatcher.swift */; };
 		20FAB16071913DEFA705C8C0 /* DockIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88B17E54E48856D9C702134A /* DockIntents.swift */; };
 		E24C3D011D670965BEB78630 /* VisualEffectBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634DD1DEF1CDA8E4BDA25E46 /* VisualEffectBackground.swift */; };
@@ -45,6 +46,7 @@
 		454043FB1D8E85E8A5036973 /* OtherTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF83C8C90B22AE954BE6EF7A /* OtherTileView.swift */; };
 		B9B0899AF00A4BD2F01FA7D8 /* AddLinkSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6DFB4DFAF3B97C4BC0BF6D1 /* AddLinkSheet.swift */; };
 		747F031F4D2F320BB5F74E66 /* DockAppearanceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70C5BEFE1C06B0D8255CAC7 /* DockAppearanceSheet.swift */; };
+		75B32006AA00A3BBF3CE7631 /* CleanUpViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97213E2CDCC3E6CE5C956545 /* CleanUpViews.swift */; };
 		222F0DBFFE5EB23DCD3FD16F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6C36FFE920F24CEDB7CFDBFC /* Assets.xcassets */; };
 		9C89DCA228620E171AECC895 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = A01D6AEEDD0EBC19F2AAF5C9 /* KeyboardShortcuts */; };
 		9E5372223E5E5304430DF2EF /* LibraryMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CD4B3767CF1C96268CC779 /* LibraryMigrationTests.swift */; };
@@ -52,6 +54,7 @@
 		1D3578B81C16729D7BA0A7B1 /* DockSwitcherLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C43398BEF17334CB213CC05 /* DockSwitcherLogicTests.swift */; };
 		BE3280C00EEEC398F38B27E1 /* DockTileEncodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66B58E57AC55A43E921D7020 /* DockTileEncodingTests.swift */; };
 		0D606D385EC62DF010F2E3CA /* AppRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DCB24CE499563E9EFDD98BA /* AppRulesTests.swift */; };
+		DAED91C6DE141CD93A1458BD /* CleanUpControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C0119A3B6ECEEC81BEB8D8 /* CleanUpControllerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -77,6 +80,7 @@
 		6987B07F9BF53EDEDCFA6BE4 /* HotkeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyService.swift; sourceTree = "<group>"; };
 		6EADF2D205FA3223B6DB1B2E /* SwitchHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchHUD.swift; sourceTree = "<group>"; };
 		92E1DA3A55B7C386A4860DFB /* SwitchActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchActions.swift; sourceTree = "<group>"; };
+		B5FE095663844D98F02B79C3 /* CleanUpController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanUpController.swift; sourceTree = "<group>"; };
 		8F0CBC736D97210E83BF4014 /* DisplayWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayWatcher.swift; sourceTree = "<group>"; };
 		88B17E54E48856D9C702134A /* DockIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIntents.swift; sourceTree = "<group>"; };
 		634DD1DEF1CDA8E4BDA25E46 /* VisualEffectBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBackground.swift; sourceTree = "<group>"; };
@@ -93,6 +97,7 @@
 		AF83C8C90B22AE954BE6EF7A /* OtherTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherTileView.swift; sourceTree = "<group>"; };
 		E6DFB4DFAF3B97C4BC0BF6D1 /* AddLinkSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLinkSheet.swift; sourceTree = "<group>"; };
 		D70C5BEFE1C06B0D8255CAC7 /* DockAppearanceSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockAppearanceSheet.swift; sourceTree = "<group>"; };
+		97213E2CDCC3E6CE5C956545 /* CleanUpViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanUpViews.swift; sourceTree = "<group>"; };
 		6C36FFE920F24CEDB7CFDBFC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		68E77A9D7BC78A97D4F4E27B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8509ABF17E9E3CEE9F5D0453 /* Docksly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Docksly.entitlements; sourceTree = "<group>"; };
@@ -102,6 +107,7 @@
 		7C43398BEF17334CB213CC05 /* DockSwitcherLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockSwitcherLogicTests.swift; sourceTree = "<group>"; };
 		66B58E57AC55A43E921D7020 /* DockTileEncodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockTileEncodingTests.swift; sourceTree = "<group>"; };
 		2DCB24CE499563E9EFDD98BA /* AppRulesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRulesTests.swift; sourceTree = "<group>"; };
+		47C0119A3B6ECEEC81BEB8D8 /* CleanUpControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanUpControllerTests.swift; sourceTree = "<group>"; };
 		7612CCAD1CBFA9739724E673 /* DockslyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DockslyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -176,6 +182,7 @@
 				7C43398BEF17334CB213CC05 /* DockSwitcherLogicTests.swift */,
 				66B58E57AC55A43E921D7020 /* DockTileEncodingTests.swift */,
 				2DCB24CE499563E9EFDD98BA /* AppRulesTests.swift */,
+				47C0119A3B6ECEEC81BEB8D8 /* CleanUpControllerTests.swift */,
 			);
 			path = DockslyTests;
 			sourceTree = "<group>";
@@ -216,6 +223,7 @@
 				6987B07F9BF53EDEDCFA6BE4 /* HotkeyService.swift */,
 				6EADF2D205FA3223B6DB1B2E /* SwitchHUD.swift */,
 				92E1DA3A55B7C386A4860DFB /* SwitchActions.swift */,
+				B5FE095663844D98F02B79C3 /* CleanUpController.swift */,
 				8F0CBC736D97210E83BF4014 /* DisplayWatcher.swift */,
 			);
 			path = Services;
@@ -238,6 +246,7 @@
 				AF83C8C90B22AE954BE6EF7A /* OtherTileView.swift */,
 				E6DFB4DFAF3B97C4BC0BF6D1 /* AddLinkSheet.swift */,
 				D70C5BEFE1C06B0D8255CAC7 /* DockAppearanceSheet.swift */,
+				97213E2CDCC3E6CE5C956545 /* CleanUpViews.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -379,6 +388,7 @@
 				28A82D10CA512B448B5E652E /* HotkeyService.swift in Sources */,
 				0A9E749EA960455C337E62ED /* SwitchHUD.swift in Sources */,
 				2836B1948F6ACEE3BD196167 /* SwitchActions.swift in Sources */,
+				FF1016E7D29F0EF766560D0D /* CleanUpController.swift in Sources */,
 				496F37F8CD8802A4BAF12B28 /* DisplayWatcher.swift in Sources */,
 				20FAB16071913DEFA705C8C0 /* DockIntents.swift in Sources */,
 				E24C3D011D670965BEB78630 /* VisualEffectBackground.swift in Sources */,
@@ -395,6 +405,7 @@
 				454043FB1D8E85E8A5036973 /* OtherTileView.swift in Sources */,
 				B9B0899AF00A4BD2F01FA7D8 /* AddLinkSheet.swift in Sources */,
 				747F031F4D2F320BB5F74E66 /* DockAppearanceSheet.swift in Sources */,
+				75B32006AA00A3BBF3CE7631 /* CleanUpViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,6 +418,7 @@
 				1D3578B81C16729D7BA0A7B1 /* DockSwitcherLogicTests.swift in Sources */,
 				BE3280C00EEEC398F38B27E1 /* DockTileEncodingTests.swift in Sources */,
 				0D606D385EC62DF010F2E3CA /* AppRulesTests.swift in Sources */,
+				DAED91C6DE141CD93A1458BD /* CleanUpControllerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

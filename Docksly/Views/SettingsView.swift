@@ -335,7 +335,7 @@ struct SettingsView: View {
             } header: {
                 Text("Apps to Keep Open")
             } footer: {
-                Text("A dock with Quit Apps Not in This Dock never quits these apps. Finder and Docksly are always kept.")
+                Text("Clean Up, and any dock with Quit apps not in this dock when switching, will keep these apps. Finder and Docksly are always kept.")
             }
         }
         .formStyle(.grouped)

@@ -32,6 +32,7 @@ SWIFT_FILES = [
     ("Services/HotkeyService.swift", "services"),
     ("Services/SwitchHUD.swift", "services"),
     ("Services/SwitchActions.swift", "services"),
+    ("Services/CleanUpController.swift", "services"),
     ("Services/DisplayWatcher.swift", "services"),
     ("Intents/DockIntents.swift", "intents"),
     ("Views/VisualEffectBackground.swift", "views"),
@@ -48,6 +49,7 @@ SWIFT_FILES = [
     ("Views/OtherTileView.swift", "views"),
     ("Views/AddLinkSheet.swift", "views"),
     ("Views/DockAppearanceSheet.swift", "views"),
+    ("Views/CleanUpViews.swift", "views"),
 ]
 
 TEST_FILES = [
@@ -56,6 +58,7 @@ TEST_FILES = [
     "DockslyTests/DockSwitcherLogicTests.swift",
     "DockslyTests/DockTileEncodingTests.swift",
     "DockslyTests/AppRulesTests.swift",
+    "DockslyTests/CleanUpControllerTests.swift",
 ]
 
 # Swift packages: (name, url, minimum version, product).

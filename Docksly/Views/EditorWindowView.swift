@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 struct EditorWindowView: View {
     @EnvironmentObject private var store: DockStore
     @EnvironmentObject private var license: LicenseStore
+    @EnvironmentObject private var cleanUp: CleanUpController
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
     @State private var showImportError = false
@@ -17,6 +18,15 @@ struct EditorWindowView: View {
             DockStripView(onAddApplication: {
                 if license.hasAccess { store.wantsAddApp = true }
             })
+            if showsCleanUpStrip {
+                CleanUpStripView()
+            }
+            if showsCleanUpReview {
+                CleanUpReviewView(layout: .editor)
+                    .padding(.horizontal, DockslyStyle.contentLeading)
+                    .padding(.trailing, DockslyStyle.trailingInset)
+                    .padding(.bottom, 12)
+            }
             errorSlot
         }
         .frame(
@@ -26,6 +36,10 @@ struct EditorWindowView: View {
         )
         .background(DockslyStyle.windowFill(colorScheme))
         .background(WindowConfigurator())
+        .background(WindowContentHeightSync(height: editorContentHeight, reduceMotion: reduceMotion))
+        .animation(reduceMotion ? nil : CleanUpStyle.heightAnimation, value: showsCleanUpStrip)
+        .animation(reduceMotion ? nil : CleanUpStyle.heightAnimation, value: cleanUp.phase)
+        .onAppear { cleanUp.refresh() }
         .onChange(of: store.lastError) { message in
             if let message {
                 DockslyStyle.announce(message)
@@ -105,6 +119,25 @@ struct EditorWindowView: View {
         }
     }
 
+    private var showsCleanUpStrip: Bool {
+        store.isSelectedCurrent && cleanUp.leftoverCount > 0 && cleanUp.phase == .idle && license.hasAccess
+    }
+
+    private var showsCleanUpReview: Bool {
+        store.isSelectedCurrent && license.hasAccess && cleanUp.phase != .idle
+    }
+
+    private var editorContentHeight: CGFloat {
+        var height = DockslyStyle.windowIdealHeight
+        if showsCleanUpReview {
+            let rows = cleanUp.phase == .result ? cleanUp.waiting.count : cleanUp.reviewRows.count
+            height += CleanUpStyle.editorReviewHeight(rowCount: rows, phase: cleanUp.phase)
+        } else if showsCleanUpStrip {
+            height += CleanUpStyle.stripHeight
+        }
+        return height
+    }
+
     private var statusChip: some View {
         Text(store.statusText)
             .font(.caption.weight(.semibold))
@@ -164,7 +197,7 @@ struct EditorWindowView: View {
             Divider()
             Button("Dock Appearance…") { store.wantsAppearance = true }
                 .disabled(!license.hasAccess)
-            Toggle("Quit Apps Not in This Dock", isOn: Binding(
+            Toggle("Quit other apps when switching", isOn: Binding(
                 get: { store.draftQuitOthers },
                 set: { on in
                     if !on {
@@ -175,6 +208,10 @@ struct EditorWindowView: View {
                 }
             ))
             .disabled(!license.hasAccess)
+            Button("Clean Up Now…") {
+                cleanUp.beginReview()
+            }
+            .disabled(!license.hasAccess || !store.isSelectedCurrent || cleanUp.leftoverCount == 0)
             Divider()
             Button("Capture Current Dock") { store.captureLiveDockIntoDraft() }
                 .disabled(!license.hasAccess)
