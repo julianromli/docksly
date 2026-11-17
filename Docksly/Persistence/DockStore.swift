@@ -564,7 +564,7 @@ final class DockStore: ObservableObject {
 
     private func writeDockBackup() {
         let tiles: [String: Any] = [
-            "persistent-apps": DockApplicator.readRawPersistentApps(),
+            "persistent-apps": (try? DockApplicator.readRawPersistentApps()) ?? [],
             "persistent-others": DockApplicator.readRawPersistentOthers()
         ]
         let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")

@@ -96,4 +96,28 @@ final class CleanUpSelectionTests: XCTestCase {
         )
         XCTAssertEqual(ids, ["com.leftover"])
     }
+
+    func testProtectedDockAppsOfferNothingWhenTheProfileAndLiveDockAreUnreadable() {
+        XCTAssertNil(CleanUpController.protectedBundleIDs(profileBundleIDs: nil, livePinned: nil))
+    }
+
+    func testProtectedDockAppsUseALiveEmptyDockWhenThereIsNoProfile() {
+        XCTAssertEqual(CleanUpController.protectedBundleIDs(profileBundleIDs: nil, livePinned: []), [])
+    }
+
+    func testProtectedDockAppsUnionTheProfileAndLiveDock() {
+        let ids = CleanUpController.protectedBundleIDs(
+            profileBundleIDs: ["com.profile"],
+            livePinned: ["com.live"]
+        )
+        XCTAssertEqual(ids, ["com.profile", "com.live"])
+    }
+
+    func testProtectedDockAppsKeepTheProfileWhenTheLiveDockIsUnreadable() {
+        let ids = CleanUpController.protectedBundleIDs(
+            profileBundleIDs: ["com.profile"],
+            livePinned: nil
+        )
+        XCTAssertEqual(ids, ["com.profile"])
+    }
 }

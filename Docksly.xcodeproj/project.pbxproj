@@ -53,6 +53,7 @@
 		1196BF10C16FAA1961B01CB8 /* TrialClockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA3C01E696363F678362CCD /* TrialClockTests.swift */; };
 		1D3578B81C16729D7BA0A7B1 /* DockSwitcherLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C43398BEF17334CB213CC05 /* DockSwitcherLogicTests.swift */; };
 		BE3280C00EEEC398F38B27E1 /* DockTileEncodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66B58E57AC55A43E921D7020 /* DockTileEncodingTests.swift */; };
+		031DC079B0F13ECB8086662C /* DockApplicatorReadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1E92F66AFF00CD142353DA /* DockApplicatorReadTests.swift */; };
 		0D606D385EC62DF010F2E3CA /* AppRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DCB24CE499563E9EFDD98BA /* AppRulesTests.swift */; };
 		DAED91C6DE141CD93A1458BD /* CleanUpControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C0119A3B6ECEEC81BEB8D8 /* CleanUpControllerTests.swift */; };
 /* End PBXBuildFile section */
@@ -106,6 +107,7 @@
 		BAA3C01E696363F678362CCD /* TrialClockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialClockTests.swift; sourceTree = "<group>"; };
 		7C43398BEF17334CB213CC05 /* DockSwitcherLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockSwitcherLogicTests.swift; sourceTree = "<group>"; };
 		66B58E57AC55A43E921D7020 /* DockTileEncodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockTileEncodingTests.swift; sourceTree = "<group>"; };
+		4A1E92F66AFF00CD142353DA /* DockApplicatorReadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockApplicatorReadTests.swift; sourceTree = "<group>"; };
 		2DCB24CE499563E9EFDD98BA /* AppRulesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRulesTests.swift; sourceTree = "<group>"; };
 		47C0119A3B6ECEEC81BEB8D8 /* CleanUpControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanUpControllerTests.swift; sourceTree = "<group>"; };
 		7612CCAD1CBFA9739724E673 /* DockslyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DockslyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -181,6 +183,7 @@
 				BAA3C01E696363F678362CCD /* TrialClockTests.swift */,
 				7C43398BEF17334CB213CC05 /* DockSwitcherLogicTests.swift */,
 				66B58E57AC55A43E921D7020 /* DockTileEncodingTests.swift */,
+				4A1E92F66AFF00CD142353DA /* DockApplicatorReadTests.swift */,
 				2DCB24CE499563E9EFDD98BA /* AppRulesTests.swift */,
 				47C0119A3B6ECEEC81BEB8D8 /* CleanUpControllerTests.swift */,
 			);
@@ -417,6 +420,7 @@
 				1196BF10C16FAA1961B01CB8 /* TrialClockTests.swift in Sources */,
 				1D3578B81C16729D7BA0A7B1 /* DockSwitcherLogicTests.swift in Sources */,
 				BE3280C00EEEC398F38B27E1 /* DockTileEncodingTests.swift in Sources */,
+				031DC079B0F13ECB8086662C /* DockApplicatorReadTests.swift in Sources */,
 				0D606D385EC62DF010F2E3CA /* AppRulesTests.swift in Sources */,
 				DAED91C6DE141CD93A1458BD /* CleanUpControllerTests.swift in Sources */,
 			);

@@ -335,6 +335,17 @@ final class CleanUpController: ObservableObject {
         }
     }
 
+    /// Bundle IDs treated as already in the dock. `livePinned` is nil when the live Dock
+    /// cannot be read. Returns nil when Clean Up must offer nothing (no active profile
+    /// and an unreadable Dock).
+    static func protectedBundleIDs(profileBundleIDs: Set<String>?, livePinned: Set<String>?) -> Set<String>? {
+        if let livePinned {
+            return (profileBundleIDs ?? []).union(livePinned)
+        }
+        guard let profileBundleIDs else { return nil }
+        return profileBundleIDs
+    }
+
     /// Builds leftovers with `QuitPlan` against the active dock, live pinned apps, and the global Keep Open list.
     static func liveLeftovers(store: DockStore) -> (dockName: String, apps: [CleanUpApp]) {
         let profile = store.library.profiles.first { $0.id == store.library.activeProfileID }
@@ -346,10 +357,14 @@ final class CleanUpController: ObservableObject {
                 isRegularApp: $0.activationPolicy == .regular
             )
         }
-        var dockApps = Set((profile?.items ?? []).compactMap(\.bundleIdentifier))
+        let livePinned: Set<String>?
         if let liveItems = try? DockApplicator.readPinnedItems() {
-            dockApps.formUnion(liveItems.compactMap(\.bundleIdentifier))
-        } else if profile == nil {
+            livePinned = Set(liveItems.compactMap(\.bundleIdentifier))
+        } else {
+            livePinned = nil
+        }
+        let profileIDs = profile.map { Set($0.items.compactMap(\.bundleIdentifier)) }
+        guard let dockApps = protectedBundleIDs(profileBundleIDs: profileIDs, livePinned: livePinned) else {
             return (dockName, [])
         }
         let keepOpen = Set((store.library.alwaysKeepOpen ?? []).map(\.bundleIdentifier))

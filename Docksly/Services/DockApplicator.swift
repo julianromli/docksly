@@ -59,8 +59,10 @@ enum DockApplicator {
     // MARK: - Read
 
     /// Pinned apps and spacers from the live Dock. Finder and Trash are omitted.
+    /// Throws when `persistent-apps` is missing or is not an array. An empty array
+    /// is a real empty Dock.
     static func readPinnedItems() throws -> [DockItem] {
-        let array = readRawPersistentApps()
+        let array = try readRawPersistentApps()
         return array.compactMap(parseTile(_:))
     }
 
@@ -76,26 +78,47 @@ enum DockApplicator {
     }
 
     /// Raw `persistent-apps` tiles, for backup only.
-    static func readRawPersistentApps() -> [[String: Any]] {
-        readRawArray("persistent-apps")
+    /// Throws when the domain or key is missing, or the value is not an array of dictionaries.
+    static func readRawPersistentApps() throws -> [[String: Any]] {
+        try readRawArray("persistent-apps")
     }
 
     /// Raw `persistent-others` tiles, for backup only.
+    /// A missing or invalid right-side list is treated as empty, matching earlier behavior.
     static func readRawPersistentOthers() -> [[String: Any]] {
-        readRawArray("persistent-others")
+        (try? readRawArray("persistent-others")) ?? []
+    }
+
+    /// Interprets a Dock preference array. An empty array is a real empty list.
+    /// Missing values and non-arrays fail so callers can tell those apart from an empty Dock.
+    static func decodePersistentArray(_ value: Any?) throws -> [[String: Any]] {
+        guard let value else {
+            throw DockApplicatorError.preferenceReadFailed
+        }
+        guard let array = value as? [Any] else {
+            throw DockApplicatorError.preferenceReadFailed
+        }
+        var tiles: [[String: Any]] = []
+        tiles.reserveCapacity(array.count)
+        for item in array {
+            guard let tile = item as? [String: Any] else {
+                throw DockApplicatorError.preferenceReadFailed
+            }
+            tiles.append(tile)
+        }
+        return tiles
     }
 
     /// Reads through `UserDefaults(suiteName:)` after a CFPreferences sync so the
     /// Swift overlay does not have to take an `Unmanaged` retain from
     /// `CFPreferencesCopyAppValue` (the import type changed across Xcode versions).
-    private static func readRawArray(_ key: String) -> [[String: Any]] {
+    private static func readRawArray(_ key: String) throws -> [[String: Any]] {
         CFPreferencesAppSynchronize(dockDomain)
-        let defaults = UserDefaults(suiteName: "com.apple.dock")
-        defaults?.synchronize()
-        if let array = defaults?.array(forKey: key) as? [[String: Any]] {
-            return array
+        guard let defaults = UserDefaults(suiteName: "com.apple.dock") else {
+            throw DockApplicatorError.preferenceReadFailed
         }
-        return []
+        defaults.synchronize()
+        return try decodePersistentArray(defaults.object(forKey: key))
     }
 
     /// The Dock settings that a dock can carry, as they are now.

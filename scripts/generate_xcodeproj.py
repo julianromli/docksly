@@ -57,6 +57,7 @@ TEST_FILES = [
     "DockslyTests/TrialClockTests.swift",
     "DockslyTests/DockSwitcherLogicTests.swift",
     "DockslyTests/DockTileEncodingTests.swift",
+    "DockslyTests/DockApplicatorReadTests.swift",
     "DockslyTests/AppRulesTests.swift",
     "DockslyTests/CleanUpControllerTests.swift",
 ]
