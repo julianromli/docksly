@@ -109,7 +109,7 @@ macOS does not publish an AppKit API that replaces the whole pinned-apps list. D
 
 1. Read or write `persistent-apps` in the `com.apple.dock` preference domain with `CFPreferencesCopyAppValue` / `CFPreferencesSetAppValue` and `CFPreferencesAppSynchronize`.
 2. Each application tile uses `tile-type = file-tile` and a `file-data` URL (`_CFURLString` + `_CFURLStringType` 15).
-3. Each spacer uses `tile-type = spacer-tile`.
+3. Each spacer uses `tile-type = small-spacer-tile` (the narrow native spacer). The system Dock does not draw a line for it; the editor preview shows a divider.
 4. `persistent-others` is left alone (folders and stacks on the right).
 5. Finder and Trash are not in `persistent-apps`. They stay.
 6. After a successful write, Docksly runs `/usr/bin/killall Dock`. Dock relaunches. A short flicker is normal.
@@ -151,7 +151,7 @@ Build and run from Xcode. Then walk this list.
 
 - [ ] Drag an icon to a new place. Status becomes `Unsaved · N items`. **Save Changes** appears.
 - [ ] Edit Dock → Add Application… Pick Safari (or any app). The icon appears.
-- [ ] Edit Dock → Add Spacer. A thin gap appears.
+- [ ] Edit Dock → Add Spacer. A thin divider appears.
 - [ ] Right-click the spacer: Move Left, Move Right, Remove.
 - [ ] Right-click an app: Remove.
 - [ ] Press **Save Changes**. Status returns to `Current` if this dock is active. The real Dock matches after a flicker.

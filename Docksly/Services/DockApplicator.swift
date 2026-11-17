@@ -270,12 +270,12 @@ enum DockApplicator {
         }
     }
 
-    private static func makeTile(from item: DockItem) -> [String: Any]? {
+    static func makeTile(from item: DockItem) -> [String: Any]? {
         switch item.kind {
         case .spacer:
             return [
                 "GUID": Int.random(in: 1 ... Int.max),
-                "tile-type": "spacer-tile",
+                "tile-type": "small-spacer-tile",
                 "tile-data": [String: Any]()
             ]
         case .application:
@@ -306,7 +306,7 @@ enum DockApplicator {
         }
     }
 
-    private static func parseTile(_ dict: [String: Any]) -> DockItem? {
+    static func parseTile(_ dict: [String: Any]) -> DockItem? {
         let tileType = (dict["tile-type"] as? String) ?? ""
         if tileType == "spacer-tile"
             || tileType == "small-spacer-tile"

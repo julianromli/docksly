@@ -16,6 +16,7 @@ struct DockTileView: View {
     var onChooseOpenTarget: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isHoveringTile = false
     @State private var isHoveringRemove = false
     @State private var allowsChromeMotion = false
@@ -24,65 +25,67 @@ struct DockTileView: View {
     private var showRemove: Bool { allowsEditing && isHovering && !isDragging && !isReordering }
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            tile
-                .scaleEffect(liftScale)
-                .animation(
-                    (reduceMotion || isReordering) ? nil : DockslyStyle.defaultSpring,
-                    value: liftScale
-                )
-                .modifier(TileEditGestures(
-                    allowsEditing: allowsEditing,
-                    reorderGesture: reorderGesture,
-                    onRemove: onRemove,
-                    onMoveLeft: onMoveLeft,
-                    onMoveRight: onMoveRight,
-                    onToggleOpen: onToggleOpen,
-                    onChooseOpenTarget: onChooseOpenTarget,
-                    opensWhenUsed: item.opensWhenUsed == true,
-                    hasOpenTarget: item.openTarget != nil
-                ))
-                .onHover { hovering in
-                    isHoveringTile = hovering
-                    updateCursor(overTile: hovering, overRemove: isHoveringRemove)
-                }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(item.title)
-                .accessibilityHint(allowsEditing ? "Drag to reorder" : "View only")
-                .accessibilityAddTraits(.isButton)
-                .accessibilityHidden(isPlaceholder)
-
-            Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .symbolRenderingMode(.palette)
-                    .foregroundStyle(.primary, Color.primary.opacity(0.18))
-                    .font(.system(size: 13, weight: .semibold))
-                    .frame(
-                        width: DockslyStyle.removeHitSize,
-                        height: DockslyStyle.removeHitSize,
-                        alignment: .topTrailing
-                    )
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(PressableButtonStyle(focusShape: .circle))
-            .offset(x: 5, y: -5)
-            .zIndex(2)
-            .help("Remove")
-            .accessibilityLabel("Remove \(item.title)")
+        tile
+            .scaleEffect(liftScale)
+            .animation(
+                (reduceMotion || isReordering) ? nil : DockslyStyle.defaultSpring,
+                value: liftScale
+            )
+            .modifier(TileEditGestures(
+                allowsEditing: allowsEditing,
+                reorderGesture: reorderGesture,
+                onRemove: onRemove,
+                onMoveLeft: onMoveLeft,
+                onMoveRight: onMoveRight,
+                onToggleOpen: onToggleOpen,
+                onChooseOpenTarget: onChooseOpenTarget,
+                opensWhenUsed: item.opensWhenUsed == true,
+                hasOpenTarget: item.openTarget != nil
+            ))
             .onHover { hovering in
-                isHoveringRemove = hovering
-                updateCursor(overTile: isHoveringTile, overRemove: hovering)
+                isHoveringTile = hovering
+                updateCursor(overTile: hovering, overRemove: isHoveringRemove)
             }
-            .contextualIconChrome(visible: showRemove, animated: allowsChromeMotion && !reduceMotion)
-            .allowsHitTesting(showRemove)
-            .accessibilityHidden(!showRemove)
-        }
-        .opacity(isPlaceholder ? 0 : 1)
-        .onAppear {
-            DispatchQueue.main.async {
-                allowsChromeMotion = true
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(item.title)
+            .accessibilityHint(allowsEditing ? "Drag to reorder" : "View only")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityHidden(isPlaceholder)
+            .overlay(alignment: .topTrailing) {
+                removeButton
             }
+            .opacity(isPlaceholder ? 0 : 1)
+            .onAppear {
+                DispatchQueue.main.async {
+                    allowsChromeMotion = true
+                }
+            }
+    }
+
+    private var removeButton: some View {
+        Button(action: onRemove) {
+            Image(systemName: "xmark.circle.fill")
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.primary, Color.primary.opacity(0.18))
+                .font(.system(size: 13, weight: .semibold))
+                .frame(
+                    width: DockslyStyle.removeHitSize,
+                    height: DockslyStyle.removeHitSize,
+                    alignment: .topTrailing
+                )
+                .contentShape(Rectangle())
         }
+        .buttonStyle(PressableButtonStyle(focusShape: .circle))
+        .offset(x: 5, y: -5)
+        .help("Remove")
+        .accessibilityLabel("Remove \(item.title)")
+        .onHover { hovering in
+            isHoveringRemove = hovering
+            updateCursor(overTile: isHoveringTile, overRemove: hovering)
+        }
+        .contextualIconChrome(visible: showRemove, animated: allowsChromeMotion && !reduceMotion)
+        .allowsHitTesting(showRemove)
+        .accessibilityHidden(!showRemove)
     }
 
     private func updateCursor(overTile: Bool, overRemove: Bool) {
@@ -166,11 +169,17 @@ struct DockTileView: View {
     }
 
     private var spacerTile: some View {
-        Capsule()
-            .fill(Color.primary.opacity(isHovering ? 0.34 : 0.20))
+        let opacity = isHovering
+            ? DockslyStyle.spacerHairlineHoverOpacity(colorScheme)
+            : DockslyStyle.spacerHairlineOpacity(colorScheme)
+        return Capsule()
+            .fill(Color.primary.opacity(opacity))
             .animation(reduceMotion ? nil : DockslyStyle.chromeFade, value: isHovering)
-            .frame(width: 4, height: 36)
-            .frame(width: DockslyStyle.spacerWidth, height: 60)
+            .frame(
+                width: DockslyStyle.spacerHairlineWidth,
+                height: DockslyStyle.spacerHairlineHeight
+            )
+            .frame(width: DockslyStyle.spacerWidth, height: DockslyStyle.tileRowHeight)
             .contentShape(Rectangle())
             .help("Spacer. Drag to reorder.")
     }

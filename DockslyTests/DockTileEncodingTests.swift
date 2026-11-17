@@ -76,6 +76,33 @@ final class DockTileEncodingTests: XCTestCase {
         )
     }
 
+
+    func testSpacerWritesSmallSpacerTile() throws {
+        let tile = try XCTUnwrap(DockApplicator.makeTile(from: .spacer()))
+        XCTAssertEqual(tile["tile-type"] as? String, "small-spacer-tile")
+        XCTAssertNotNil(tile["GUID"])
+        let data = try XCTUnwrap(tile["tile-data"] as? [String: Any])
+        XCTAssertEqual(data.count, 0)
+
+        let parsed = try XCTUnwrap(DockApplicator.parseTile(tile))
+        XCTAssertEqual(parsed.kind, .spacer)
+        XCTAssertEqual(parsed.title, "Spacer")
+    }
+
+    func testReadsEveryKnownSpacerTileType() {
+        for tileType in ["spacer-tile", "small-spacer-tile", "flex-spacer-tile"] {
+            let withData = DockApplicator.parseTile([
+                "tile-type": tileType,
+                "tile-data": [String: Any](),
+            ])
+            XCTAssertEqual(withData?.kind, .spacer, tileType)
+
+            // `defaults write … '{"tile-type"="small-spacer-tile";}'` has no tile-data.
+            let typeOnly = DockApplicator.parseTile(["tile-type": tileType])
+            XCTAssertEqual(typeOnly?.kind, .spacer, tileType)
+        }
+    }
+
     func testWholeDockSignatureSeparatesBothSides() {
         let apps = [DockItem.spacer()]
         XCTAssertNotEqual(
