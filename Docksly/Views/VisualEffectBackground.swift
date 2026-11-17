@@ -129,8 +129,10 @@ struct WindowConfigurator: NSViewRepresentable {
     /// Saved frames from the taller glass window leave a gray floor. Shrink once.
     private static func compactRestoredFrameIfNeeded(_ window: NSWindow) {
         guard !didCompactRestoredFrame else { return }
+        // Only collapse leftover frames from the old taller glass window.
+        // Clean Up can grow this window past the ideal height on purpose.
         let target = DockslyStyle.windowIdealHeight
-        guard window.frame.height > target + 24 else {
+        guard window.frame.height > 640 else {
             didCompactRestoredFrame = true
             return
         }

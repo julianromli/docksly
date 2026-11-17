@@ -11,6 +11,7 @@ struct DockslyApp: App {
             EditorWindowView()
                 .environmentObject(store)
                 .environmentObject(license)
+                .environmentObject(CleanUpController.shared)
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
@@ -30,9 +31,10 @@ struct DockslyApp: App {
             MenuBarContentView()
                 .environmentObject(store)
                 .environmentObject(license)
+                .environmentObject(CleanUpController.shared)
         } label: {
             MenuBarLabel()
         }
-        .menuBarExtraStyle(.menu)
+        .menuBarExtraStyle(.window)
     }
 }

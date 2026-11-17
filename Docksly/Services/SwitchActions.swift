@@ -30,10 +30,27 @@ enum SwitchActions {
             keepOpen: keepOpen,
             ownBundleIdentifier: Bundle.main.bundleIdentifier ?? "app.docksly.Docksly"
         )
-        for id in ids {
+        askToQuit(bundleIdentifiers: ids)
+    }
+
+    /// Asks each app to quit. Docksly never force-quits.
+    static func askToQuit(bundleIdentifiers: [String]) {
+        for id in bundleIdentifiers {
             for app in NSRunningApplication.runningApplications(withBundleIdentifier: id) {
                 app.terminate()
             }
+        }
+    }
+
+    /// Brings a running app forward, used by Clean Up's Show button.
+    static func activate(bundleIdentifier: String) {
+        guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first else {
+            return
+        }
+        if #available(macOS 14.0, *) {
+            app.activate()
+        } else {
+            app.activate(options: [.activateAllWindows])
         }
     }
 

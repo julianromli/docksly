@@ -312,6 +312,8 @@ final class DockStore: ObservableObject {
     // MARK: - Profiles
 
     /// Creates a dock from what the real Dock shows now, then selects it.
+    /// Returns nil and sets `lastError` when the live Dock cannot be read,
+    /// including a missing `persistent-apps` key. A real empty pinned list still saves.
     @discardableResult
     func createDockFromLiveDock(named name: String) -> DockProfile? {
         if rejectIfLocked() { return nil }
@@ -564,7 +566,7 @@ final class DockStore: ObservableObject {
 
     private func writeDockBackup() {
         let tiles: [String: Any] = [
-            "persistent-apps": DockApplicator.readRawPersistentApps(),
+            "persistent-apps": (try? DockApplicator.readRawPersistentApps()) ?? [],
             "persistent-others": DockApplicator.readRawPersistentOthers()
         ]
         let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")

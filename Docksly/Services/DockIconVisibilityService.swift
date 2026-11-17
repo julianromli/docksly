@@ -191,13 +191,17 @@ struct MenuSettingsButton: View {
         if #available(macOS 14.0, *) {
             MenuSettingsLink()
         } else {
-            Button("Settings…") {
+            Button {
                 AppWindowPresentation.activate()
                 NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
                 DispatchQueue.main.async {
                     AppWindowPresentation.activate()
                     AppWindowPresentation.orderFrontSettings()
                 }
+            } label: {
+                Text("Settings…")
+                    .font(.system(size: 13))
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .keyboardShortcut(",", modifiers: .command)
         }
@@ -209,6 +213,8 @@ private struct MenuSettingsLink: View {
     var body: some View {
         SettingsLink {
             Text("Settings…")
+                .font(.system(size: 13))
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .simultaneousGesture(TapGesture().onEnded {
             AppWindowPresentation.activate()
