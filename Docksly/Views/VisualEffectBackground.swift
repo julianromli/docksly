@@ -253,6 +253,8 @@ enum DockslyStyle {
     /// Slot for a small spacer, close to the native Dock divider next to Trash.
     /// 16 pt is about 29% of `tileWidth` (56).
     static let spacerWidth: CGFloat = 16
+    /// The spacer hit area grows into the gaps on both sides (16 + 8 + 8 = 32 pt). Layout does not change.
+    static var spacerHitOutset: CGFloat { itemSpacing }
     static let spacerHairlineWidth: CGFloat = 1
     /// About 63% of `tileRowHeight` (60).
     static let spacerHairlineHeight: CGFloat = 38

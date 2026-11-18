@@ -180,7 +180,7 @@ struct DockTileView: View {
                 height: DockslyStyle.spacerHairlineHeight
             )
             .frame(width: DockslyStyle.spacerWidth, height: DockslyStyle.tileRowHeight)
-            .contentShape(Rectangle())
+            .contentShape(Rectangle().inset(by: -DockslyStyle.spacerHitOutset))
             .help("Spacer. Drag to reorder.")
     }
 }

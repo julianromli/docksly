@@ -48,6 +48,20 @@ final class CleanUpSelectionTests: XCTestCase {
         XCTAssertTrue(selection.selected.isEmpty)
     }
 
+    func testUnkeepPutsTheAppBackIntoTheQuitSet() {
+        var selection = CleanUpSelection()
+        let figma = app("com.figma", "Figma")
+        selection.replaceLeftovers([figma, app("com.slack", "Slack")])
+        selection.keep(figma)
+        selection.replaceLeftovers([app("com.slack", "Slack")])
+
+        selection.unkeep("com.figma")
+        selection.replaceLeftovers([figma, app("com.slack", "Slack")])
+        XCTAssertFalse(selection.isKeeping("com.figma"))
+        XCTAssertTrue(selection.isChecked("com.figma"))
+        XCTAssertEqual(selection.selected.map(\.bundleIdentifier), ["com.figma", "com.slack"])
+    }
+
     func testAnAppThatLeavesTheLeftoverListDropsItsUncheck() {
         var selection = CleanUpSelection()
         selection.replaceLeftovers([app("com.a", "A"), app("com.b", "B")])
@@ -62,15 +76,43 @@ final class CleanUpSelectionTests: XCTestCase {
         XCTAssertEqual(CleanUpCopy.countLabel(6), "6 apps")
         XCTAssertEqual(CleanUpCopy.leftoverHeadline(count: 1, dockName: "Work"), "1 app not in Work")
         XCTAssertEqual(CleanUpCopy.leftoverHeadline(count: 6, dockName: "Work"), "6 apps not in Work")
-        XCTAssertEqual(CleanUpCopy.quitTitle(1), "Quit 1 App")
-        XCTAssertEqual(CleanUpCopy.quitTitle(4), "Quit 4 Apps")
+        XCTAssertEqual(CleanUpCopy.holdToQuitTitle(4), "Hold to Quit 4")
+        XCTAssertEqual(CleanUpCopy.quittingTitle(4), "Quitting 4…")
         XCTAssertEqual(CleanUpCopy.asking(1), "Asking 1 app to quit…")
         XCTAssertEqual(CleanUpCopy.asking(4), "Asking 4 apps to quit…")
-        XCTAssertEqual(CleanUpCopy.resultTitle(quitCount: 0), "No apps quit")
-        XCTAssertEqual(CleanUpCopy.resultTitle(quitCount: 1), "Quit 1 app")
-        XCTAssertEqual(CleanUpCopy.resultTitle(quitCount: 3), "Quit 3 apps")
+        XCTAssertEqual(CleanUpCopy.askingApp("Slack"), "Asking Slack to quit…")
+        XCTAssertEqual(CleanUpCopy.hoverHint("Slack"), "Hold to quit Slack")
+        XCTAssertEqual(CleanUpCopy.holdingHint("Slack"), "Keep holding to quit Slack")
+        XCTAssertEqual(CleanUpCopy.holdingAllHint(3), "Keep holding to quit 3 apps")
+        XCTAssertEqual(CleanUpCopy.armedHint("Slack"), "Press Return again to quit Slack")
+        XCTAssertEqual(CleanUpCopy.keptNotice("Spotify"), "Spotify will stay open in every dock.")
         XCTAssertEqual(CleanUpCopy.waitingMessage(names: ["Figma"]), "Figma is waiting for you to save.")
         XCTAssertEqual(CleanUpCopy.waitingMessage(names: ["Figma", "Sketch"]), "2 apps are waiting for you to save.")
+    }
+
+    func testAllClearDetailNamesKeptApps() {
+        XCTAssertEqual(CleanUpCopy.allClearDetail(dockName: "Work", kept: []), "Only Work apps are running.")
+        XCTAssertEqual(
+            CleanUpCopy.allClearDetail(dockName: "Work", kept: ["Notion"]),
+            "Only Work apps are running. Notion stays open."
+        )
+        XCTAssertEqual(
+            CleanUpCopy.allClearDetail(dockName: "Work", kept: ["Notion", "Spotify"]),
+            "Only Work apps are running. Notion and Spotify stay open."
+        )
+        XCTAssertEqual(
+            CleanUpCopy.allClearDetail(dockName: "Work", kept: ["A", "B", "C"]),
+            "Only Work apps are running. 3 kept apps stay open."
+        )
+    }
+
+    func testWaveGapsShrinkAndStayUnder100ms() {
+        let gaps = CleanUpStyle.reviewWaveGaps
+        XCTAssertEqual(CleanUpStyle.waveDelay(index: 0, gaps: gaps), 0)
+        XCTAssertEqual(CleanUpStyle.waveDelay(index: 1, gaps: gaps), 0.04, accuracy: 0.0001)
+        XCTAssertEqual(CleanUpStyle.waveDelay(index: 2, gaps: gaps), 0.07, accuracy: 0.0001)
+        XCTAssertEqual(CleanUpStyle.waveDelay(index: 3, gaps: gaps), 0.09, accuracy: 0.0001)
+        XCTAssertEqual(CleanUpStyle.waveDelay(index: 2, gaps: CleanUpStyle.stripWaveGaps), 0.09, accuracy: 0.0001)
     }
 
     func testListHeightCapsAtEightRows() {

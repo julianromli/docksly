@@ -11,6 +11,7 @@ struct EditorWindowView: View {
     @State private var showImportError = false
     @State private var importError = ""
     @State private var showDeleteConfirm = false
+    @State private var measuredContentHeight: CGFloat = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,6 +30,18 @@ struct EditorWindowView: View {
             }
             errorSlot
         }
+        // Measure the real content height so the window never crops the bottom row.
+        .fixedSize(horizontal: false, vertical: true)
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(key: EditorContentHeightKey.self, value: proxy.size.height)
+            }
+        }
+        .onPreferenceChange(EditorContentHeightKey.self) { height in
+            measuredContentHeight = height
+        }
+        // A fixed height stops the user from dragging the window taller.
+        .frame(height: measuredContentHeight > 0 ? editorContentHeight : nil, alignment: .top)
         .frame(
             minWidth: DockslyStyle.windowMinWidth,
             idealWidth: DockslyStyle.windowIdealWidth,
@@ -120,7 +133,10 @@ struct EditorWindowView: View {
     }
 
     private var showsCleanUpStrip: Bool {
-        store.isSelectedCurrent && cleanUp.leftoverCount > 0 && cleanUp.phase == .idle && license.hasAccess
+        store.isSelectedCurrent
+            && (cleanUp.leftoverCount > 0 || cleanUp.stripAllClear)
+            && cleanUp.phase == .idle
+            && license.hasAccess
     }
 
     private var showsCleanUpReview: Bool {
@@ -128,10 +144,13 @@ struct EditorWindowView: View {
     }
 
     private var editorContentHeight: CGFloat {
+        if measuredContentHeight > 0 {
+            return measuredContentHeight.rounded(.up)
+        }
+        // Used only until the first measure arrives.
         var height = DockslyStyle.windowIdealHeight
         if showsCleanUpReview {
-            let rows = cleanUp.phase == .result ? cleanUp.waiting.count : cleanUp.reviewRows.count
-            height += CleanUpStyle.editorReviewHeight(rowCount: rows, phase: cleanUp.phase)
+            height += CleanUpStyle.listHeight(rowCount: cleanUp.reviewRows.count) + 96
         } else if showsCleanUpStrip {
             height += CleanUpStyle.stripHeight
         }
@@ -394,6 +413,14 @@ struct EditorWindowView: View {
                 showImportError = true
             }
         }
+    }
+}
+
+private struct EditorContentHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 
