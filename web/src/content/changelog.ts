@@ -12,6 +12,24 @@ export type ChangelogItem = {
 
 export const releases: ChangelogItem[] = [
   {
+    version: "1.4.0",
+    id: "v1-4-0",
+    date: new Date("2026-11-18"),
+    notes: "Clean Up quits the apps that are not in your dock. Hold to quit, so one click never quits anything.",
+    features: [
+      "Clean Up in the menu bar and in the editor shows running apps that are not in the current dock",
+      "Hold a row or an icon to quit one app, or hold Quit all to quit them all. Apps are asked to quit, never forced",
+      "Right-click an app to quit it at once or to keep it open in every dock, with Undo in the editor",
+      "Apps with unsaved work stay in the list with Show, so you can save first",
+      "Return twice quits the focused app. Reduce Motion uses fades only",
+      "Spacers are narrow in the Dock and show as a divider in the editor",
+    ],
+    fixes: [
+      "The editor window no longer cuts off the Clean Up row, and it keeps its height",
+      "Spacers are easier to drag in the editor",
+    ],
+  },
+  {
     version: "1.3.2",
     id: "v1-3-2",
     date: new Date("2026-11-03"),

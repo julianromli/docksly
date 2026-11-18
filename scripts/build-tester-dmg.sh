@@ -7,7 +7,7 @@
 set -eu
 
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-VERSION="1.3.2"
+VERSION="1.4.0"
 VOLUME="Install Docksly"
 DERIVED="$ROOT/.build/DerivedData"
 APP="$DERIVED/Build/Products/Release/Docksly.app"
